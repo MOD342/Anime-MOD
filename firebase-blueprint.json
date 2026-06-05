@@ -1,0 +1,143 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "modPoints": { "type": "number" },
+        "streakDays": { "type": "number" },
+        "likesReceived": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "recommendationsAccepted": { "type": "number" },
+        "aiGamesPoints": { "type": "number" },
+        "ratingsCount": { "type": "number" },
+        "chatMessagesCount": { "type": "number" },
+        "lastActiveDate": { "type": "string" },
+        "privacySettings": { "type": "object" },
+        "avatarAlignment": { "type": "string" },
+        "avatarShape": { "type": "string" },
+        "bannerSize": { "type": "string" },
+        "dislikesReceived": { "type": "number" },
+        "approvedRecommendationsCount": { "type": "number" }
+      },
+      "required": ["role", "createdAt", "xp", "level", "modPoints", "streakDays", "likesReceived", "commentsCount", "recommendationsAccepted", "aiGamesPoints", "ratingsCount", "chatMessagesCount", "lastActiveDate"]
+    },
+    "CustomList": {
+      "title": "CustomList",
+      "description": "User defined custom list",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "createdAt"]
+    },
+    "AnimeEntry": {
+      "title": "AnimeEntry",
+      "description": "A user's anime entry in their library",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "posterUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["watching", "completed", "plan_to_watch", "on_hold", "dropped", "none"] },
+        "releaseYear": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "episodesCount": { "type": "number" },
+        "progress": { "type": "number" }
+      },
+      "required": ["title", "posterUrl", "status", "addedAt", "updatedAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Anime comment.",
+      "type": "object",
+      "properties": {
+        "animeId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userDisplayName": { "type": "string" },
+        "text": { "type": "string" },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["animeId", "userId", "userDisplayName", "text", "likes", "createdAt"]
+    },
+    "Recommendation": {
+      "title": "Recommendation",
+      "description": "User recommendation for an anime.",
+      "type": "object",
+      "properties": {
+        "animeId": { "type": "string" },
+        "targetAnimeId": { "type": "string" },
+        "targetAnimeTitle": { "type": "string" },
+        "reason": { "type": "string" },
+        "userId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["animeId", "targetAnimeId", "targetAnimeTitle", "reason", "userId", "status", "createdAt"]
+    },
+    "Rating": {
+      "title": "Rating",
+      "description": "User rating for an anime.",
+      "type": "object",
+      "properties": {
+        "animeId": { "type": "string" },
+        "userId": { "type": "string" },
+        "score": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["animeId", "userId", "score", "createdAt", "updatedAt"]
+    },
+    "GameQuestion": {
+      "title": "GameQuestion",
+      "description": "Cache of AI and user submitted game questions",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "questionData": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "author": { "type": "string" },
+        "likes": { "type": "number" },
+        "dislikes": { "type": "number" }
+      },
+      "required": ["type", "questionData", "createdAt", "author", "likes", "dislikes"]
+    }
+  },
+  "firestore": {
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Global comments per anime"
+    },
+    "/recommendations/{recommendationId}": {
+      "schema": "Recommendation",
+      "description": "Recommendations submitted by users"
+    },
+    "/ratings/{ratingId}": {
+      "schema": "Rating",
+      "description": "Ratings submitted by users"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles"
+    },
+    "/users/{userId}/customLists/{listId}": {
+      "schema": "CustomList",
+      "description": "User's custom lists"
+    },
+    "/users/{userId}/animeEntries/{animeId}": {
+      "schema": "AnimeEntry",
+      "description": "User's anime collection entries with status and metadata"
+    },
+    "/gameQuestions/{questionId}": {
+      "schema": "GameQuestion",
+      "description": "Smart persistent questions pool for games"
+    }
+  }
+}

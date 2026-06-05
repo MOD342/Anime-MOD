@@ -1,0 +1,6 @@
+{
+  "name": "Anime Mod - Scraping Backend",
+  "description": "Backend server using Express and Playwright to scrape anime websites for the Anime Mod mobile app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,285 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Phase 4: Primitive Definition
+    function isValidId(id) { 
+      return id is string && id.size() > 0 && id.size() <= 512; 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['role', 'createdAt', 'xp', 'level', 'modPoints', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate']) 
+        && (data.keys().size() >= 13 && data.keys().size() <= 40)
+        && data.role is string && data.role.size() <= 20
+        && data.xp is number && data.level is number && data.modPoints is number
+        && data.streakDays is number && data.likesReceived is number
+        && data.commentsCount is number && data.recommendationsAccepted is number
+        && data.aiGamesPoints is number && data.ratingsCount is number && data.chatMessagesCount is number
+        && (!data.keys().hasAny(['coins']) || data.coins is number)
+        && (!data.keys().hasAny(['purchasedItems']) || data.purchasedItems is list)
+        && (!data.keys().hasAny(['claimedAchievements']) || data.claimedAchievements is list)
+        && (!data.keys().hasAny(['dailyStats']) || data.dailyStats is map)
+        && (!data.keys().hasAny(['equippedBanner']) || data.equippedBanner is string || data.equippedBanner == null)
+        && (!data.keys().hasAny(['equippedAvatar']) || data.equippedAvatar is string || data.equippedAvatar == null)
+        && (!data.keys().hasAny(['equippedFrame']) || data.equippedFrame is string || data.equippedFrame == null)
+        && (!data.keys().hasAny(['equippedTitle']) || data.equippedTitle is string || data.equippedTitle == null)
+        && (!data.keys().hasAny(['equippedBadge']) || data.equippedBadge is string || data.equippedBadge == null)
+        && (!data.keys().hasAny(['lastSpinTimestamp']) || data.lastSpinTimestamp is number)
+        && (!data.keys().hasAny(['listCount']) || data.listCount is number)
+        && (!data.keys().hasAny(['username']) || data.username is string && data.username.size() <= 30)
+        && (!data.keys().hasAny(['displayName']) || data.displayName is string && data.displayName.size() <= 50)
+        && (!data.keys().hasAny(['lastUsernameChange']) || data.lastUsernameChange is number)
+        && (!data.keys().hasAny(['lastDisplayNameChange']) || data.lastDisplayNameChange is number)
+        && (!data.keys().hasAny(['totalEpisodesWatched']) || data.totalEpisodesWatched is number)
+        && (!data.keys().hasAny(['completedAnimeCount']) || data.completedAnimeCount is number)
+        && (!data.keys().hasAny(['privacySettings']) || data.privacySettings is map)
+        && (!data.keys().hasAny(['avatarAlignment']) || data.avatarAlignment is string)
+        && (!data.keys().hasAny(['avatarShape']) || data.avatarShape is string)
+        && (!data.keys().hasAny(['bannerSize']) || data.bannerSize is string)
+        && (!data.keys().hasAny(['dislikesReceived']) || data.dislikesReceived is number)
+        && (!data.keys().hasAny(['approvedRecommendationsCount']) || data.approvedRecommendationsCount is number)
+        && data.lastActiveDate is string
+        && data.createdAt == request.time;
+    }
+
+    function isValidCustomList(data) {
+      return data.keys().hasAll(['name', 'createdAt'])
+        && data.keys().size() == 2
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.createdAt == request.time;
+    }
+
+    function isValidAnimeEntry(data) {
+      return data.keys().hasAll(['title', 'posterUrl', 'updatedAt'])
+        && data.keys().size() <= 30
+        && (data.title is string || data.title == null)
+        && (data.posterUrl is string || data.posterUrl == null)
+        && (!data.keys().hasAny(['status']) || data.status == null || data.status is string)
+        && (!data.keys().hasAny(['releaseYear']) || data.releaseYear == null || data.releaseYear is string || data.releaseYear is number)
+        && (!data.keys().hasAny(['customLists']) || data.customLists == null || data.customLists is map)
+        && (!data.keys().hasAny(['score']) || data.score == null || data.score is number)
+        && (!data.keys().hasAny(['isFavorite']) || data.isFavorite is bool || data.isFavorite == null)
+        && (!data.keys().hasAny(['animeId']) || data.animeId is string || data.animeId == null)
+        && (!data.keys().hasAny(['completedXpClaimed']) || data.completedXpClaimed is bool || data.completedXpClaimed == null)
+        && (!data.keys().hasAny(['watchedEpisodes']) || data.watchedEpisodes is list || data.watchedEpisodes == null)
+        && (!data.keys().hasAny(['episodesCount']) || data.episodesCount is number || data.episodesCount == null)
+        && (!data.keys().hasAny(['progress']) || data.progress is number || data.progress == null)
+        && (!data.keys().hasAny(['addedAt']) || data.addedAt == null || data.addedAt is string || data.addedAt is timestamp);
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['animeId', 'userId', 'userDisplayName', 'text', 'likes', 'dislikes', 'createdAt'])
+        && (data.keys().size() >= 7 && data.keys().size() <= 16)
+        && data.animeId is string && data.animeId.size() > 0 && data.animeId.size() <= 100
+        && data.userId is string && data.userId == request.auth.uid
+        && data.userDisplayName is string && data.userDisplayName.size() <= 100
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 1000
+        && data.likes is number
+        && data.dislikes is number
+        && data.createdAt == request.time
+        && (!data.keys().hasAny(['userPhotoUrl']) || (data.userPhotoUrl is string && data.userPhotoUrl.size() <= 1000))
+        && (!data.keys().hasAny(['parentCommentId']) || (data.parentCommentId is string && data.parentCommentId.size() <= 100))
+        && (!data.keys().hasAny(['isSpoiler']) || data.isSpoiler is bool)
+        && (!data.keys().hasAny(['equippedAvatar']) || data.equippedAvatar is string || data.equippedAvatar == null)
+        && (!data.keys().hasAny(['equippedFrame']) || data.equippedFrame is string || data.equippedFrame == null)
+        && (!data.keys().hasAny(['equippedTitle']) || data.equippedTitle is string || data.equippedTitle == null)
+        && (!data.keys().hasAny(['equippedBadge']) || data.equippedBadge is string || data.equippedBadge == null);
+    }
+
+    function isValidRecommendation(data) {
+      return data.keys().hasAll(['animeId', 'targetAnimeId', 'targetAnimeTitle', 'reason', 'userId', 'status', 'createdAt'])
+        && (data.keys().size() >= 7 && data.keys().size() <= 9)
+        && data.animeId is string && data.animeId.size() > 0 && data.animeId.size() <= 100
+        && data.targetAnimeId is string && data.targetAnimeId.size() <= 100
+        && data.targetAnimeTitle is string && data.targetAnimeTitle.size() > 0 && data.targetAnimeTitle.size() <= 500
+        && data.reason is string && data.reason.size() <= 1000
+        && data.userId is string && data.userId == request.auth.uid
+        && data.status in ['pending', 'approved', 'rejected']
+        && data.createdAt == request.time
+        && (!data.keys().hasAny(['likes']) || data.likes is number)
+        && (!data.keys().hasAny(['dislikes']) || data.dislikes is number);
+    }
+
+    function isValidRating(data) {
+      return data.keys().hasAll(['animeId', 'userId', 'score', 'createdAt', 'updatedAt'])
+        && data.keys().size() == 5
+        && data.animeId is string && data.animeId.size() > 0 && data.animeId.size() <= 100
+        && data.userId is string && data.userId == request.auth.uid
+        && data.score is number && data.score >= 1 && data.score <= 10
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function isValidGameQuestion(data) {
+      return data.keys().hasAll(['type', 'questionData', 'createdAt', 'author', 'likes', 'dislikes'])
+        && data.keys().size() == 6
+        && data.type is string && data.type.size() > 0 && data.type.size() <= 30
+        && data.questionData is map
+        && data.author is string && data.author.size() <= 128
+        && data.likes is number
+        && data.dislikes is number
+        && data.createdAt == request.time;
+    }
+
+    function getUserRole(uid) {
+      return (request.auth != null && request.auth.token != null && request.auth.token.email != null && (request.auth.token.email == '342.mod@gmail.com' || request.auth.token.email == 'mod.mg.342@gmail.com')) ? 'owner' : (exists(/databases/$(database)/documents/globalRoles/$(uid)) ? get(/databases/$(database)/documents/globalRoles/$(uid)).data.role : 'user');
+    }
+    
+    function isOwnerAuth() { return isSignedIn() && getUserRole(request.auth.uid) == 'owner'; }
+    function isAdminAuth() { return isSignedIn() && getUserRole(request.auth.uid) in ['owner', 'admin']; }
+    function isModeratorAuth() { return isSignedIn() && getUserRole(request.auth.uid) in ['owner', 'admin', 'moderator']; }
+
+    match /globalRoles/{userId} {
+      allow read: if true;
+      allow write: if isOwnerAuth();
+    }
+    
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
+      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
+    }
+
+    match /reports/{reportId} {
+      allow read: if isModeratorAuth();
+      allow create: if isSignedIn();
+      allow update, delete: if isModeratorAuth();
+    }
+
+    match /globalNotifications/{notifId} {
+      allow read: if true;
+      allow write: if isAdminAuth();
+    }
+
+    match /users/{userId}/notifications/{notifId} {
+      allow read: if isOwner(userId);
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner(userId) || isAdminAuth();
+    }
+    
+    match /bannedUsers/{userId} {
+      allow read: if true;
+      allow write: if isAdminAuth();
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(commentId) && isValidComment(incoming())
+        && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+      allow update: if isSignedIn() && isValidId(commentId) 
+        && (
+          (incoming().diff(existing()).affectedKeys().hasOnly(['likes'])) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['dislikes'])) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'dislikes'])) ||
+          (existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['text', 'isSpoiler']) && incoming().text is string && incoming().text.size() <= 1000 && (!incoming().keys().hasAny(['isSpoiler']) || incoming().isSpoiler is bool))
+        ) && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+      allow delete: if isModeratorAuth() || (isSignedIn() && existing().userId == request.auth.uid);
+    }
+
+    match /recommendations/{recommendationId} {
+      allow read: if true; 
+      allow create: if isSignedIn() && isValidId(recommendationId) && isValidRecommendation(incoming())
+        && (incoming().status == 'pending' || incoming().status == 'approved')
+        && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+      allow update: if isSignedIn() && isValidId(recommendationId)
+        && (
+          (isModeratorAuth() && 
+           incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+           incoming().status in ['approved', 'rejected'])
+        );
+      allow delete: if isModeratorAuth();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(ratingId) && isValidRating(incoming());
+      allow update: if isSignedIn() && isValidId(ratingId)
+        && existing().userId == request.auth.uid
+        && incoming().diff(existing()).affectedKeys().hasOnly(['score', 'updatedAt'])
+        && incoming().score is number && incoming().score >= 1 && incoming().score <= 10
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /gameQuestions/{questionId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(questionId) && isValidGameQuestion(incoming())
+        && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+      allow update: if isSignedIn() && isValidId(questionId)
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'dislikes'])
+        ) && !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+      allow delete: if isModeratorAuth();
+    }
+
+    match /{path=**}/animeEntries/{docId} {
+      allow read: if true;
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && 
+        incoming().diff(existing()).affectedKeys().hasOnly(['role', 'xp', 'level', 'modPoints', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate', 'coins', 'purchasedItems', 'claimedAchievements', 'dailyStats', 'equippedBanner', 'equippedAvatar', 'equippedFrame', 'equippedTitle', 'equippedBadge', 'lastSpinTimestamp', 'listCount', 'username', 'displayName', 'lastUsernameChange', 'lastDisplayNameChange', 'totalEpisodesWatched', 'completedAnimeCount', 'privacySettings', 'avatarAlignment', 'avatarShape', 'bannerSize', 'dislikesReceived', 'approvedRecommendationsCount']) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['role']) || (incoming().role is string && incoming().role.size() <= 20)) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['xp']) || incoming().xp is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['level']) || incoming().level is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['modPoints']) || incoming().modPoints is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['streakDays']) || incoming().streakDays is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['likesReceived']) || incoming().likesReceived is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['commentsCount']) || incoming().commentsCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['recommendationsAccepted']) || incoming().recommendationsAccepted is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['aiGamesPoints']) || incoming().aiGamesPoints is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['ratingsCount']) || incoming().ratingsCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['chatMessagesCount']) || incoming().chatMessagesCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['coins']) || incoming().coins is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['purchasedItems']) || incoming().purchasedItems is list) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['claimedAchievements']) || incoming().claimedAchievements is list) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['dailyStats']) || incoming().dailyStats is map) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBanner']) || incoming().equippedBanner is string || incoming().equippedBanner == null) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedAvatar']) || incoming().equippedAvatar is string || incoming().equippedAvatar == null) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedFrame']) || incoming().equippedFrame is string || incoming().equippedFrame == null) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedTitle']) || incoming().equippedTitle is string || incoming().equippedTitle == null) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBadge']) || incoming().equippedBadge is string || incoming().equippedBadge == null) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['lastSpinTimestamp']) || incoming().lastSpinTimestamp is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['listCount']) || incoming().listCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['totalEpisodesWatched']) || incoming().totalEpisodesWatched is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['completedAnimeCount']) || incoming().completedAnimeCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['privacySettings']) || incoming().privacySettings is map) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['avatarAlignment']) || incoming().avatarAlignment is string) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['avatarShape']) || incoming().avatarShape is string) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['bannerSize']) || incoming().bannerSize is string) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['dislikesReceived']) || incoming().dislikesReceived is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['approvedRecommendationsCount']) || incoming().approvedRecommendationsCount is number) &&
+        (!incoming().diff(existing()).affectedKeys().hasAny(['lastActiveDate']) || incoming().lastActiveDate is string);
+      allow delete: if false;
+
+      match /customLists/{listId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(listId) && isValidCustomList(incoming());
+        allow update: if isOwner(userId) && isValidId(listId) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['name']) &&
+          incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 100;
+        allow delete: if isOwner(userId) && isValidId(listId);
+      }
+
+      match /animeEntries/{animeId} {
+        allow read: if true;
+        allow create: if isOwner(userId) && isValidId(animeId) 
+          && isValidAnimeEntry(incoming());
+        allow update: if isOwner(userId) && isValidId(animeId)
+          && isValidAnimeEntry(incoming())
+          && (
+            !incoming().diff(existing()).affectedKeys().hasAny(['addedAt']) ||
+            (incoming().addedAt is string || incoming().addedAt is timestamp)
+          )
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'customLists', 'score', 'isFavorite', 'animeId', 'updatedAt', 'title', 'posterUrl', 'releaseYear', 'completedXpClaimed', 'watchedEpisodes', 'episodesCount', 'progress', 'addedAt']);
+        allow delete: if isOwner(userId) && isValidId(animeId);
+      }
+    }
+  }
+}
