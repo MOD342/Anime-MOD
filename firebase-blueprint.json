@@ -108,6 +108,43 @@
         "dislikes": { "type": "number" }
       },
       "required": ["type", "questionData", "createdAt", "author", "likes", "dislikes"]
+    },
+    "GlobalSettings": {
+      "title": "GlobalSettings",
+      "description": "Global options like slider settings and announcements",
+      "type": "object",
+      "properties": {
+        "sliderLimit": { "type": "number" },
+        "sliderSeason": { "type": "string" },
+        "sliderSpeed": { "type": "number" },
+        "globalAnnouncement": { "type": "string" }
+      }
+    },
+    "GlobalRole": {
+      "title": "GlobalRole",
+      "description": "Custom administrative or moderator roles assigned to users",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string" },
+        "assignedBy": { "type": "string" },
+        "assignedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["role", "assignedBy", "assignedAt"]
+    },
+    "Suggestion": {
+      "title": "Suggestion",
+      "description": "User feedback suggestion or complaint",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "type": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      },
+      "required": ["userId", "email", "displayName", "type", "message", "createdAt", "status"]
     }
   },
   "firestore": {
@@ -138,6 +175,18 @@
     "/gameQuestions/{questionId}": {
       "schema": "GameQuestion",
       "description": "Smart persistent questions pool for games"
+    },
+    "/globalSettings/{settingsId}": {
+      "schema": "GlobalSettings",
+      "description": "Global settings such as sliders and dynamic main banners"
+    },
+    "/globalRoles/{userId}": {
+      "schema": "GlobalRole",
+      "description": "Global roles for access control and moderators selection list"
+    },
+    "/suggestions/{suggestionId}": {
+      "schema": "Suggestion",
+      "description": "User feedback suggestions and complaints"
     }
   }
 }

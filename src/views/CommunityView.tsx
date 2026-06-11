@@ -28,13 +28,17 @@ import {
   Laugh,
   ShieldAlert,
   Swords,
-  Sword
+  Sword,
+  MoreVertical,
+  Flag,
+  Trash2
 } from 'lucide-react';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { STORE_ITEMS_SORTED, getAvatarShapeClass } from '../data/storeItems';
 import { awardXP } from '../services/gamificationService';
+import { moderationService } from '../services/moderationService';
 
 const WhoSaidGame = lazy(() => import('../components/games/WhoSaidGame'));
 const AnimeMathGame = lazy(() => import('../components/games/AnimeMathGame'));
@@ -196,10 +200,11 @@ const ALL_GAMES = [
 
 interface CommunityViewProps {
   onUserClick?: (userId: string) => void;
+  focusCommentId?: string;
 }
 
-export default function CommunityView({ onUserClick }: CommunityViewProps) {
-  const { user, userData } = useAuth();
+export default function CommunityView({ onUserClick, focusCommentId }: CommunityViewProps) {
+  const { user, userData, userRole } = useAuth();
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard'>('feed');
 
   // Feed Tab States
@@ -210,6 +215,16 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
   const [expandedCommentsPostId, setExpandedCommentsPostId] = useState<string | null>(null);
   const [newReplyText, setNewReplyText] = useState<{ [postId: string]: string }>({});
   const [loadingPosts, setLoadingPosts] = useState(true);
+
+  // Community Flag and Delete States
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [reportingItemId, setReportingItemId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
+
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [submittingDelete, setSubmittingDelete] = useState(false);
 
   // Challenges Tab States
   const [activeChallengeGame, setActiveChallengeGame] = useState<string | null>(null);
@@ -274,6 +289,23 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
     };
   }, []);
 
+  // Highlight and focus reported comment dynamically
+  useEffect(() => {
+    if (posts.length > 0 && focusCommentId) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`comment-${focusCommentId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('bg-[#FF1744]/15', 'rounded-xl', 'p-3', 'border', 'border-[#FF1744]/30', 'transition-all', 'duration-500');
+          setTimeout(() => {
+            el.classList.remove('bg-[#FF1744]/15', 'border-[#FF1744]/30');
+          }, 3000);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [posts, focusCommentId]);
+
   // 2. Fetch Leaderboard in real-time (XP ranking)
   useEffect(() => {
     if (activeTab === 'leaderboard') {
@@ -297,17 +329,80 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
     }
   }, [activeTab]);
 
+  // Handle report submission
+  const handleSendReport = async () => {
+    if (!reportingItemId || !reportReason.trim()) return;
+    setSubmittingReport(true);
+    try {
+      await moderationService.reportContent(reportingItemId, 'comment', reportReason.trim());
+      alert('تم تقديم الإبلاغ بنجاح للإدارة وسيقوم المشرفون بمراجعته. 🛡️');
+      setReportingItemId(null);
+      setReportReason('');
+    } catch (e) {
+      console.error(e);
+      alert('حدث خطأ أثناء تقديم الإبلاغ.');
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
+  // Handle deletion of post/reply
+  const handleDeleteItem = async (itemId: string, itemUserId: string) => {
+    const isPostOwner = user?.uid === itemUserId;
+    const isMod = userRole === 'owner' || userRole === 'admin' || userRole === 'moderator';
+    
+    if (isPostOwner && !isMod) {
+      if (window.confirm('هل أنت متأكد من رغبتك في حذف هذا المنشور؟ 🗑️')) {
+        try {
+          await moderationService.deleteComment(itemId);
+          alert('تم حذف المنشور بنجاح.');
+        } catch (err) {
+          console.error(err);
+          alert('حدث خطأ أثناء محاولة الحذف.');
+        }
+      }
+    } else if (isMod) {
+      setDeletingItemId(itemId);
+      setDeleteReason('');
+    }
+  };
+
+  // Moderator Delete Confirmation
+  const handleModDeleteConfirm = async () => {
+    if (!deletingItemId || !deleteReason.trim()) return;
+    setSubmittingDelete(true);
+    try {
+      await moderationService.deleteComment(deletingItemId);
+      alert('تم حذف المحتوى كـمستند مشرف وإغلاق المخالفة بنجاح. 🛡️');
+      setDeletingItemId(null);
+      setDeleteReason('');
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء حذف المحتوى.');
+    } finally {
+      setSubmittingDelete(false);
+    }
+  };
+
   // Form Submission for creating a main post
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (userData?.isMuted) {
+      alert('تم تقييد حسابك من الكتابة والمشاركة بواسطة الإدارة! 🔇');
+      return;
+    }
+    if ((userData?.level || 1) < 2) {
+      alert('تحتاج للوصول إلى المستوى 2 على الأقل للتمكن من النشر ومشاركة المنشورات! 🚀');
+      return;
+    }
     if (!newPostText.trim()) return;
 
     setPosting(true);
     try {
       const postPayload: any = {
         animeId: 'community',
-        userId: user.uid,
+        userId: user.id,
         userDisplayName: userData?.displayName || user.displayName || 'لاعب مجهول',
         text: newPostText.trim(),
         likes: 0,
@@ -326,7 +421,7 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
       setNewPostText('');
 
       // Award XP for contributing a post (+10 XP)
-      await awardXP(user.uid, 10);
+      await awardXP(user.id, 10);
     } catch (err) {
       console.error("Failed to publish community post", err);
     } finally {
@@ -337,6 +432,14 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
   // Form Submission for submitting a nested reply
   const handleCreateReply = async (postId: string) => {
     if (!user) return;
+    if (userData?.isMuted) {
+      alert('تم تقييد حسابك من الكتابة والتعليق بواسطة الإدارة! 🔇');
+      return;
+    }
+    if ((userData?.level || 1) < 2) {
+      alert('تحتاج للوصول إلى المستوى 2 على الأقل للتمكن من التعليق والردود! 🚀');
+      return;
+    }
     const text = newReplyText[postId]?.trim();
     if (!text) return;
 
@@ -344,7 +447,7 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
       const replyPayload: any = {
         animeId: 'community_reply',
         parentCommentId: postId,
-        userId: user.uid,
+        userId: user.id,
         userDisplayName: userData?.displayName || user.displayName || 'لاعب مجهول',
         text: text,
         likes: 0,
@@ -362,7 +465,7 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
       setNewReplyText(prev => ({ ...prev, [postId]: '' }));
 
       // Award XP for reply (+5 XP)
-      await awardXP(user.uid, 5);
+      await awardXP(user.id, 5);
     } catch (err) {
       console.error("Failed to publish reply", err);
     }
@@ -383,7 +486,7 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
   // Scoring in quiz awards actual user XP + Coins in db
   const handleQuizScoreUpdated = async (pointsGained: number) => {
     if (user) {
-      await awardXP(user.uid, pointsGained, true);
+      await awardXP(user.id, pointsGained, true);
     }
   };
 
@@ -476,7 +579,7 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
                <div className="relative p-0.5 shrink-0 h-12 w-12">
                    <div className={`w-full h-full ${getAvatarShapeClass(STORE_ITEMS_SORTED.find(i => i.id === userData?.equippedFrame)?.avatarShape)} overflow-hidden border border-neutral-800 bg-neutral-900 flex items-center justify-center shadow-lg`}>
                       <img 
-                        src={STORE_ITEMS_SORTED.find(i => i.id === userData?.equippedAvatar)?.img || user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.uid} 
+                        src={STORE_ITEMS_SORTED.find(i => i.id === userData?.equippedAvatar)?.img || user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.id} 
                         className="w-full h-full object-cover" 
                         alt="my-avatar"
                         referrerPolicy="no-referrer"
@@ -492,13 +595,19 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
                    type="text" 
                    value={newPostText}
                    onChange={e => setNewPostText(e.target.value)}
-                   disabled={posting}
-                   placeholder="ما الذي يدور في ذهنك اليوم من نظريات أنمي؟ شاركنا منشورك..." 
-                   className="w-full bg-black/40 border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500/50 focus:bg-black/60 transition-all font-medium placeholder:text-neutral-600 block text-right"
+                   disabled={posting || userData?.isMuted || (userData?.level || 1) < 2}
+                   placeholder={
+                     userData?.isMuted 
+                       ? "تم كتم حسابك من كتابة المنشورات بواسطة الإدارة 🔇" 
+                       : (userData?.level || 1) < 2 
+                         ? "مغلق 🔒 المستوى 2 مطلوب للتمكن من النشر وكتابة الآراء" 
+                         : "ما الذي يدور في ذهنك اليوم من نظريات أنمي؟ شاركنا منشورك..."
+                   } 
+                   className="w-full bg-black/40 border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-xs md:text-sm text-white focus:outline-none focus:border-purple-500/50 focus:bg-black/60 transition-all font-medium placeholder:text-neutral-600 block text-right disabled:opacity-50"
                  />
                  <button 
                    type="submit"
-                   disabled={posting || !newPostText.trim()}
+                   disabled={posting || !newPostText.trim() || userData?.isMuted || (userData?.level || 1) < 2}
                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 disabled:opacity-40 rounded-xl transition-colors cursor-pointer"
                  >
                    {posting ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} className="translate-x-0.5" />}
@@ -582,6 +691,48 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
                         </p>
                       </div>
                     </div>
+
+                    {/* Ellipsis Actions Menu */}
+                    {user && (
+                      <div className="relative">
+                        <button 
+                          onClick={() => setActiveMenuId(activeMenuId === post.id ? null : post.id)}
+                          className="text-neutral-500 hover:text-white p-1 rounded-full transition hover:bg-white/5 cursor-pointer flex items-center justify-center"
+                        >
+                          <MoreVertical size={18} />
+                        </button>
+
+                        {activeMenuId === post.id && (
+                          <>
+                            <div className="fixed inset-0 z-30" onClick={() => setActiveMenuId(null)} />
+                            <div className="absolute left-0 top-full mt-1 bg-[#15151b] border border-neutral-800 rounded-xl shadow-2xl py-1.5 w-36 z-40 text-xs text-right overflow-hidden">
+                              {(userRole === 'owner' || userRole === 'admin' || userRole === 'moderator' || user?.uid === post.userId) && (
+                                <button 
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    handleDeleteItem(post.id, post.userId);
+                                  }}
+                                  className="w-full text-right px-3 py-2 hover:bg-neutral-800 text-red-500 transition flex items-center gap-2 justify-start cursor-pointer border-b border-white/5"
+                                >
+                                  <Trash2 size={13} />
+                                  <span>حذف المنشور</span>
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  setReportingItemId(post.id);
+                                }}
+                                className="w-full text-right px-3 py-2 hover:bg-neutral-800 text-neutral-300 transition flex items-center gap-2 justify-start cursor-pointer"
+                              >
+                                <Flag size={13} className="text-orange-500" />
+                                <span>إبلغ عن المنشور</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Main content body */}
@@ -631,7 +782,48 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
                                const repBadge = STORE_ITEMS_SORTED.find(i => i.id === reply.equippedBadge);
 
                                return (
-                                 <div key={reply.id} className="flex gap-2.5 items-start bg-[#0e0e11]/45 p-3 rounded-2xl border border-neutral-900 text-right">
+                                 <div key={reply.id} className="flex gap-2.5 items-start bg-[#0e0e11]/45 p-3 rounded-2xl border border-neutral-900 text-right relative group/reply">
+                                  {/* Reply Ellipsis Actions Menu */}
+                                  {user && (
+                                    <div className="absolute left-2 top-2 z-10 md:opacity-0 group-hover/reply:opacity-100 transition-opacity">
+                                      <button 
+                                        onClick={() => setActiveMenuId(activeMenuId === reply.id ? null : reply.id)}
+                                        className="text-neutral-500 hover:text-white p-0.5 rounded transition cursor-pointer flex items-center justify-center bg-black/40 hover:bg-black/60"
+                                      >
+                                        <MoreVertical size={13} />
+                                      </button>
+
+                                      {activeMenuId === reply.id && (
+                                        <>
+                                          <div className="fixed inset-0 z-30" onClick={() => setActiveMenuId(null)} />
+                                          <div className="absolute left-0 top-full mt-0.5 bg-[#15151b] border border-neutral-800 rounded-lg shadow-2xl py-1 w-28 z-40 text-[10px] text-right overflow-hidden font-sans">
+                                            {(userRole === 'owner' || userRole === 'admin' || userRole === 'moderator' || user?.uid === reply.userId) && (
+                                              <button 
+                                                onClick={() => {
+                                                  setActiveMenuId(null);
+                                                  handleDeleteItem(reply.id, reply.userId);
+                                                }}
+                                                className="w-full text-right px-2.5 py-1.5 hover:bg-neutral-800 text-red-500 transition flex items-center gap-1.5 justify-start cursor-pointer border-b border-white/5"
+                                              >
+                                                <Trash2 size={10} />
+                                                <span>حذف الرد</span>
+                                              </button>
+                                            )}
+                                            <button 
+                                              onClick={() => {
+                                                setActiveMenuId(null);
+                                                setReportingItemId(reply.id);
+                                              }}
+                                              className="w-full text-right px-2.5 py-1.5 hover:bg-neutral-800 text-neutral-300 transition flex items-center gap-1.5 justify-start cursor-pointer"
+                                            >
+                                              <Flag size={10} className="text-orange-500" />
+                                              <span>إبلاغ</span>
+                                            </button>
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
                                    {/* Comment frame cosmetics */}
                                    <div className="relative p-0.5 shrink-0">
                                      <div className={`w-8 h-8 ${getAvatarShapeClass(repFrame?.avatarShape)} overflow-hidden bg-neutral-900 border border-neutral-800 flex items-center justify-center`}>
@@ -684,12 +876,19 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
                                type="text" 
                                value={newReplyText[post.id] || ''}
                                onChange={e => setNewReplyText(prev => ({ ...prev, [post.id]: e.target.value }))}
-                               placeholder="اكتب ردك على هذا المنشور..." 
-                               className="flex-1 bg-black/60 border border-neutral-800 text-xs text-neutral-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-purple-600 transition text-right"
+                               placeholder={
+                                 userData?.isMuted 
+                                   ? "مكتوم عن النشر والردود 🔇" 
+                                   : (userData?.level || 1) < 2 
+                                     ? "المستوى 2 مطلوب للرد 🔒" 
+                                     : "اكتب ردك على هذا المنشور..."
+                               } 
+                               className="flex-1 bg-black/60 border border-neutral-800 text-xs text-neutral-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-purple-600 transition text-right disabled:opacity-40"
+                               disabled={userData?.isMuted || (userData?.level || 1) < 2}
                              />
                              <button
                                onClick={() => handleCreateReply(post.id)}
-                               disabled={!(newReplyText[post.id]?.trim())}
+                               disabled={!(newReplyText[post.id]?.trim()) || userData?.isMuted || (userData?.level || 1) < 2}
                                className="bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white p-2.5 rounded-xl transition flex items-center justify-center shrink-0"
                              >
                                <CornerDownLeft size={14} />
@@ -918,6 +1117,162 @@ export default function CommunityView({ onUserClick }: CommunityViewProps) {
           </div>
         </motion.div>
       )}
+
+      {/* 🛡️ Modals for Community Moderation */}
+      <AnimatePresence>
+        {/* 1. Report Modal */}
+        {reportingItemId && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setReportingItemId(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#121217] border border-neutral-800 rounded-3xl p-6 w-full max-w-md relative z-10 text-right font-sans"
+              dir="rtl"
+            >
+              <h3 className="text-base font-black text-white mb-2 flex items-center gap-2">
+                <Flag className="text-orange-500 shrink-0" size={18} />
+                <span>تقديم إبلاغ عن محتوى مخالف</span>
+              </h3>
+              <p className="text-xs text-neutral-400 mb-4 font-medium leading-relaxed font-sans">
+                هل لاحظت وجود انتهاك للقوانين أو سلوك غير لائق؟ يرجى إبلاغ الإدارة من خلال إرسال موضوع المخالفة لتتمكن من مراجعتها.
+              </p>
+
+              <div className="space-y-3 mb-5">
+                {[
+                  'سب شتائم أو سلوك غير محترم 🤬',
+                  'حرق للأحداث بدون غطاء أو تحديد حرق 🍿',
+                  'محتوى إعلاني أو روابط سبام خارجية غير مرغوبة 🚫',
+                  'حديث سياسي أو غير متعلق بالأنمي 🕌',
+                  'آخر (يرجى التوضيح في الأسفل)'
+                ].map((reason) => (
+                  <button
+                    key={reason}
+                    onClick={() => {
+                      if (reason.startsWith('آخر')) {
+                        setReportReason('آخر: ');
+                      } else {
+                        setReportReason(reason);
+                      }
+                    }}
+                    className={`w-full text-right p-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                      reportReason === reason || (reason.startsWith('آخر') && reportReason.startsWith('آخر:'))
+                        ? 'bg-purple-600/10 border-purple-500/30 text-purple-400'
+                        : 'bg-[#181822] hover:bg-[#1f1f2e] border-transparent text-neutral-300'
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+
+                <textarea
+                  placeholder="اكتب تفاصيل المخالفة بوضوح هنا..."
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full bg-[#0d0d12] border border-neutral-800 text-xs text-neutral-300 rounded-xl p-3 focus:outline-none focus:border-purple-600 focus:bg-black transition text-right min-h-[70px] resize-none font-sans"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={submittingReport || !reportReason.trim()}
+                  onClick={handleSendReport}
+                  className="flex-1 py-3 hover:bg-opacity-95 bg-purple-600 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-900/20 disabled:opacity-40 transition cursor-pointer flex items-center justify-center font-sans"
+                >
+                  {submittingReport ? <Loader2 size={14} className="animate-spin" /> : 'إرسال الإبلاغ 🛡️'}
+                </button>
+                <button
+                  onClick={() => setReportingItemId(null)}
+                  className="px-4 py-3 bg-[#181822] hover:bg-neutral-800 text-neutral-400 font-bold text-xs rounded-xl transition cursor-pointer font-sans"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* 2. Mod Delete Reason Modal */}
+        {deletingItemId && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDeletingItemId(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#121217] border border-neutral-800 rounded-3xl p-6 w-full max-w-md relative z-10 text-right font-sans"
+              dir="rtl"
+            >
+              <h3 className="text-base font-black text-red-500 mb-2 flex items-center gap-2">
+                <Trash2 size={18} />
+                <span>طلب حظر وحذف محتوى كمشرف</span>
+              </h3>
+              <p className="text-xs text-neutral-400 mb-4 font-medium leading-relaxed font-sans">
+                بصفتك مشرفاً أو إدارياً، يمكنك إزالة المحتوى المخالف فوراً. يرجى توضيح سبب الإزالة لتسجيل الإجراء الإداري:
+              </p>
+
+              <div className="space-y-3 mb-5">
+                {[
+                  'سلوك عدائي وشتائم مكررة 🚫',
+                  'حرق قصة أنمي مستمر دون تنبيه 🍿',
+                  'إعلانات وروابط سبام غير مرخص بها ⛓️',
+                  'محتوى مخالف للآداب السلوكية والذوق العام 💥'
+                ].map((reason) => (
+                  <button
+                    key={reason}
+                    onClick={() => setDeleteReason(reason)}
+                    className={`w-full text-right p-3 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                      deleteReason === reason
+                        ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                        : 'bg-[#181822] hover:bg-[#1f1f2e] border-transparent text-neutral-300'
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+
+                <textarea
+                  placeholder="توضيح سبب الحذف التفصيلي..."
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  className="w-full bg-[#0d0d12] border border-neutral-800 text-xs text-neutral-300 rounded-xl p-3 focus:outline-none focus:border-red-600 focus:bg-black transition text-right min-h-[70px] resize-none font-sans"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={submittingDelete || !deleteReason.trim()}
+                  onClick={handleModDeleteConfirm}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-xl shadow-lg shadow-red-900/20 disabled:opacity-40 transition cursor-pointer flex items-center justify-center font-sans"
+                >
+                  {submittingDelete ? <Loader2 size={14} className="animate-spin" /> : 'تأكيد الحذف والإزالة 🛡️'}
+                </button>
+                <button
+                  onClick={() => setDeletingItemId(null)}
+                  className="px-4 py-3 bg-[#181822] hover:bg-neutral-800 text-neutral-400 font-bold text-xs rounded-xl transition cursor-pointer font-sans"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

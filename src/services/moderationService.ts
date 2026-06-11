@@ -5,7 +5,7 @@ import { OperationType, handleFirestoreError } from '../firebaseUtils';
 export type RoleLevel = 'owner' | 'admin' | 'moderator' | 'user';
 
 export interface GlobalRole {
-  uid: string;
+  id: string;
   role: RoleLevel;
   assignedBy?: string;
   assignedAt?: any;
@@ -41,6 +41,27 @@ export const moderationService = {
     if (!auth.currentUser) return;
     try {
       await setDoc(doc(db, 'globalSettings', 'modPermissions'), perms);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'globalSettings');
+    }
+  },
+
+  getGlobalSettings: async (id: string): Promise<any> => {
+    try {
+      const snap = await getDoc(doc(db, 'globalSettings', id));
+      if (snap.exists()) {
+        return snap.data();
+      }
+    } catch(error) {
+      console.error("Failed to load global settings: " + id, error);
+    }
+    return null;
+  },
+
+  updateGlobalSettings: async (id: string, data: any): Promise<void> => {
+    if (!auth.currentUser) return;
+    try {
+      await setDoc(doc(db, 'globalSettings', id), data, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'globalSettings');
     }
@@ -99,7 +120,7 @@ export const moderationService = {
       const snap = await getDocs(q);
       const roles: GlobalRole[] = [];
       snap.forEach(doc => {
-        roles.push({ uid: doc.id, ...doc.data() } as GlobalRole);
+        roles.push({ id: doc.id, ...doc.data() } as GlobalRole);
       });
       return roles;
     } catch(error) {
@@ -139,7 +160,7 @@ export const moderationService = {
     }
   },
 
-  resolveReport: async (reportId: string, resolution: 'deleted_content' | 'dismissed'): Promise<void> => {
+  resolveReport: async (reportId: string, resolution: 'deleted_content' | 'dismissed', contentType?: 'comment' | 'recommendation', contentId?: string): Promise<void> => {
     try {
        await updateDoc(doc(db, 'reports', reportId), {
           status: 'resolved',
@@ -147,18 +168,26 @@ export const moderationService = {
           resolvedAt: serverTimestamp(),
           resolvedBy: auth.currentUser?.uid
        });
+       
+       if (resolution === 'deleted_content' && contentType && contentId) {
+         if (contentType === 'comment') {
+           await deleteDoc(doc(db, 'comments', contentId));
+         } else if (contentType === 'recommendation') {
+           await deleteDoc(doc(db, 'recommendations', contentId));
+         }
+       }
     } catch(error) {
        handleFirestoreError(error, OperationType.WRITE, 'reports');
     }
   },
   
-  assignRole: async (uid: string, role: RoleLevel): Promise<void> => {
+  assignRole: async (id: string, role: RoleLevel): Promise<void> => {
     if (!auth.currentUser) throw new Error('Not auth');
     try {
       if (role === 'user') {
-         await deleteDoc(doc(db, 'globalRoles', uid));
+         await deleteDoc(doc(db, 'globalRoles', id));
       } else {
-         await setDoc(doc(db, 'globalRoles', uid), {
+         await setDoc(doc(db, 'globalRoles', id), {
            role,
            assignedBy: auth.currentUser.uid,
            assignedAt: serverTimestamp()
@@ -169,10 +198,10 @@ export const moderationService = {
     }
   },
 
-  banUser: async (uid: string, reason: string): Promise<void> => {
+  banUser: async (id: string, reason: string): Promise<void> => {
     if (!auth.currentUser) return;
     try {
-      await setDoc(doc(db, 'bannedUsers', uid), {
+      await setDoc(doc(db, 'bannedUsers', id), {
         reason,
         bannedBy: auth.currentUser.uid,
         bannedAt: serverTimestamp()
@@ -182,9 +211,9 @@ export const moderationService = {
     }
   },
   
-  unbanUser: async (uid: string): Promise<void> => {
+  unbanUser: async (id: string): Promise<void> => {
     try {
-      await deleteDoc(doc(db, 'bannedUsers', uid));
+      await deleteDoc(doc(db, 'bannedUsers', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, 'bannedUsers');
     }
@@ -196,12 +225,52 @@ export const moderationService = {
       const snap = await getDocs(q);
       const bans: any[] = [];
       snap.forEach(doc => {
-        bans.push({ uid: doc.id, ...doc.data() });
+        bans.push({ id: doc.id, ...doc.data() });
       });
       return bans;
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, 'bannedUsers');
       return [];
+    }
+  },
+
+  getAllUsers: async (): Promise<any[]> => {
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      const items: any[] = [];
+      snap.forEach(doc => {
+        items.push({ id: doc.id, ...doc.data() });
+      });
+      return items;
+    } catch (error) {
+       console.error("Failed to fetch all users", error);
+       return [];
+    }
+  },
+
+  updateUserCoinsAndXP: async (id: string, coins: number, xp: number, level: number): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'users', id), {
+        coins: Number(coins),
+        xp: Number(xp),
+        level: Number(level)
+      });
+    } catch (error) {
+      console.error("Failed to update user stats", error);
+      throw error;
+    }
+  },
+
+  restrictMember: async (id: string, restrictions: { isMuted: boolean; isGamesRestricted: boolean; isCoinsRestricted: boolean }): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'users', id), {
+        isMuted: restrictions.isMuted,
+        isGamesRestricted: restrictions.isGamesRestricted,
+        isCoinsRestricted: restrictions.isCoinsRestricted
+      });
+    } catch (error) {
+      console.error("Failed to restrict member in Firestore", error);
+      throw error;
     }
   },
 
@@ -229,17 +298,17 @@ export const moderationService = {
       const usersSnap = await getDocs(collection(db, 'users'));
       
       const promises = usersSnap.docs.map(async (userDoc) => {
-        const uid = userDoc.id;
+        const id = userDoc.id;
         
         // Fetch and delete all anime entries for this user
-        const entriesSnap = await getDocs(collection(db, 'users', uid, 'animeEntries'));
+        const entriesSnap = await getDocs(collection(db, 'users', id, 'animeEntries'));
         const deletePromises = entriesSnap.docs.map(d => 
-          deleteDoc(doc(db, 'users', uid, 'animeEntries', d.id))
+          deleteDoc(doc(db, 'users', id, 'animeEntries', d.id))
         );
         await Promise.all(deletePromises);
         
         // Reset the user statistics and level stats
-        await updateDoc(doc(db, 'users', uid), {
+        await updateDoc(doc(db, 'users', id), {
           xp: 0,
           level: 1,
           coins: 0,

@@ -1,6 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Star, Loader2, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { LongPressCopy } from '../components/LongPressCopy';
+
+const GENRE_ARABIC_MAP: Record<string, string> = {
+  'Action': 'أكشن ⚔️',
+  'Adventure': 'مغامرات 🗺️',
+  'Comedy': 'كوميديا 🎭',
+  'Drama': 'دراما 😭',
+  'Fantasy': 'خيالي 🦄',
+  'Romance': 'رومانسي 💕',
+  'Sci-Fi': 'خيال علمي 🚀',
+  'Slice of Life': 'شريحة من الحياة 🌸',
+  'Supernatural': 'قوى خارقة 🔮',
+  'Suspense': 'إثارة ⏳',
+  'Mystery': 'غموض 🔍',
+  'Sports': 'رياضة ⚽',
+  'Horror': 'رعب 👻',
+  'Gourmet': 'طهي وطعام 🍜',
+  'Award Winning': 'حائز على جوائز 🏆',
+  'Boys Love': 'رومانسية شباب',
+  'Girls Love': 'رومانسية فتيات',
+  'Ecchi': 'إيتشي 🔞',
+  'Avant Garde': 'طليعي / غريب 🎨',
+  'Erotica': 'عمل للبالغين 🔞',
+  'Hentai': 'محتوى للبالغين 🔞',
+  'Workplace': 'بيئة عمل 💼'
+};
 
 interface ExploreViewProps {
   onAnimeClick: (id: string) => void;
@@ -237,7 +263,7 @@ export default function ExploreView({ onAnimeClick, initialQuery }: ExploreViewP
                               : 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white'
                           }`}
                         >
-                          {g.name}
+                          {GENRE_ARABIC_MAP[g.name] || g.name}
                         </button>
                       ))}
                     </div>
@@ -341,7 +367,9 @@ export default function ExploreView({ onAnimeClick, initialQuery }: ExploreViewP
                           {anime.status}
                         </div>
                       )}
-                      <h5 className="font-bold text-xs md:text-sm text-white truncate drop-shadow text-center">{anime.title}</h5>
+                      <LongPressCopy text={anime.title}>
+                        <h5 className="font-bold text-xs md:text-sm text-white truncate drop-shadow text-center pointer-events-auto">{anime.title}</h5>
+                      </LongPressCopy>
                     </div>
                   </motion.div>
                 ))}

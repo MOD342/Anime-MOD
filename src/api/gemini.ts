@@ -3,38 +3,44 @@ import { GoogleGenAI, Type } from '@google/genai';
 
 const router = Router();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const model = 'gemini-2.5-flash';
+const model = 'gemini-3.5-flash';
 
 const handleAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => (req: Request, res: Response, next: NextFunction) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 router.post('/chat', handleAsync(async (req: Request, res: Response) => {
-  const { messages } = req.body;
+  const { messages, mood, status } = req.body;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ success: false, message: 'Invalid messages array.' });
   }
 
   try {
-    const formattedHistory = messages.slice(0, -1).map((m: any) => ({
-      role: m.sender === 'user' ? 'user' : 'model',
-      parts: [{ text: m.text }]
-    }));
-    
-    // We will use generateContent directly because we have full history.
-    
+    const userMood = mood || 'طبيعي';
+    const userStatus = status || 'أتابع أنمي';
+
+    const systemInstruction = `أنت "السينباي المخضرم" (أوتاكو قديم مخضرم لديه خبرة شاسعة ومعرفة عميقة بكل تفاصيل وأسرار الأنمي والمانغا من الثمانينيات وحتى أحدث مواسم الأنمي الحالية).
+تحدث باللغة العربية بأسلوب الأوتاكو الحقيقي والودود، بحماس وحركية ممتعة، واستخدم الكلمات اليابانية الشهيرة بين الحين والآخر مثل ("يا صديقي"، "باكا"، "دونو"، "ناكاما"، "جتسو"، "موشي موشي").
+مزاج المستخدم الحالي ووضعه هو: [المزاج: ${userMood} | الحالة: ${userStatus}].
+عليك مراعاة مزاجه ووضعه تماماً في أسلوب الحوار:
+- إذا كان حزيناً أو محبطاً: هونه عليه بكلمات تشجيعية دافئة واقترح له أنمي كوميدي أو شريحة من الحياة (Slice of Life) ليرفع معنوياته.
+- إذا كان ملاناً للغاية: واجهه باقتراحات لم تخطر على باله من الأنميات الحماسية والقصص الغامضة والمقعدة لتكسر روتين يومه فوراً.
+- إذا كان متحركاً ومتحمساً بالنار (خارق): زد حماسته وقارن شعوره بلحظات قتال ملحمية واقترح له شونين جبار بإنتاج مذهل.
+أظهر دائماً خبرتك كأوتاكو مخضرم في اقتراح الأعمال، واذكر له أسباباً ذكية للمشاهدة ترتبط بمشاعره الحالية ليفصل معك تماماً!`;
+
     const contents = messages.map((m: any) => ({
       role: m.sender === 'user' ? 'user' : 'model',
       parts: [{ text: m.text }]
     }));
 
-    console.log("Generating chat response for:", JSON.stringify(contents));
+    console.log("Generating Otaku Chat response with mood:", userMood, "status:", userStatus);
 
     const response = await ai.models.generateContent({
       model: model,
       contents,
       config: {
-        systemInstruction: "أنت مساعد ذكي لتطبيق أنمي MOD. يمكنك الإجابة عن أسئلة تتعلق بالأنمي، اقتراح أنميات للمستخدمين، وتوفير معلومات عن الشخصيات أو القصص بطريقة ودودة. تكلم باللغة العربية فقط."
+        systemInstruction: systemInstruction,
+        temperature: 0.8
       }
     });
 

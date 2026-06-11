@@ -9,6 +9,18 @@ const FALLBACK_CHALLENGES = [
   { emojis: '📓🍎🖋️👻', options: ['Bleach', 'Death Note', 'Tokyo Ghoul', 'Jujutsu Kaisen'], correct: 1 },
   { emojis: '🏴‍☠️👒🍖🌊', options: ['Naruto', 'Fairy Tail', 'One Piece', 'Hunter x Hunter'], correct: 2 },
   { emojis: '🦊🍜🍥🥷', options: ['Gintama', 'Naruto', 'Bleach', 'Inuyasha'], correct: 1 },
+  { emojis: '🏰🛡️🧱🦖🩸', options: ['Hunter x Hunter', 'Death Note', 'Attack on Titan', 'Bleach'], correct: 2 },
+  { emojis: '👁️🤞🔴🔵🟣', options: ['Jujutsu Kaisen', 'Demon Slayer', 'Naruto', 'Bleach'], correct: 0 },
+  { emojis: '🎴🐗⚡🌊⚔️', options: ['Demon Slayer', 'One Piece', 'Bleach', 'Sword Art Online'], correct: 0 },
+  { emojis: '🎣🕸️🧬🐜🎭', options: ['Hunter x Hunter', 'Bleach', 'Naruto', 'My Hero Academia'], correct: 0 },
+  { emojis: '☄️🐉🟠🐒🥋', options: ['Dragon Ball Z', 'One Punch Man', 'Naruto', 'Gintama'], correct: 0 },
+  { emojis: '🦸🥦💥🔥❄️', options: ['My Hero Academia', 'Hunter x Hunter', 'Gintama', 'Black Clover'], correct: 0 },
+  { emojis: '💀🌸❄️⚔️🦊', options: ['Bleach', 'Naruto', 'Fairy Tail', 'One Piece'], correct: 0 },
+  { emojis: '🍀👿📖📚🗡️', options: ['Black Clover', 'Fairy Tail', 'Blue Exorcist', 'Naruto'], correct: 0 },
+  { emojis: '☕👁️🩸🕷️😷', options: ['Tokyo Ghoul', 'Parasyte', 'Another', 'Shiki'], correct: 0 },
+  { emojis: '👾🖥️💻👩‍❤️‍👨⚔️', options: ['Sword Art Online', 'Overlord', 'Log Horizon', 'Accel World'], correct: 0 },
+  { emojis: '✊🧬⚙️🪙🤖', options: ['Fullmetal Alchemist', 'Steins;Gate', 'Code Geass', 'Evangelion'], correct: 0 },
+  { emojis: '🏐👟🦅🦊🦉', options: ['Haikyuu', 'Kuroko no Basket', 'Blue Lock', 'Slam Dunk'], correct: 0 }
 ];
 
 export default function EmojiCharadesGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

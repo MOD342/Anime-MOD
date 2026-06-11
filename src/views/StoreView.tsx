@@ -175,7 +175,7 @@ export default function StoreView({ onBack }: StoreViewProps) {
       isPurchasingRef.current = true;
       setPurchasing(item.id);
       
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         coins: increment(-item.price),
         purchasedItems: arrayUnion(item.id)
       });
@@ -202,7 +202,7 @@ export default function StoreView({ onBack }: StoreViewProps) {
     if (!key) return;
 
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         [key]: forceUnequip ? null : item.id
       });
       if (previewItem?.id === item.id && forceUnequip) {

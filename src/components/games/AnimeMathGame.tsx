@@ -11,6 +11,13 @@ const FALLBACK_QUESTIONS = [
   { id: 3, text: 'رقم الأسبادا لأولكيورا + عدد أعضاء الأكاتسوكي الأساسيين', answer: 14, options: [12, 14, 16, 18], correct: 1 },
   { id: 4, text: 'عمر غون في بداية الأنمي + عمر كيلوا', answer: 24, options: [20, 22, 24, 26], correct: 2 },
   { id: 5, text: 'إصدارات القير للوفي (Gear) الحالية', answer: 5, options: [3, 4, 5, 6], correct: 2 },
+  { id: 6, text: 'عدد أصابع سوكونا كاملة - رقم الأسبادا لجريمجو', answer: 14, options: [10, 12, 14, 16], correct: 2 },
+  { id: 7, text: 'عدد أفراد فرقة جينيو للنخبة + عدد عيون كاكاشي بالشارينغان المزدوجة', answer: 7, options: [6, 7, 8, 9], correct: 1 },
+  { id: 8, text: 'عدد جدران جزيرة باراديس (هجوم العمالقة) + عدد سيوف زورو المفعلة بنفس الوقت', answer: 6, options: [5, 6, 7, 8], correct: 1 },
+  { id: 9, text: 'أقوى بوابة فتحها مايت غاي ضد مادارا - عدد سيوف كيلر بي الملعونة', answer: 1, options: [1, 2, 3, 4], correct: 0 },
+  { id: 10, text: 'عدد أحجار البونيغليف الحمراء (Road Poneglyphs) + عدد وحوش البيجو بالكامل', answer: 13, options: [11, 12, 13, 14], correct: 2 },
+  { id: 11, text: 'رقم فرقة الشينيغامي للقائد بياكويا كوتشيكي + عدد بوابات تشاكرا غاي المفتوحة الكلية', answer: 14, options: [11, 12, 14, 16], correct: 2 },
+  { id: 12, text: 'عدد أفراد طاقم قبعة القش الحاليين (مع لوفي) + عدد رتب فيلق الاستطلاع الكبيرة', answer: 13, options: [11, 12, 13, 14], correct: 2 },
 ];
 
 export default function AnimeMathGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

@@ -3,6 +3,8 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { notificationsService } from '../services/notificationsService';
 import NotificationsModal from './NotificationsModal';
+import { db } from '../firebase';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 export function AppLayout({ children, activeTab, setActiveTab, onNavigateTo }: { children: ReactNode; activeTab: string; setActiveTab: (tab: string) => void; onNavigateTo: (view: string, props?: any) => void }) {
   const { user } = useAuth();
@@ -13,20 +15,21 @@ export function AppLayout({ children, activeTab, setActiveTab, onNavigateTo }: {
 
   useEffect(() => {
     if (!user) return;
-    const fetchUnread = async () => {
-      try {
-        const notifs = await notificationsService.getUserNotifications(user.uid);
-        const count = notifs.filter(n => !n.read).length;
-        setUnreadNotifsCount(count);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchUnread();
     
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
+    // Listen to user notifications in real-time for updated unread badgecount
+    const q = query(collection(db, 'users', user.id, 'notifications'));
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const count = snapshot.docs.filter(d => !d.data().read).length;
+        setUnreadNotifsCount(count);
+      },
+      (err) => {
+        console.error("Real-time notifications counter error:", err);
+      }
+    );
+
+    return () => unsub();
   }, [user]);
 
   useEffect(() => {

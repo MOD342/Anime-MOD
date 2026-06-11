@@ -165,7 +165,7 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
       const success = await submitCustomQuestion(
         contribType,
         qData,
-        user.uid,
+        user.id,
         userData.displayName || 'أوتاكو مساهم'
       );
 
@@ -275,8 +275,8 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
         };
       }
 
-      await updateDoc(doc(db, 'users', user.uid), updateObj);
-      await awardXP(user.uid, finalPoints);
+      await updateDoc(doc(db, 'users', user.id), updateObj);
+      await awardXP(user.id, finalPoints);
     } catch (e) {
       console.error(e);
     }
@@ -296,7 +296,7 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
         [type]: (current[type] || 0) + 1
       };
 
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         coins: increment(-price),
         boosters: updatedBoosters
       });
@@ -308,7 +308,7 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
   const handleClaimQuest = async (questNum: number, rewardCoins: number) => {
     if (!user) return;
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         coins: increment(rewardCoins),
         [`dailyStats.quest${questNum}Claimed`]: true
       });
@@ -324,6 +324,10 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
   const hasFoughtBossToday = userData?.lastBossDefeatDate === new Date().toDateString();
 
   const startRaidFight = () => {
+    if (userData?.isGamesRestricted) {
+      alert('عذراً! تم حظر وصولك إلى ألعاب وفعاليات الأكاديمية بواسطة إدارة المنصة! 🎮🛑');
+      return;
+    }
     if (hasFoughtBossToday) {
       alert("قد نلت مأربك وقهرت زعيم اليوم! عد مجدداً في الغد لمواجهة رعب آخر.");
       return;
@@ -379,7 +383,7 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
         [boosterType]: count - 1
       };
 
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         boosters: updatedBoosters
       });
 
@@ -412,11 +416,11 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
     if (!user) return;
     setShowBattleEnd('win');
     try {
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         coins: increment(activeBoss.rewardCoins),
         lastBossDefeatDate: new Date().toDateString()
       });
-      await awardXP(user.uid, activeBoss.rewardXp);
+      await awardXP(user.id, activeBoss.rewardXp);
     } catch (e) {
       console.error(e);
     }
@@ -891,7 +895,13 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
                   return (
                     <div 
                       key={game.id} 
-                      onClick={() => { if (!isLocked) { setSelectedGame(game.id); setActiveTab('game'); } }}
+                      onClick={() => { 
+                        if (userData?.isGamesRestricted) {
+                          alert('عذراً! تم حظر دخولك إلى ألعاب وفعاليات الأكاديمية بواسطة إدارة المنصة! 🎮🛑');
+                          return;
+                        }
+                        if (!isLocked) { setSelectedGame(game.id); setActiveTab('game'); } 
+                      }}
                       className={`p-5 rounded-3xl border transition-all flex flex-col items-start gap-4 shadow-xl relative overflow-hidden text-right ${
                         isLocked 
                           ? 'bg-black/50 border-white/5 opacity-60 cursor-not-allowed' 

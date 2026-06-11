@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, PlayCircle, Star, Tv } from 'lucide-react';
+import { clientCache } from '../utils/clientCache';
 
 export default function RecentEpisodesView({ onBack, onAnimeClick }: { onBack: () => void, onAnimeClick: (id: string) => void }) {
   const [episodes, setEpisodes] = useState<any[]>(() => {
-    try {
-      const cached = sessionStorage.getItem('client_dashboard_cache');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        return parsed.recentEpisodes || [];
-      }
-    } catch {}
-    return [];
+    const cached = clientCache.get<any>('client_dashboard_cache');
+    return cached?.recentEpisodes || [];
   });
   const [loading, setLoading] = useState(() => {
-    try {
-      return !sessionStorage.getItem('client_dashboard_cache');
-    } catch {
-      return true;
-    }
+    return !clientCache.get('client_dashboard_cache');
   });
 
   useEffect(() => {

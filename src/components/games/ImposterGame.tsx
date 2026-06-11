@@ -11,6 +11,11 @@ const FALLBACK_IMPOSTER = [
   { anime: 'ناروتو', options: ['كاكاشي', 'غارا', 'هيسوكا', 'ساكورا'], correct: 2 },
   { anime: 'بليتش', options: ['إيتشيغو', 'إيتشيمارو', 'مادارا', 'روكيا'], correct: 2 },
   { anime: 'هنتر x هنتر', options: ['غون', 'كيلوا', 'كورابيكا', 'ليفاي'], correct: 3 },
+  { anime: 'جوجوتسو كايسن', options: ['يوجي إيتادوري', 'ميغومي فوشيغورو', 'تانجيرو', 'نوبارا كوجيساكي'], correct: 2 },
+  { anime: 'قاتل الشياطين (Demon Slayer)', options: ['تانجيرو', 'نيزوكو', 'إينوسكي', 'كورابيكا'], correct: 3 },
+  { anime: 'مفكرة الموت (Death Note)', options: ['لايت', 'إل', 'مادارا', 'ميرا'], correct: 2 },
+  { anime: 'دراغون بول Z', options: ['غوكو', 'فيجيتا', 'غوهان', 'سانجي'], correct: 3 },
+  { anime: 'أكاديميتي للأبطال', options: ['ميدوريا', 'باكوغو', 'تودوروكي', 'لولوش'], correct: 3 }
 ];
 
 export default function ImposterGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

@@ -8,8 +8,12 @@ import { useAuth } from '../../contexts/AuthContext';
 const FALLBACK_SONGS = [
   { text: 'أريد أن أكون الأقوى... سأجد كل شيء في ذلك المكان!', options: ['ون بيس (We Are)', 'ناروتو (Blue Bird)', 'بليتش (Asterisk)', 'دراغون بول (Cha-La)'], correct: 0 },
   { text: 'إذا كان العالم لا معنى له، فقط قم بتدمير ما لا تحب... واعرضه!', options: ['هجوم العمالقة (Guren no Yumiya)', 'طوكيو غول (Unravel)', 'كود جياس (Colors)', 'ديث نوت (The World)'], correct: 1 },
-  { text: 'أنت لست وحدك، لأننا معاً دائماً تحت هذه السماء المزرقة الدافئة.', options: ['ناروتو شيبودن', 'فيري تيل', 'هنتر اكس هنتر', 'ون بيس'], correct: 0 },
-  { text: 'لا زلت أتذكر صوت ذلك اليوم الذي انكسر فيه كل شيء.', options: ['بليتش', 'طوكيو غول', 'هجوم العمالقة', 'ناروتو شيبودن'], correct: 2 },
+  { text: 'أنت لست وحدك، لأننا معاً دائماً تحت هذه السماء المزرقة الدافئة.', options: ['ناروتو شيبودن (Blue Bird)', 'فيري تيل (Snow Fairy)', 'هنتر اكس هنتر (Departure)', 'ون بيس (Hope)'], correct: 0 },
+  { text: 'لا زلت أتذكر صوت ذلك اليوم الذي انكسر فيه كل شيء.', options: ['بليتش (Ranbu no Melody)', 'طوكيو غول (Unravel)', 'هجوم العمالقة (Shinzou wo Sasageyo)', 'ناروتو شيبودن'], correct: 2 },
+  { text: 'يا إلهي، من فضلك دع عيني ترى ما وراء الكلمات... دع قوة قلبي تشتعل مجدداً!', options: ['قاتل الشياطين (Gurenge)', 'بوروثو شيبودن', 'ون بنش مان (The Hero)', 'جوجوتسو كايسن (Kaikai Kitan)'], correct: 0 },
+  { text: 'تلك النجمة اللامعة في عتمة الليل تظهر كأمنية كاذبة ولكنها ساحرة تملأ قلوب الجماهير بالهتاف الصاخب!', options: ['أوشي نو كو (Idol)', 'الكلاب الضالة (Trash Candy)', 'دراغون بول (Limit Break)', 'كاجويا ساما (Love Dramatic)'], correct: 0 },
+  { text: 'إذا كنت تطير في تلك الحفرة العميقة الفولاذية، فتعلم كيف تطلق جناح نسر الفخر البعيد!', options: ['هايكيو (Fly High)', 'سيريل السكك الحديدية', 'بليتش (ALONES)', 'فول ميتال الكيميائي'], correct: 0 },
+  { text: 'تنهدات الغسق المتسلل تكشف شعلة السيف، الروح النبيلة تصرخ في وجه الفراغ!', options: ['بليتش (Asterisk)', 'جوجوتسو كايسن (Kaikai Kitan)', 'روروني كنشين', 'ناروتو (Silhouette)'], correct: 1 }
 ];
 
 export default function OpeningLyricsGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

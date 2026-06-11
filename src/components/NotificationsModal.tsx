@@ -3,8 +3,7 @@ import { Bell, X, Info, Trophy, MessageCircle, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { notificationsService, AppNotification } from '../services/notificationsService';
 import { useAuth } from '../contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatArabicDistanceToNow } from '../utils/dateFormatter';
 
 interface NotificationsModalProps {
   onClose: () => void;
@@ -30,7 +29,7 @@ export default function NotificationsModal({ onClose, onNavigate }: Notification
 
     // User specific
     if (user) {
-       const userNotifs = await notificationsService.getUserNotifications(user.uid);
+       const userNotifs = await notificationsService.getUserNotifications(user.id);
        allNotifs = [...allNotifs, ...userNotifs];
     }
     
@@ -47,7 +46,7 @@ export default function NotificationsModal({ onClose, onNavigate }: Notification
 
   const handleClear = async () => {
     if (user) {
-      await notificationsService.clearAllUserNotifications(user.uid);
+      await notificationsService.clearAllUserNotifications(user.id);
       await loadNotifications();
     }
   };
@@ -62,6 +61,13 @@ export default function NotificationsModal({ onClose, onNavigate }: Notification
       onNavigate?.('games');
     } else if (n.linkTo === 'leaderboard') {
       onNavigate?.('leaderboard');
+    } else if (n.linkTo.startsWith('comment_view')) {
+      const parts = n.linkTo.split(':');
+      const animeId = parts[1] || n.metadata?.animeId;
+      const commentId = parts[2] || n.metadata?.commentId;
+      if (animeId) {
+        onNavigate?.('anime_comments', { animeId, focusCommentId: commentId });
+      }
     } else if (n.linkTo.startsWith('anime_details')) {
       const parts = n.linkTo.split(':');
       const animeId = parts[1] || n.metadata?.animeId;
@@ -144,7 +150,7 @@ export default function NotificationsModal({ onClose, onNavigate }: Notification
                        <h4 className="text-sm font-bold text-white mb-1 line-clamp-1">{n.title}</h4>
                        <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{n.body}</p>
                        <span className="text-[10px] text-neutral-600 mt-2 block">
-                         {n.createdAt && n.createdAt.toMillis ? formatDistanceToNow(n.createdAt.toDate(), { addSuffix: true, locale: ar }) : 'الآن'}
+                         {formatArabicDistanceToNow(n.createdAt)}
                        </span>
                      </div>
                   </div>

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Star, List, MessageCircle, Heart, Share2, Info, ChevronRight, Loader2, Users, Youtube, X, Plus, LogIn, ThumbsUp, ThumbsDown, Copy, Reply, Flag, EyeOff, Eye, Edit2, Trash2, ShieldCheck, CheckSquare, PlayCircle, Trophy, Send, Flame } from 'lucide-react';
+import { Play, Star, List, MessageCircle, Heart, Share2, Info, ChevronRight, Loader2, Users, Youtube, X, Plus, LogIn, ThumbsUp, ThumbsDown, Copy, Reply, Flag, EyeOff, Eye, Edit2, Trash2, ShieldCheck, CheckSquare, PlayCircle, Trophy, Send, Flame, Download, Lightbulb } from 'lucide-react';
 import { Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, collection, query, where, getDocs } from 'firebase/firestore';
 import { listService, CustomList, MainListStatus, AnimeEntry, getAnimeRewards } from '../services/listService';
 import { Recommendation, getApprovedRecommendations, addRecommendation, Comment, getComments, addComment, updateCommentInteraction, updateRecommendationInteraction } from '../services/animeInteractionService';
 import { notificationsService } from '../services/notificationsService';
+import { clientCache } from '../utils/clientCache';
+import { LongPressCopy } from '../components/LongPressCopy';
 
 function RecommendationItem({ rec, user, isMod, onDelete }: any) {
   const [likes, setLikes] = useState(rec.likes || 0);
@@ -84,9 +86,12 @@ import RelatedAnimeCard from '../components/RelatedAnimeCard';
 
 interface AnimeDetailsProps {
   id?: string;
+  showComments?: boolean;
+  focusCommentId?: string;
   onBack: () => void;
   onWatch: (episode: any, anime: any) => void;
   onAnimeClick?: (id: string) => void;
+  onNavigate?: (view: string, props?: any) => void;
 }
 
 const MAIN_LISTS: { id: MainListStatus, label: string, icon: React.ElementType, color: string }[] = [
@@ -112,7 +117,7 @@ const RELATION_TYPES_AR: Record<string, string> = {
   'Other': 'أخرى'
 };
 
-export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: AnimeDetailsProps) {
+export default function AnimeDetailsView({ id, showComments = false, focusCommentId, onBack, onWatch, onAnimeClick, onNavigate }: AnimeDetailsProps) {
   const { user, signIn, userRole, userData } = useAuth();
   const [anime, setAnime] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -143,7 +148,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
   const [newListName, setNewListName] = useState('');
   const [creatingCustomList, setCreatingCustomList] = useState(false);
   const [isLoadingLists, setIsLoadingLists] = useState(false);
-  const [activeTab, setActiveTab] = useState<'story' | 'episodes' | 'characters' | 'comments' | 'recommendations'>('story');
+  const [activeTab, setActiveTab] = useState<'story' | 'episodes' | 'characters' | 'photos' | 'recommendations'>('story');
 
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [showAddRecModal, setShowAddRecModal] = useState(false);
@@ -177,10 +182,10 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     return () => clearTimeout(delayDebounceFn);
   }, [recSearchQuery, selectedRecAnime]);
 
-  const [comments, setComments] = useState<any[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [isSpoiler, setIsSpoiler] = useState(false);
-  const [submittingComment, setSubmittingComment] = useState(false);
+  const [pictures, setPictures] = useState<string[]>([]);
+  const [loadingPictures, setLoadingPictures] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [downloadingPhoto, setDownloadingPhoto] = useState(false);
   const [hoverRating, setHoverRating] = useState<number>(0);
 
   useEffect(() => {
@@ -188,15 +193,10 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     const fetchDetails = async () => {
       try {
         if (id !== 'random') {
-          const cached = sessionStorage.getItem(`client_anime_details_${id}`);
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed && parsed.description && parsed.description !== 'جاري تحديث قصة وتفاصيل هذا الأنمي قريباً.') {
-              setAnime(parsed);
-              setLoading(false);
-            } else {
-              setLoading(true);
-            }
+          const cached = clientCache.get<any>(`client_anime_details_${id}`);
+          if (cached && cached.description && cached.description !== 'جاري تحديث قصة وتفاصيل هذا الأنمي قريباً.') {
+            setAnime(cached);
+            setLoading(false);
           } else {
             setLoading(true);
           }
@@ -207,17 +207,17 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
         setLoading(true);
       }
       try {
-        const res = await fetch(`/api/anime/details/${id}`);
-        const data = await res.json();
-        if (data.success) {
-          setAnime(data.data);
-          try {
-            sessionStorage.setItem(`client_anime_details_${data.data._id}`, JSON.stringify(data.data));
-          } catch (e) {}
-          import('../services/listService').then(({ listService }) => {
-             listService.getAnimeAppRating(data.data._id || id).then(setAppRating);
-          });
-        }
+        await clientCache.fetchWithRevalidate(
+          `client_anime_details_${id}`,
+          `/api/anime/details/${id}`,
+          (data: any) => {
+            setAnime(data);
+            import('../services/listService').then(({ listService }) => {
+               listService.getAnimeAppRating(data._id || id).then(setAppRating);
+            });
+          },
+          12 * 60 * 60 * 1000 // 12 Hours TTL for details with SWR revalidation
+        );
       } catch (err) {
         console.error(err);
       } finally {
@@ -231,10 +231,43 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     if (anime) {
       getApprovedRecommendations(anime._id).then(setRecommendations);
     }
-    if (activeTab === 'comments' && anime) {
-      getComments(anime._id).then(setComments);
+  }, [anime]);
+
+  useEffect(() => {
+    if (activeTab === 'photos' && anime) {
+      setLoadingPictures(true);
+      fetch(`/api/anime/pictures/${anime._id || id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.pictures) {
+            setPictures(data.pictures);
+          }
+        })
+        .catch(err => console.error('Error loading pictures:', err))
+        .finally(() => setLoadingPictures(false));
     }
   }, [activeTab, anime]);
+
+  const handleDownloadImage = async (url: string) => {
+    try {
+      setDownloadingPhoto(true);
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${anime?.title || 'anime'}-image.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed, fallback to direct open', error);
+      window.open(url, '_blank');
+    } finally {
+      setDownloadingPhoto(false);
+    }
+  };
 
   useEffect(() => {
     if (user && anime) {
@@ -247,8 +280,8 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     setIsLoadingLists(true);
     try {
       const [allCustom, allEntries] = await Promise.all([
-        listService.getCustomLists(user.uid),
-        listService.getAnimeEntries(user.uid)
+        listService.getCustomLists(user.id),
+        listService.getAnimeEntries(user.id)
       ]);
       setCustomLists(allCustom);
       const entry = allEntries.find(e => e.id === anime._id);
@@ -318,7 +351,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     setShowListModal(false);
 
     try {
-      await listService.saveAnimeEntry(user.uid, anime._id, {
+      await listService.saveAnimeEntry(user.id, anime._id, {
         title: anime.title,
         posterUrl: anime.posterUrl,
         releaseYear: anime.releaseYear,
@@ -367,7 +400,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     });
 
     try {
-      await listService.saveAnimeEntry(user.uid, anime._id, {
+      await listService.saveAnimeEntry(user.id, anime._id, {
         title: anime.title,
         posterUrl: anime.posterUrl,
         releaseYear: anime.releaseYear,
@@ -446,7 +479,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     setShowListModal(false);
 
     try {
-      await listService.saveAnimeEntry(user.uid, anime._id, {
+      await listService.saveAnimeEntry(user.id, anime._id, {
         title: anime.title,
         posterUrl: anime.posterUrl,
         releaseYear: anime.releaseYear,
@@ -467,7 +500,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     if (!user || !anime || !newListName.trim()) return;
     try {
       setCreatingCustomList(true);
-      const listId = await listService.createCustomList(user.uid, newListName.trim());
+      const listId = await listService.createCustomList(user.id, newListName.trim());
       setNewListName('');
       
       const currentMap = userEntry?.customLists || {};
@@ -478,7 +511,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
         return { ...prev, customLists: newMap };
       });
       
-      await listService.saveAnimeEntry(user.uid, anime._id, {
+      await listService.saveAnimeEntry(user.id, anime._id, {
         title: anime.title,
         posterUrl: anime.posterUrl,
         releaseYear: anime.releaseYear,
@@ -488,7 +521,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
         watchedEpisodes: userEntry?.watchedEpisodes || []
       });
       
-      const freshCustom = await listService.getCustomLists(user.uid);
+      const freshCustom = await listService.getCustomLists(user.id);
       setCustomLists(freshCustom);
       loadUserData();
       setShowListModal(false);
@@ -505,12 +538,16 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     setSubmittingRec(true);
     try {
       await addRecommendation({
-        animeId: anime._id,
-        targetAnimeId: selectedRecAnime._id,
+        animeId: anime._id || id,
+        animeTitle: anime.title,
+        animePosterUrl: anime.posterUrl,
+        targetAnimeId: selectedRecAnime._id || selectedRecAnime.id,
         targetAnimeTitle: selectedRecAnime.title,
+        targetAnimePosterUrl: selectedRecAnime.posterUrl,
         reason: recReason,
-        userId: user.uid,
+        userId: user.id,
       });
+      alert('تم تقديم توصيتك بنجاح! وسوف تظهر للجميع على الصفحة فور مراجعتها واعتمادها من قبل الإدارة. ✨');
       // Create global notification for recommendation (only if admin or owner)
       if (userRole === 'admin' || userRole === 'owner') {
         await notificationsService.createGlobalNotification({
@@ -532,61 +569,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
     }
   };
 
-  const handleAddComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !anime || !newComment.trim()) return;
-    setSubmittingComment(true);
-    try {
-      await addComment({
-        animeId: anime._id,
-        userId: user.uid,
-        userDisplayName: user.displayName || 'مستخدم',
-        userPhotoUrl: user.photoURL || undefined,
-        text: newComment,
-        isSpoiler,
-        likes: 0,
-        dislikes: 0,
-        equippedAvatar: userData?.equippedAvatar || null,
-        equippedFrame: userData?.equippedFrame || null,
-        equippedTitle: userData?.equippedTitle || null,
-        equippedBadge: userData?.equippedBadge || null
-      });
-      import('../services/gamificationService').then(({ incrementInteraction }) => {
-        incrementInteraction(user.uid, 'comment');
-      });
-
-      // Handle mention check/replies notification
-      if (newComment.startsWith('@')) {
-        const spaceIdx = newComment.indexOf(' ');
-        if (spaceIdx > 1) {
-          const mentionedName = newComment.slice(1, spaceIdx).trim();
-          const targetComment = comments.find(c => c.userDisplayName === mentionedName);
-          if (targetComment && targetComment.userId !== user.uid) {
-            await notificationsService.createUserNotification(targetComment.userId, {
-              title: '💬 رد جديد على تعليقك!',
-              body: `${user.displayName || 'متابع'} رد على تعليقك في أنمي "${anime.title}": "${newComment.slice(spaceIdx + 1, spaceIdx + 51)}..."`,
-              type: 'social',
-              linkTo: `anime_details:${anime._id}`,
-              metadata: {
-                animeId: anime._id,
-                commentId: targetComment.id
-              }
-            });
-          }
-        }
-      }
-
-      setNewComment('');
-      setIsSpoiler(false);
-      // refetch comments
-      const updated = await getComments(anime._id);
-      setComments(updated);
-    } catch(err) {
-      console.error(err);
-    } finally {
-      setSubmittingComment(false);
-    }
-  }
+  // Removed handleAddComment and parseMentionsAndNotify
 
   const handleDeleteRec = async (recId: string, trueRecId: string) => {
     if (window.confirm("هل أنت متأكد من حذف هذه التوصية؟")) {
@@ -630,7 +613,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
               else {
                 const newStatus = !userEntry?.isFavorite;
                 import('../services/listService').then(({ listService }) => {
-                  listService.saveAnimeEntry(user.uid, anime._id, {
+                  listService.saveAnimeEntry(user.id, anime._id, {
                     title: anime.title,
                     posterUrl: anime.posterUrl,
                     releaseYear: anime.season || '',
@@ -661,7 +644,11 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
         
         {/* Info Overlay */}
         <div className="absolute bottom-6 right-4 left-4 z-30 flex flex-col items-center text-center gap-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-2xl">{anime.title}</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-2xl">
+            <LongPressCopy text={anime.title}>
+              {anime.title}
+            </LongPressCopy>
+          </h1>
           <div className="flex flex-row justify-center items-center gap-2 flex-wrap">
             <span className="text-yellow-400 flex items-center justify-center gap-1 bg-black/80 px-3 py-1 rounded backdrop-blur-md border border-white/5 text-xs font-bold"><Star size={14} fill="currentColor"/> {anime.rating || anime.score || '?'}</span>
             <span className="bg-black/80 px-3 py-1 rounded backdrop-blur-md border border-white/5 text-purple-300 text-xs font-bold">{anime.season || 'غير محدد'}</span>
@@ -702,8 +689,14 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
               })()}
             </button>
             
-            <button className="w-12 h-12 bg-[#1E1E1E] rounded-xl flex items-center justify-center text-neutral-300 hover:bg-neutral-800 transition border border-neutral-800 shrink-0">
-              <Share2 size={20} />
+            <button 
+              onClick={() => {
+                if (anime) onNavigate?.('anime_comments', { animeId: anime._id || id });
+              }}
+              className="w-12 h-12 bg-[#1E1E1E] rounded-xl flex items-center justify-center text-[#FF1744] hover:bg-neutral-800 hover:border-[#FF1744]/40 transition border border-neutral-850 shrink-0 cursor-pointer select-none"
+              title="النقاشات والتعليقات"
+            >
+              <MessageCircle size={20} />
             </button>
           </div>
           
@@ -713,7 +706,7 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
               { id: 'story', label: 'القصة' },
               { id: 'episodes', label: 'الحلقات' },
               { id: 'characters', label: 'الشخصيات' },
-              { id: 'comments', label: 'التعليقات' }
+              { id: 'photos', label: 'صور الأنمي' }
             ].map(tab => (
               <motion.button 
                 key={tab.id}
@@ -802,7 +795,17 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
               
               <div className="flex overflow-x-auto hide-scrollbar gap-3 pb-2">
                 {[
-                  ...recommendations.map(r => ({ title: r.targetAnimeTitle, reason: r.reason, id: r.targetAnimeId, trueId: r.id, isUser: true, posterUrl: null })),
+                  ...recommendations.map(r => {
+                    const isSource = String(r.animeId) === String(anime._id);
+                    return {
+                      title: isSource ? r.targetAnimeTitle : (r.animeTitle || 'أنمي'),
+                      reason: r.reason,
+                      id: isSource ? r.targetAnimeId : r.animeId,
+                      trueId: r.id,
+                      isUser: true,
+                      posterUrl: isSource ? (r.targetAnimePosterUrl || null) : (r.animePosterUrl || null)
+                    };
+                  }),
                   ...(anime.jikanRecommendations || []).map((jr: any) => ({ title: jr.title, posterUrl: jr.posterUrl, id: jr.id, trueId: null, isUser: false }))
                 ].map((rec, i) => (
                   <div 
@@ -817,10 +820,11 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
                     )}
                     <div className="w-28 h-40 rounded-xl overflow-hidden bg-[#121212] border border-neutral-800 shadow-lg group-hover:border-[#FF1744] transition-colors relative">
                        {rec.posterUrl ? (
-                         <img src={rec.posterUrl} alt={rec.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                         <img src={rec.posterUrl} alt={rec.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" referrerPolicy="no-referrer" />
                        ) : (
                          <div className="w-full h-full flex flex-col p-2 items-center justify-center bg-neutral-900 border border-neutral-800">
-                           <span className="text-[10px] font-bold text-blue-400 line-clamp-3 text-center">"{rec.reason}"</span>
+                           <Lightbulb size={24} className="text-[#FF1744] mb-2" />
+                           <span className="text-[9px] text-[#B0B0B0] text-center px-1 font-bold">توصية أنمي</span>
                          </div>
                        )}
                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -924,72 +928,93 @@ export default function AnimeDetailsView({ id, onBack, onWatch, onAnimeClick }: 
           </motion.div>
         )}
 
-        {activeTab === 'comments' && (
+        {activeTab === 'photos' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pb-28">
-            {/* Comment list is now on Top */}
-            <div className="space-y-2.5">
-              {comments.map(comment => (
-                <AnimeCommentItem key={comment.id} comment={comment} user={user} onReply={(c) => setNewComment(`@${c.userDisplayName} `)} onDeleteLocally={(id) => setComments(comments.filter(c => c.id !== id))} />
-              ))}
-              {comments.length === 0 && (
-                <div className="text-center py-6 text-neutral-500 font-bold bg-[#1E1E1E] text-xs rounded-2xl border border-neutral-800">
-                  كن أول من يعلق!
-                </div>
-              )}
-            </div>
-
-            {/* Comment Form is now fixed at the Bottom, matching instant chat layout in centered column */}
-            <div className="fixed bottom-0 left-0 right-0 max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl mx-auto p-4 bg-gradient-to-t from-black via-black/95 to-transparent z-[50]">
-               <form onSubmit={handleAddComment} className="flex flex-col gap-2 w-full">
-                  {isSpoiler && (
-                    <div className="text-[10px] text-[#FF1744] bg-[#FF1744]/10 border border-[#FF1744]/15 px-3 py-1.5 rounded-full self-start font-bold inline-flex items-center gap-1.5 animate-pulse">
-                      <Flame size={12} fill="currentColor" />
-                      <span>سيتم نشر هذا التعليق كحرق للأحداث!</span>
-                    </div>
-                  )}
-                  <div className="bg-[#12161E] px-2.5 py-1.5 rounded-full border border-neutral-800/95 flex items-center justify-between gap-3 shadow-2xl w-full">
-                    {/* Flame/Spoiler toggle button on the left */}
-                    <button
-                      type="button"
-                      title="تنبيه حرق"
-                      onClick={() => setIsSpoiler(!isSpoiler)}
-                      className={`p-2 rounded-full transition shrink-0 flex items-center justify-center ${isSpoiler ? 'text-[#FF1744] bg-[#FF1744]/10' : 'text-neutral-500 hover:text-neutral-300 hover:bg-white/5'}`}
-                    >
-                      <Flame size={16} fill={isSpoiler ? 'currentColor' : 'none'} />
-                    </button>
-
-                    {/* TextInput in middle */}
-                    <input
-                      type="text"
-                      value={newComment}
-                      onChange={e => setNewComment(e.target.value)}
-                      placeholder="إضافة تعليق..."
-                      className="flex-1 bg-transparent text-white text-xs py-2 focus:outline-none placeholder-neutral-500 font-sans text-right"
-                      dir="rtl"
-                      disabled={submittingComment}
+            {loadingPictures ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-2">
+                <Loader2 className="animate-spin text-[#FF1744]" size={20} />
+                <p className="text-xs text-neutral-500 font-bold">جاري تحميل البوم الصور...</p>
+              </div>
+            ) : pictures.length === 0 ? (
+              <div className="text-center py-10 text-xs font-bold text-neutral-500 bg-[#1E1E1E] rounded-2xl border border-neutral-800">
+                لا توجد صور متوفرة لهذا الأنمي حالياً.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {pictures.map((picUrl, idx) => (
+                  <motion.div
+                    key={idx}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedPhoto(picUrl)}
+                    className="aspect-[4/3] bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800/60 shadow-md cursor-pointer relative group"
+                  >
+                    <img
+                      src={picUrl}
+                      alt={`anime-picture-${idx}`}
+                      className="w-full h-full object-cover group-hover:brightness-110 transition duration-300"
+                      referrerPolicy="no-referrer"
                     />
-
-                    {/* Blue circular paperplane icon to send */}
-                    <button
-                      type="submit"
-                      disabled={!user || !newComment.trim() || submittingComment}
-                      className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-35 text-white flex items-center justify-center transition shrink-0 shadow-md"
-                    >
-                      {submittingComment ? (
-                        <Loader2 size={13} className="animate-spin" />
-                      ) : (
-                        <Send size={13} className="transform rotate-180" />
-                      )}
-                    </button>
-                  </div>
-               </form>
-            </div>
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <span className="bg-black/70 backdrop-blur text-[10px] text-white px-2.5 py-1 rounded-full font-bold">توسيع الصورة 🔍</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 
       </div>
 
       <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedPhoto(null)}
+            className="fixed inset-0 max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-5xl xl:max-w-7xl mx-auto z-[120] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()} 
+              className="relative max-w-3xl w-full flex flex-col items-center gap-4 bg-transparent animate-fadeIn text-right"
+              dir="rtl"
+            >
+              <button 
+                onClick={() => setSelectedPhoto(null)}
+                className="absolute -top-12 right-2 w-10 h-10 flex items-center justify-center rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 transition cursor-pointer z-50 shadow-md"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="w-full max-h-[80vh] flex items-center justify-center rounded-2xl overflow-hidden bg-neutral-950/75 border border-neutral-800/80 shadow-2xl relative select-none p-1">
+                <img 
+                  src={selectedPhoto} 
+                  alt="Magnified Anime" 
+                  className="max-h-[75vh] w-auto max-w-full rounded-xl object-contain pointer-events-none shadow-2xl"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              <div className="flex gap-2 w-full justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadImage(selectedPhoto)}
+                  className="bg-[#FF1744] hover:bg-rose-600 active:scale-95 text-white font-black text-xs py-3 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(255,23,68,0.45)] cursor-pointer select-none"
+                >
+                  {downloadingPhoto ? (
+                    <Loader2 size={15} className="animate-spin text-white" />
+                  ) : (
+                    <Download size={15} />
+                  )}
+                  <span>تنزيل الصورة بأقصى دقة جودة</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {showAddRecModal && (
           <motion.div 
             initial={{ opacity: 0 }}

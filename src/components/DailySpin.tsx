@@ -61,7 +61,7 @@ export default function DailySpin({ onClose }: { onClose: () => void }) {
         if (reward.type === 'coins') updates.coins = increment(reward.amount);
         if (reward.type === 'points') updates.aiGamesPoints = increment(reward.amount);
         
-        await updateDoc(doc(db, 'users', user.uid), updates);
+        await updateDoc(doc(db, 'users', user.id), updates);
       } catch (e) {
          console.error(e);
       }

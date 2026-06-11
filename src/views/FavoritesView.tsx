@@ -14,7 +14,7 @@ export default function FavoritesView({ onBack, onAnimeClick }: { onBack: () => 
     if (user) {
        const fetchFavs = async () => {
          try {
-           const q = query(collection(db, 'users', user.uid, 'animeEntries'), where('isFavorite', '==', true));
+           const q = query(collection(db, 'users', user.id, 'animeEntries'), where('isFavorite', '==', true));
            const snap = await getDocs(q);
            const favs = snap.docs.map(d => ({id: d.id, ...d.data()} as AnimeEntry));
            setFavorites(favs);

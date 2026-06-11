@@ -60,8 +60,8 @@ export default function MyListsView({ onAnimeClick }: MyListsViewProps) {
     if (!user) return;
     try {
       const [fetchedCustom, fetchedEntries] = await Promise.all([
-        listService.getCustomLists(user.uid),
-        listService.getAnimeEntries(user.uid)
+        listService.getCustomLists(user.id),
+        listService.getAnimeEntries(user.id)
       ]);
       const getMillis = (val: any) => {
         if (!val) return 0;
@@ -89,7 +89,7 @@ export default function MyListsView({ onAnimeClick }: MyListsViewProps) {
   const handleCreateList = async () => {
     if (!user || !newListName.trim()) return;
     try {
-      await listService.createCustomList(user.uid, newListName.trim());
+      await listService.createCustomList(user.id, newListName.trim());
       setNewListName('');
       setShowAddList(false);
       loadData();
@@ -102,7 +102,7 @@ export default function MyListsView({ onAnimeClick }: MyListsViewProps) {
     if (!user) return;
     if (window.confirm('هل أنت متأكد من حذف هذه القائمة؟')) {
       try {
-        await listService.deleteCustomList(user.uid, listId);
+        await listService.deleteCustomList(user.id, listId);
         if (activeListId === listId) setActiveListId('watching');
         loadData();
       } catch (e) {
@@ -116,7 +116,7 @@ export default function MyListsView({ onAnimeClick }: MyListsViewProps) {
     if (!user) return;
     if (window.confirm('هل تريد إزالة الأنمي من المكتبة؟')) {
        try {
-         await listService.removeAnimeEntry(user.uid, id);
+         await listService.removeAnimeEntry(user.id, id);
          setEntries(prev => prev.filter(a => a.id !== id));
        } catch (err) {
          console.error(err);

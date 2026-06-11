@@ -54,8 +54,8 @@ export default function ProfileView({
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   // Resolved identity
-  const targetId = userId || user?.uid;
-  const isCurrentUser = !userId || userId === user?.uid;
+  const targetId = userId || user?.id;
+  const isCurrentUser = !userId || userId === user?.id;
   const userData = isCurrentUser ? currentUserData : targetUserData;
 
   // Optimized fetch profile statistics
@@ -138,12 +138,12 @@ export default function ProfileView({
         // Claim unique validation
         const userNameRef = doc(db, 'usernames', cleanUsername);
         const nameSnap = await getDoc(userNameRef);
-        if (nameSnap.exists() && nameSnap.data().uid !== user.uid) {
+        if (nameSnap.exists() && nameSnap.data().id !== user.id) {
           setEditFields(prev => ({ ...prev, error: 'اسم المعرّف محجوز مسبقاً، اختر آخر من فضلك.' }));
           return;
         }
         
-        await setDoc(userNameRef, { uid: user.uid });
+        await setDoc(userNameRef, { id: user.id });
         if (userData.username) {
           await deleteDoc(doc(db, 'usernames', userData.username)).catch(console.error);
         }
@@ -153,7 +153,7 @@ export default function ProfileView({
       }
       
       if (Object.keys(finalUpdates).length > 0) {
-        await updateDoc(doc(db, 'users', user.uid), finalUpdates);
+        await updateDoc(doc(db, 'users', user.id), finalUpdates);
       }
       setEditFields(prev => ({ ...prev, success: true, error: '' }));
       setTimeout(() => setEditFields(prev => ({ ...prev, success: false })), 3000);
@@ -296,7 +296,7 @@ export default function ProfileView({
     if (type === 'title') updatePayload.equippedTitle = id;
     if (type === 'badge') updatePayload.equippedBadge = id;
     
-    await updateDoc(doc(db, 'users', user.uid), updatePayload);
+    await updateDoc(doc(db, 'users', user.id), updatePayload);
   }, [user]);
 
   const handleTogglePrivacy = async (field: 'showStats' | 'showStore' | 'showHistory') => {
@@ -307,7 +307,7 @@ export default function ProfileView({
         ...currentPrivacy,
         [field]: currentPrivacy[field] === false ? true : false
       };
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', user.id), {
         privacySettings: updatedPrivacy
       });
     } catch (e) {
@@ -331,7 +331,7 @@ export default function ProfileView({
   const handleUpdateLayoutConfig = async (key: string, value: string) => {
     if (!user) return;
     try {
-      await updateDoc(doc(db, 'users', user.uid), { [key]: value });
+      await updateDoc(doc(db, 'users', user.id), { [key]: value });
     } catch (err) {
       console.error(err);
     }

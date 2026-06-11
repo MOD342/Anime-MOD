@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import { ScraperService } from '../services/scraperService';
 import geminiRoutes from './gemini';
 import { GoogleGenAI } from '@google/genai';
+import { serverCache } from '../services/cacheService';
 
 const router = Router();
 const scraper = new ScraperService();
@@ -17,20 +18,82 @@ const aiTranslate = new GoogleGenAI({
 });
 
 async function translateToArabic(text: string): Promise<string> {
-  try {
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn("GEMINI_API_KEY is not configured.");
-      return text;
-    }
-    const response = await aiTranslate.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: `ترجم القصة التالية للأنمي إلى لغة عربية فصيحة ومثيرة ومشوقة لمحبين الأنمي، دون إضافة مقدمات أو كتابة "هذه هي الترجمة" أو أي كلام جانبي، فقط الترجمة المباشرة للقصة وبأسلوب عربي رائع ومفهوم:\n\n${text}`,
-    });
-    return response?.text?.trim() || text;
-  } catch (error) {
-    console.error("Failed to translate synopsis:", error);
+  if (!text || !text.trim()) return text;
+  if (!process.env.GEMINI_API_KEY) {
+    console.warn("GEMINI_API_KEY is not configured.");
     return text;
   }
+
+  // List of models and fallbacks to ensure translation never crashes or gets blocked under heavy load
+  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+
+  for (const model of modelsToTry) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const response = await aiTranslate.models.generateContent({
+          model: model,
+          contents: `ترجم القصة التالية للأنمي إلى لغة عربية فصيحة ومثيرة ومشوقة لمحبين الأنمي، دون إضافة مقدمات أو كتابة "هذه هي الترجمة" أو أي كلام جانبي، فقط الترجمة المباشرة للقصة وبأسلوب عربي رائع ومفهوم:\n\n${text}`,
+        });
+        if (response?.text) {
+          return response.text.trim();
+        }
+      } catch (error: any) {
+        console.warn(`Translation attempt ${attempt} using ${model} failed:`, error.message || error);
+        if (attempt < 2) {
+          await delay(500 * attempt);
+        }
+      }
+    }
+  }
+
+  console.error("All translation models and attempts failed. Returning original synopsis text.");
+  return text;
+}
+
+async function translateTitleToEnglish(title: string): Promise<string> {
+  try {
+    if (!title) return '';
+    
+    // If it is already in standard English/romanized letters and doesn't contain Japanese or Arabic characters, return directly
+    if (/^[a-zA-Z0-9\s\-,.:'!()&?]+$/.test(title) && !/[\u0600-\u06FF\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf]/.test(title)) {
+      return title;
+    }
+
+    const normalized = normalizeArabic(title);
+    if (LOCAL_ANIME_MAP[normalized]) {
+      return LOCAL_ANIME_MAP[normalized];
+    }
+    
+    // Check if any key from LOCAL_ANIME_MAP is inside the title
+    for (const [arKey, enVal] of Object.entries(LOCAL_ANIME_MAP)) {
+      if (normalized.includes(arKey)) {
+        return enVal;
+      }
+    }
+
+    // Fast, simple local formatting & cleanup of common prefixes or episode keywords
+    let cleaned = title
+      .replace(/انمي|موسم|حلقة|فيلم|أفلام|مسلسل/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+      
+    return cleaned || title;
+  } catch (error) {
+    return title;
+  }
+}
+
+async function translateItemsList(items: any[]): Promise<any[]> {
+  if (!items || !Array.isArray(items)) return [];
+  return Promise.all(
+    items.map(async (item) => {
+      if (item && item.title) {
+        const enTitle = await translateTitleToEnglish(item.title);
+        return { ...item, title: enTitle };
+      }
+      return item;
+    })
+  );
 }
 
 // إضافة المسارات الخاصة بـ Gemini
@@ -41,23 +104,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 let requestQueue: Promise<void> = Promise.resolve();
 const MIN_DELAY = 500;
 
-const apiCache = new Map<string, { data: any, expireAt: number }>();
-const dashboardCache = new Map<string, { data: any, expireAt: number }>();
-const detailsCache = new Map<string, { data: any, expireAt: number }>();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
-
-setInterval(() => {
-  const now = Date.now();
-  apiCache.forEach((value, key) => {
-    if (now > value.expireAt) apiCache.delete(key);
-  });
-  dashboardCache.forEach((value, key) => {
-    if (now > value.expireAt) dashboardCache.delete(key);
-  });
-  detailsCache.forEach((value, key) => {
-    if (now > value.expireAt) detailsCache.delete(key);
-  });
-}, 10 * 60 * 1000);
 
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 6000): Promise<any> {
   const controller = new AbortController();
@@ -75,11 +122,11 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
-async function fetchJikan(url: string, retries = 5, useCache = true): Promise<any> {
+async function fetchJikan(url: string, retries = 2, useCache = true): Promise<any> {
   if (useCache && !url.includes('random')) {
-    const cached = apiCache.get(url);
-    if (cached && Date.now() < cached.expireAt) {
-      return cached.data;
+    const cached = await serverCache.get(url);
+    if (cached !== null) {
+      return cached;
     }
   }
 
@@ -92,35 +139,44 @@ async function fetchJikan(url: string, retries = 5, useCache = true): Promise<an
     });
 
     try {
-      const res = await fetch(url);
+      // Avoid hanging request by setting an explicit 4 seconds timeout limit on external Jikan endpoints
+      const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
       
-      // Minimum delay between requests to respect rate limit
-      setTimeout(resolveQueue, MIN_DELAY);
-
       if (res.status === 429) {
-        // Rate limited, apply extra backoff before retrying
-        await delay(2000 * (i + 1));
+        // Rate limited! Hold the sequential queue for 2.5 seconds to let Jikan cool down, and back off
+        setTimeout(resolveQueue, 2500);
+        await delay(2500 * (i + 1));
         continue;
       }
+      
+      // Standard release of the queue after MIN_DELAY
+      setTimeout(resolveQueue, MIN_DELAY);
+      
+      if (!res.ok) {
+        throw new Error(`Jikan error: status ${res.status}`);
+      }
+      
       const data = await res.json();
       
       if (useCache && !url.includes('random')) {
-        apiCache.set(url, { data, expireAt: Date.now() + CACHE_TTL });
+        await serverCache.set(url, data, CACHE_TTL);
       }
       return data;
     } catch (error) {
-      resolveQueue();
+      // Keep queue sequential even on error to prevent cascading burst requests
+      setTimeout(resolveQueue, MIN_DELAY);
+      
       if (i === retries - 1) {
-         const fallback = apiCache.get(url);
-         if (fallback) return fallback.data;
+         const fallback = await serverCache.get(url);
+         if (fallback !== null) return fallback;
          throw error;
       }
-      await delay(2000 * (i + 1));
+      await delay(1000 * (i + 1));
     }
   }
   
-  const fallback = apiCache.get(url);
-  if (fallback) return fallback.data;
+  const fallback = await serverCache.get(url);
+  if (fallback !== null) return fallback;
   
   throw new Error('Jikan API rate limit exceeded after retries');
 }
@@ -289,7 +345,7 @@ async function extractDoodstreamLink(targetUrl: string, html: string, customHead
         'Accept': '*/*'
       };
       
-      const resp = await fetchWithTimeout(md5Url, { headers: passHeaders }, 5000);
+      const resp = await fetchWithTimeout(md5Url, { headers: passHeaders }, 1500);
       if (resp.ok) {
         const tokenVal = await resp.text();
         const tokenKey = md5Url.split('/').pop() || '';
@@ -401,7 +457,7 @@ async function extractDirectStream(targetUrl: string): Promise<{ directUrl: stri
       }
     }
 
-    const response = await fetchWithTimeout(targetUrl, { headers, method: 'GET' }, 5000);
+    const response = await fetchWithTimeout(targetUrl, { headers, method: 'GET' }, 1500);
     if (!response.ok) {
       return { directUrl: targetUrl, type: 'iframe' };
     }
@@ -455,7 +511,7 @@ async function extractDirectStream(targetUrl: string): Promise<{ directUrl: stri
 
             nestedIframeUrl = iframeSrc;
             setDynamicHeaders(iframeSrc);
-            const nextResp = await fetchWithTimeout(iframeSrc, { headers, method: 'GET' }, 5000);
+            const nextResp = await fetchWithTimeout(iframeSrc, { headers, method: 'GET' }, 1500);
             if (nextResp.ok) {
               const nextContentType = nextResp.headers.get('content-type') || '';
               const nextContentLength = nextResp.headers.get('content-length') || '';
@@ -744,37 +800,65 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
   try {
     // Read day requested by user to align with local timezone, default to server local day
     const userDay = req.query.day as string;
+    const requestedSeason = (req.query.season as string || 'auto').toLowerCase();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const currentDay = days.includes(userDay) ? userDay : days[new Date().getDay()];
 
-    const cacheKey = `dashboard-${currentDay}`;
-    const cached = dashboardCache.get(cacheKey);
-    if (cached && Date.now() < cached.expireAt) {
-      return res.json({ success: true, data: cached.data });
+    const cacheKey = `dashboard-${currentDay}-${requestedSeason}`;
+    const cached = await serverCache.get<any>(cacheKey);
+    if (cached !== null) {
+      return res.json({ success: true, data: cached });
     }
 
-    const popularJson = await fetchJikan('https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=8');
-    const seasonJson = await fetchJikan('https://api.jikan.moe/v4/seasons/now?limit=25');
-    const recentList = await scraper.getRecentEpisodes();
-    const todayScheduleJson = await fetchJikan(`https://api.jikan.moe/v4/schedules?filter=${currentDay}&limit=20`);
+    // Determine season url to fetch based on custom settings
+    let seasonUrl = 'https://api.jikan.moe/v4/seasons/now?limit=25';
+    if (requestedSeason && requestedSeason !== 'auto' && ['winter', 'spring', 'summer', 'fall'].includes(requestedSeason)) {
+      const currentYear = new Date().getFullYear();
+      seasonUrl = `https://api.jikan.moe/v4/seasons/${currentYear}/${requestedSeason}?limit=25`;
+    }
 
-    // Slice top5 from seasonJson to save an entire Jikan API call and prevent sequential bottlenecks!
-    const top5 = (seasonJson.data || []).slice(0, 5).map((anime: any) => ({
+    // Fetch Jikan & scraper endpoints concurrently to solve high density delay & make page loading 4x faster!
+    const [popularJson, seasonJson, recentList, todayScheduleJson] = await Promise.all([
+      fetchJikan('https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=8').catch((err) => {
+        console.warn('DashboardPopularFetchWarning:', err.message);
+        return { data: [] };
+      }),
+      fetchJikan(seasonUrl).catch((err) => {
+        console.warn('DashboardSeasonFetchWarning:', err.message);
+        return { data: [] };
+      }),
+      scraper.getRecentEpisodes().catch((err) => {
+        console.warn('DashboardScrapedRecentFetchWarning:', err.message);
+        return [];
+      }),
+      fetchJikan(`https://api.jikan.moe/v4/schedules?filter=${currentDay}&limit=20`).catch((err) => {
+        console.warn('DashboardScheduleFetchWarning:', err.message);
+        return { data: [] };
+      })
+    ]);
+
+    // Slice top5 from seasonJson to save an entire Jikan API call, using native English/Romaji Jikan title
+    const top5 = (seasonJson.data || []).slice(0, 15).map((anime: any) => ({
       _id: anime.mal_id.toString(),
-      title: anime.title,
+      title: anime.title_english || anime.title,
       posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
       rating: anime.score || 0,
       genres: anime.genres?.map((g: any) => g.name) || []
     }));
 
+    // Map recent scraped episodes to English titles using fast local dictionary to bypass AI completely
     const recentEpisodes = recentList.map((item, idx) => {
       const posterUrl = item.imageUrl ? item.imageUrl.replace('-thumbnail.', '-poster.') : 'https://via.placeholder.com/300x400?text=Anime';
       const thumbnailUrl = item.imageUrl || 'https://via.placeholder.com/300x400?text=Anime';
+      
+      const normalizedTitle = normalizeArabic(item.title);
+      const enTitle = LOCAL_ANIME_MAP[normalizedTitle] || LOCAL_ANIME_MAP[item.title] || item.title;
+
       return {
         _id: `recent-scraped-${idx}`,
         animeId: {
           _id: `search-${item.title}`,
-          title: item.title,
+          title: enTitle,
           posterUrl,
           thumbnailUrl
         },
@@ -784,12 +868,12 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
 
     const popular = (popularJson.data || []).map((anime: any) => ({
       _id: anime.mal_id.toString(),
-      title: anime.title,
+      title: anime.title_english || anime.title,
       posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
       rating: anime.score || 0
     }));
 
-    // Filter duplicates for current season
+    // Filter duplicates for current season, using English titles
     const seenSeasonIds = new Set<string>();
     const currentSeason: any[] = [];
     (seasonJson.data || []).forEach((anime: any) => {
@@ -798,14 +882,14 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
         seenSeasonIds.add(malId);
         currentSeason.push({
           _id: malId,
-          title: anime.title,
+          title: anime.title_english || anime.title,
           posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
           rating: anime.score || 0
         });
       }
     });
 
-    // Filter duplicates for schedule
+    // Filter duplicates for schedule, using English titles
     const seenScheduleIds = new Set<string>();
     const schedule: any[] = [];
     (todayScheduleJson.data || []).forEach((anime: any) => {
@@ -814,7 +898,7 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
         seenScheduleIds.add(malId);
         schedule.push({
           _id: malId,
-          title: anime.title,
+          title: anime.title_english || anime.title,
           posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
           rating: anime.score || 0
         });
@@ -829,8 +913,8 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
       schedule
     };
 
-    // Cache the whole dashboard payload for 5 minutes
-    dashboardCache.set(cacheKey, { data: dashboardData, expireAt: Date.now() + 5 * 60 * 1000 });
+    // Cache the whole dashboard payload for 15 minutes in double-layered cache
+    await serverCache.set(cacheKey, dashboardData, 15 * 60 * 1000);
 
     res.json({
       success: true,
@@ -856,15 +940,38 @@ router.get('/anime/poster/:id', handleAsync(async (req: Request, res: Response) 
   }
 }));
 
+router.get('/anime/pictures/:id', handleAsync(async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.json({ success: true, pictures: [] });
+    }
+    const cacheKey = `anime-pictures-${id}`;
+    const cached = await serverCache.get<any>(cacheKey);
+    if (cached !== null) {
+      return res.json({ success: true, pictures: cached });
+    }
+    
+    const picsRes = await fetchJikan(`https://api.jikan.moe/v4/anime/${id}/pictures`).catch(e => { console.warn(e); return null; });
+    const pictures = picsRes?.data?.map((p: any) => p.large_image_url || p.jpg?.large_image_url || p.image_url) || [];
+    
+    await serverCache.set(cacheKey, pictures, 24 * 60 * 60); // Cache for 24h
+    return res.json({ success: true, pictures });
+  } catch (e) {
+    console.error('[pictures] API error', e);
+    return res.json({ success: false, pictures: [] });
+  }
+}));
+
 // مسار لجلب تفاصيل الأنمي بناءً على الـ ID (Scraper priority)
 router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
 
     if (id !== 'random') {
-      const cached = detailsCache.get(id);
-      if (cached && Date.now() < cached.expireAt && cached.data?.description !== 'جاري تحديث قصة وتفاصيل هذا الأنمي قريباً.') {
-        return res.json({ success: true, data: cached.data });
+      const cached = await serverCache.get<any>(`anime-details-${id}`);
+      if (cached !== null && cached.description && cached.description !== 'جاري تحديث قصة وتفاصيل هذا الأنمي قريباً.') {
+        return res.json({ success: true, data: cached });
       }
     }
 
@@ -942,7 +1049,7 @@ router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response)
           }));
         }
 
-        if (jikanDataRes.data && jikanDataRes.data.title) {
+        if (jikanDataRes?.data && jikanDataRes.data.title) {
           const searchedId = await scraper.searchAnime(jikanDataRes.data.title);
           if (searchedId) animelekId = searchedId;
         }
@@ -1053,6 +1160,7 @@ router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response)
 
     // Append standard features
     if (data && jikanDataRes?.data) {
+       data.title = jikanDataRes.data.title_english || jikanDataRes.data.title || data.title;
        data.posterUrl = jikanDataRes.data.images?.jpg?.large_image_url || jikanDataRes.data.images?.jpg?.image_url || data.posterUrl;
        if (!data.rating || data.rating === '?') data.rating = jikanDataRes.data.score;
     }
@@ -1119,13 +1227,21 @@ router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response)
       }
     }
 
+    if (data && data.title) {
+      try {
+        data.title = await translateTitleToEnglish(data.title);
+      } catch (err) {
+        console.warn('Title translation failed:', err);
+      }
+    }
+
     if (data) {
       const requestParamId = req.params.id;
       if (requestParamId && requestParamId !== 'random') {
-        detailsCache.set(requestParamId, { data, expireAt: Date.now() + 60 * 60 * 1000 }); // 1 hour cache
+        await serverCache.set(`anime-details-${requestParamId}`, data, 24 * 60 * 60 * 1000); // 24 hours cache for ultra-speed
       }
       if (data._id && data._id !== 'random' && data._id !== requestParamId) {
-        detailsCache.set(data._id, { data, expireAt: Date.now() + 60 * 60 * 1000 }); // 1 hour cache
+        await serverCache.set(`anime-details-${data._id}`, data, 24 * 60 * 60 * 1000); // 24 hours cache for ultra-speed
       }
     }
 
@@ -1136,13 +1252,182 @@ router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response)
   }
 }));
 
+const LOCAL_ANIME_MAP: Record<string, string> = {
+  'ون بيس': 'One Piece',
+  'ونبيس': 'One Piece',
+  'ناروتو': 'Naruto',
+  'ناروتو شيبودن': 'Naruto Shippuden',
+  'ناروتو شيبودين': 'Naruto Shippuden',
+  'هجوم العمالقه': 'Attack on Titan',
+  'هجوم العمالقة': 'Attack on Titan',
+  'اتاك': 'Attack on Titan',
+  'اتاك اون تايتن': 'Attack on Titan',
+  'مذكره الموت': 'Death Note',
+  'مذكرة الموت': 'Death Note',
+  'دفتر الموت': 'Death Note',
+  'ديث نوت': 'Death Note',
+  'قاتل الشياطين': 'Kimetsu no Yaiba',
+  'ديمون سلاير': 'Kimetsu no Yaiba',
+  'بليتش': 'Bleach',
+  'هنتر': 'Hunter x Hunter',
+  'القناص': 'Hunter x Hunter',
+  'هنتر x هنتر': 'Hunter x Hunter',
+  'جوجوتسو كايسن': 'Jujutsu Kaisen',
+  'جوجوتسو': 'Jujutsu Kaisen',
+  'جوجيتسو': 'Jujutsu Kaisen',
+  'طوكيو غول': 'Tokyo Ghoul',
+  'توكيو غول': 'Tokyo Ghoul',
+  'دراغون بول': 'Dragon Ball',
+  'دراغون بول زد': 'Dragon Ball Z',
+  'دراغون بول سوبر': 'Dragon Ball Super',
+  'ماي هيرو اكاديميا': 'My Hero Academia',
+  'بوكو نو هيرو': 'My Hero Academia',
+  'اكاديميه بطلي': 'My Hero Academia',
+  'اكاديمية بطلي': 'My Hero Academia',
+  'سورد ارت اونلاين': 'Sword Art Online',
+  'بوابه شتاينز': 'Steins;Gate',
+  'بوابة شتاينز': 'Steins;Gate',
+  'شتاينز غيت': 'Steins;Gate',
+  'فول ميتال': 'Fullmetal Alchemist',
+  'فولميتال': 'Fullmetal Alchemist',
+  'الخيميائي الفولاذي': 'Fullmetal Alchemist',
+  'كود غياس': 'Code Geass',
+  'كود جياس': 'Code Geass',
+  'سولو ليفيلينغ': 'Solo Leveling',
+  'سولو ليفيلنج': 'Solo Leveling',
+  'موب سايكو': 'Mob Psycho 100',
+  'ون بنش مان': 'One Punch Man',
+  'رجل لكمه واحده': 'One Punch Man',
+  'رجل لكمة واحدة': 'One Punch Man',
+  'ون بنش': 'One Punch Man',
+  'رجل المنشار': 'Chainsaw Man',
+  'شينسو مان': 'Chainsaw Man',
+  'فينلاندا ساغا': 'Vinland Saga',
+  'فينلاند ساغا': 'Vinland Saga',
+  'فينلاند': 'Vinland Saga',
+  'دكتور ستون': 'Dr. Stone',
+  'بلاك كلوفر': 'Black Clover',
+  'البرسيم الاسود': 'Black Clover',
+  'البرسيم الأسود': 'Black Clover',
+  'هايكو': 'Haikyuu',
+  'هايكيو': 'Haikyuu',
+  'هايكيوو': 'Haikyuu',
+  'جوندام': 'Gundam',
+  'اوفرلورد': 'Overlord',
+  'سلايم': 'Tensura',
+  'نيون جينيسيس': 'Neon Genesis Evangelion',
+  'ايفانجيليون': 'Neon Genesis Evangelion',
+  'سلايرز': 'Slayers',
+  'كونان': 'Detective Conan',
+  'المحقق كونان': 'Detective Conan',
+  'دراغون': 'Dragon',
+  'ليفاي': 'Levi Ackerman',
+  'ميكاسا': 'Mikasa Ackerman',
+  'ايرين': 'Eren Yeager',
+  'إيرين': 'Eren Yeager',
+  'غوكو': 'Goku',
+  'لوفي': 'Luffy',
+  'زورو': 'Zoro',
+  'سنجي': 'Sanji',
+  'ايتاتشي': 'Itachi Uchiha',
+  'ساسكي': 'Sasuke Uchiha',
+  'مادارا': 'Madara Uchiha',
+  'غوجو': 'Gojo Satoru',
+  'جوجو': 'JoJo\'s Bizarre Adventure'
+};
+
+function normalizeArabic(str: string): string {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/[ة]/g, 'ه')
+    .replace(/\s+/g, ' ');
+}
+
+async function smartQueryTranslator(queryStr: string): Promise<string> {
+  const trimmed = queryStr.trim();
+  // Check if query contains Arabic text. If not, return immediately.
+  if (!/[\u0600-\u06FF]/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // 1. Check local mapper with normalized query
+  const normalizedQuery = normalizeArabic(trimmed);
+  if (LOCAL_ANIME_MAP[normalizedQuery]) {
+    console.log(`[Smart Translation] Local Map Hit: "${trimmed}" -> "${LOCAL_ANIME_MAP[normalizedQuery]}"`);
+    return LOCAL_ANIME_MAP[normalizedQuery];
+  }
+
+  // Check direct keys
+  if (LOCAL_ANIME_MAP[trimmed]) {
+    console.log(`[Smart Translation] Local Map Direct Hit: "${trimmed}" -> "${LOCAL_ANIME_MAP[trimmed]}"`);
+    return LOCAL_ANIME_MAP[trimmed];
+  }
+
+  // 2. Check persistence server cache for already translated queries to conserve API quota
+  const cacheKey = `trans_q_${Buffer.from(normalizedQuery).toString('base64').replace(/=/g, '')}`;
+  try {
+    const cached = await serverCache.get<string>(cacheKey);
+    if (cached) {
+      console.log(`[Smart Translation] Cache Hit: "${trimmed}" -> "${cached}"`);
+      return cached;
+    }
+  } catch (err: any) {
+    console.warn("[Smart Translation] Cache lookup warning:", err.message);
+  }
+
+  // 3. Fallback to Gemini with stable active model (gemini-3.5-flash)
+  try {
+    const prompt = `You are an intelligent search processor for an anime streaming application.
+The user entered an Arabic anime or character search description: "${trimmed}".
+Your job is to translate and expand this search query so that it successfully matches standard worldwide databases (like MyAnimeList).
+Examples:
+- "ون بيس" -> "One Piece"
+- "شخصية ليفاي" -> "Levi Ackerman"
+- "زورو" -> "Zoro"
+- "مذكرة الموت" -> "Death Note"
+- "قاتل الشياطين" -> "Kimetsu no Yaiba"
+- "ناروتو شيبودن" -> "Naruto Shippuden"
+- "ايتاتشي" -> "Itachi Uchiha"
+- "طوكيو غول" -> "Tokyo Ghoul"
+- "غوكو" -> "Goku"
+
+Respond with ONLY the plain English translated title or character name. Do NOT include any additional labels, quotes, explanation, or markdown.`;
+
+    const response = await aiTranslate.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+      }
+    });
+
+    const result = response.text?.trim() || trimmed;
+    console.log(`Smart Search Query translator: "${trimmed}" -> "${result}"`);
+
+    // Cache the resolved result for 7 days to preserve resources and maintain instant speed
+    try {
+      await serverCache.set(cacheKey, result, 7 * 24 * 60 * 60 * 1000);
+    } catch (_) {}
+
+    return result;
+  } catch (err) {
+    console.error("Gemini query translator error (falling back gracefully to original input):", err);
+    return trimmed;
+  }
+}
+
 // مسار للبحث المتقدم
 router.get('/anime/search', handleAsync(async (req: Request, res: Response) => {
   try {
     const { q, genres, min_score, status, page = 1, order_by, sort, year } = req.query;
     let url = `https://api.jikan.moe/v4/anime?page=${page}&sfw=true`;
     
-    if (q) url += `&q=${encodeURIComponent(q as string)}`;
+    if (q) {
+      const resolvedQuery = await smartQueryTranslator(q as string);
+      url += `&q=${encodeURIComponent(resolvedQuery)}`;
+    }
     if (genres) url += `&genres=${genres}`;
     if (min_score) url += `&min_score=${min_score}`;
     if (status) url += `&status=${status}`;
@@ -1156,7 +1441,7 @@ router.get('/anime/search', handleAsync(async (req: Request, res: Response) => {
 
     const results = (data.data || []).map((anime: any) => ({
       _id: anime.mal_id.toString(),
-      title: anime.title,
+      title: anime.title_english || anime.title,
       posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
       rating: anime.score || 0,
       genres: anime.genres?.map((g: any) => g.name) || [],
@@ -1177,6 +1462,51 @@ router.get('/anime/genres', handleAsync(async (req: Request, res: Response) => {
     res.json({ success: true, data: data.data || [] });
   } catch (error) {
     res.status(500).json({ success: false, message: 'فشل في جلب التصنيفات.' });
+  }
+}));
+
+// مسار لجلب أنميات موسم محدد مع التحديث الأسبوعي والتخزين المؤقت
+router.get('/anime/season', handleAsync(async (req: Request, res: Response) => {
+  try {
+    const { year, season } = req.query;
+    let url = '';
+    let cacheKey = '';
+    
+    if (year && season) {
+      url = `https://api.jikan.moe/v4/seasons/${year}/${season}`;
+      cacheKey = `season-${year}-${season}`;
+    } else {
+      url = `https://api.jikan.moe/v4/seasons/now`;
+      // مفتاح الكاش يتضمن السنة والأسبوع الحالي لضمان التحديث التلقائي بداية كل أسبوع
+      const currentYear = new Date().getFullYear();
+      const oneJan = new Date(currentYear, 0, 1);
+      const numberOfDays = Math.floor((Date.now() - oneJan.getTime()) / (24 * 60 * 60 * 1000));
+      const resultWeek = Math.ceil((numberOfDays + oneJan.getDay() + 1) / 7);
+      cacheKey = `season-now-${currentYear}-W${resultWeek}`;
+    }
+    
+    const cached = await serverCache.get<any>(cacheKey);
+    if (cached !== null) {
+      return res.json({ success: true, data: cached });
+    }
+
+    const data = await fetchJikan(url);
+
+    const results = (data.data || []).map((anime: any) => ({
+      _id: anime.mal_id.toString(),
+      title: anime.title_english || anime.title,
+      posterUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
+      rating: anime.score || 0,
+      genres: anime.genres?.map((g: any) => g.name) || [],
+      status: anime.status === 'Finished Airing' ? 'مكتمل' : anime.status === 'Currently Airing' ? 'مستمر' : 'قادم',
+    }));
+
+    await serverCache.set(cacheKey, results, 7 * 24 * 60 * 60 * 1000); // كاش لمدة 7 أيام ليتم التحديث أسبوعياً
+
+    res.json({ success: true, data: results });
+  } catch (error) {
+    console.error('API Error season:', error);
+    res.status(500).json({ success: false, message: 'فشل في جلب أنميات الموسم.' });
   }
 }));
 

@@ -123,8 +123,14 @@ export const notificationsService = {
     if (!auth.currentUser) return;
     try {
       const dRef = doc(collection(db, 'globalNotifications'));
+      const cleanNotif: any = {};
+      (Object.keys(notif) as Array<keyof typeof notif>).forEach(key => {
+        if (notif[key] !== undefined) {
+          cleanNotif[key] = notif[key];
+        }
+      });
       await setDoc(dRef, {
-        ...notif,
+        ...cleanNotif,
         createdAt: serverTimestamp()
       });
       // Invalidate global notifications cache
@@ -142,8 +148,14 @@ export const notificationsService = {
   createUserNotification: async (userId: string, notif: Omit<AppNotification, 'id' | 'createdAt' | 'read'>): Promise<void> => {
     try {
       const dRef = doc(collection(db, 'users', userId, 'notifications'));
+      const cleanNotif: any = {};
+      (Object.keys(notif) as Array<keyof typeof notif>).forEach(key => {
+        if (notif[key] !== undefined) {
+          cleanNotif[key] = notif[key];
+        }
+      });
       await setDoc(dRef, {
-        ...notif,
+        ...cleanNotif,
         read: false,
         createdAt: serverTimestamp()
       });

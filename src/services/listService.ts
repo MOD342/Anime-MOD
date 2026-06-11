@@ -66,86 +66,86 @@ const animeEntriesPromises = new Map<string, Promise<AnimeEntry[]>>();
 const appRatingPromises = new Map<string, Promise<{ score: number; count: number }>>();
 
 export const listService = {
-  getCustomLists: async (uid: string): Promise<CustomList[]> => {
+  getCustomLists: async (id: string): Promise<CustomList[]> => {
     const now = Date.now();
-    const cached = customListsCache.get(uid);
+    const cached = customListsCache.get(id);
     if (cached && now < cached.expireAt) {
       return cached.data;
     }
 
-    let activePromise = customListsPromises.get(uid);
+    let activePromise = customListsPromises.get(id);
     if (!activePromise) {
       activePromise = (async () => {
         try {
-          const q = collection(db, 'users', uid, 'customLists');
+          const q = collection(db, 'users', id, 'customLists');
           const snapshot = await getDocs(q);
           const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CustomList));
-          customListsCache.set(uid, { data, expireAt: Date.now() + 15 * 1000 }); // 15 seconds cache
+          customListsCache.set(id, { data, expireAt: Date.now() + 15 * 1000 }); // 15 seconds cache
           return data;
         } catch (e) {
-          handleFirestoreError(e, OperationType.LIST, `users/${uid}/customLists`);
+          handleFirestoreError(e, OperationType.LIST, `users/${id}/customLists`);
           return [];
         } finally {
-          customListsPromises.delete(uid);
+          customListsPromises.delete(id);
         }
       })();
-      customListsPromises.set(uid, activePromise);
+      customListsPromises.set(id, activePromise);
     }
     return activePromise;
   },
 
-  createCustomList: async (uid: string, name: string): Promise<string> => {
+  createCustomList: async (id: string, name: string): Promise<string> => {
     try {
       const listId = 'list_' + Date.now();
-      const ref = doc(db, 'users', uid, 'customLists', listId);
+      const ref = doc(db, 'users', id, 'customLists', listId);
       await setDoc(ref, {
         name,
         createdAt: serverTimestamp(),
       });
       // Invalidate cache
-      customListsCache.delete(uid);
+      customListsCache.delete(id);
       return listId;
     } catch (e) {
-      handleFirestoreError(e, OperationType.CREATE, `users/${uid}/customLists`);
+      handleFirestoreError(e, OperationType.CREATE, `users/${id}/customLists`);
       throw e;
     }
   },
 
-  deleteCustomList: async (uid: string, listId: string): Promise<void> => {
+  deleteCustomList: async (id: string, listId: string): Promise<void> => {
     try {
-      await deleteDoc(doc(db, 'users', uid, 'customLists', listId));
+      await deleteDoc(doc(db, 'users', id, 'customLists', listId));
       // Invalidate cache
-      customListsCache.delete(uid);
+      customListsCache.delete(id);
     } catch (e) {
-      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/customLists/${listId}`);
+      handleFirestoreError(e, OperationType.DELETE, `users/${id}/customLists/${listId}`);
       throw e;
     }
   },
 
-  getAnimeEntries: async (uid: string): Promise<AnimeEntry[]> => {
+  getAnimeEntries: async (id: string): Promise<AnimeEntry[]> => {
     const now = Date.now();
-    const cached = animeEntriesCache.get(uid);
+    const cached = animeEntriesCache.get(id);
     if (cached && now < cached.expireAt) {
       return cached.data;
     }
 
-    let activePromise = animeEntriesPromises.get(uid);
+    let activePromise = animeEntriesPromises.get(id);
     if (!activePromise) {
       activePromise = (async () => {
         try {
-          const q = collection(db, 'users', uid, 'animeEntries');
+          const q = collection(db, 'users', id, 'animeEntries');
           const snapshot = await getDocs(q);
           const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnimeEntry));
-          animeEntriesCache.set(uid, { data, expireAt: Date.now() + 10 * 1000 }); // 10 seconds cache
+          animeEntriesCache.set(id, { data, expireAt: Date.now() + 10 * 1000 }); // 10 seconds cache
           return data;
         } catch (e) {
-          handleFirestoreError(e, OperationType.LIST, `users/${uid}/animeEntries`);
+          handleFirestoreError(e, OperationType.LIST, `users/${id}/animeEntries`);
           return [];
         } finally {
-          animeEntriesPromises.delete(uid);
+          animeEntriesPromises.delete(id);
         }
       })();
-      animeEntriesPromises.set(uid, activePromise);
+      animeEntriesPromises.set(id, activePromise);
     }
     return activePromise;
   },
@@ -192,7 +192,7 @@ export const listService = {
   },
 
   saveAnimeEntry: async (
-    uid: string, 
+    id: string, 
     animeId: string, 
     data: { 
       title: string, 
@@ -210,7 +210,7 @@ export const listService = {
     }
   ): Promise<void> => {
     try {
-      const ref = doc(db, 'users', uid, 'animeEntries', animeId);
+      const ref = doc(db, 'users', id, 'animeEntries', animeId);
       const snap = await getDoc(ref);
       
       let awardAmount = data.extraXp || 0;
@@ -283,7 +283,7 @@ export const listService = {
       }
 
       // Invalidate caches to guarantee data consistency
-      animeEntriesCache.delete(uid);
+      animeEntriesCache.delete(id);
       if (data.score !== undefined) {
         appRatingCache.delete(animeId);
       }
@@ -304,46 +304,46 @@ export const listService = {
       if (finalAwardAmount > 0) {
          const { awardXP } = await import('./gamificationService');
          const coinsParam = finalCoinsAmount > 0 ? finalCoinsAmount : true;
-         await awardXP(uid, finalAwardAmount, coinsParam, userProfileUpdates);
+         await awardXP(id, finalAwardAmount, coinsParam, userProfileUpdates);
       } else if (Object.keys(userProfileUpdates).length > 0) {
          try {
-           const userRef = doc(db, 'users', uid);
+           const userRef = doc(db, 'users', id);
            await updateDoc(userRef, userProfileUpdates);
          } catch (_) {}
       }
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${uid}/animeEntries/${animeId}`);
+      handleFirestoreError(e, OperationType.WRITE, `users/${id}/animeEntries/${animeId}`);
       throw e;
     }
   },
 
-  removeAnimeEntry: async (uid: string, animeId: string): Promise<void> => {
+  removeAnimeEntry: async (id: string, animeId: string): Promise<void> => {
     try {
-      await deleteDoc(doc(db, 'users', uid, 'animeEntries', animeId));
+      await deleteDoc(doc(db, 'users', id, 'animeEntries', animeId));
       try {
-        const userRef = doc(db, 'users', uid);
+        const userRef = doc(db, 'users', id);
         await updateDoc(userRef, { listCount: increment(-1) });
       } catch (_) {}
       // Invalidate caches to avoid stale reads
-      animeEntriesCache.delete(uid);
+      animeEntriesCache.delete(id);
       appRatingCache.delete(animeId);
     } catch (e) {
-      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/animeEntries/${animeId}`);
+      handleFirestoreError(e, OperationType.DELETE, `users/${id}/animeEntries/${animeId}`);
       throw e;
     }
   },
 
-  invalidateUserCache: (uid: string, animeId?: string) => {
-    animeEntriesCache.delete(uid);
-    customListsCache.delete(uid);
+  invalidateUserCache: (id: string, animeId?: string) => {
+    animeEntriesCache.delete(id);
+    customListsCache.delete(id);
     if (animeId) {
       appRatingCache.delete(animeId);
     }
   },
 
-  boostUserToMaxLevel: async (uid: string): Promise<void> => {
+  boostUserToMaxLevel: async (id: string): Promise<void> => {
     try {
-      const userRef = doc(db, 'users', uid);
+      const userRef = doc(db, 'users', id);
       await updateDoc(userRef, {
         xp: 500000,
         level: 100,

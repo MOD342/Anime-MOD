@@ -42,6 +42,7 @@ interface WatchViewProps {
 export default function WatchView({ onBack, episode: initialEpisode, anime, onEpisodeSelect }: WatchViewProps) {
   const [episode, setEpisode] = useState(initialEpisode);
   const [activeTab, setActiveTab] = useState<'servers' | 'episodes' | 'comments'>('servers');
+  const [serverSubTab, setServerSubTab] = useState<'watch' | 'download'>('watch');
   const [useAdBlocker, setUseAdBlocker] = useState(true);
   const [servers, setServers] = useState<any[]>([]);
   const [activeServerUrl, setActiveServerUrl] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
           return 1;
         };
         const epNum = parseEpisodeNumber(episode?.num, episode?.title || '');
-        recordEpisodeWatch(user.uid, anime, epNum).catch(console.error);
+        recordEpisodeWatch(user.id, anime, epNum).catch(console.error);
       }
     }
 
@@ -97,6 +98,12 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
     if (episode) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setLoadingServers(true);
+      setServers([]);
+      setActiveServerUrl(null);
+      setExtractedUrl(null);
+      setExtractedSources([]);
+      setExtracting(false);
+      
       fetch('/api/anime/servers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -155,6 +162,21 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
     setExtractedUrl(null);
     setExtractedSources([]);
     
+    // Optimize performance: Immediately play direct links without hitting the extraction backend
+    const isDirectURL = url.toLowerCase().split('?')[0].endsWith('.mp4') || 
+                        url.toLowerCase().split('?')[0].endsWith('.m3u8') ||
+                        url.includes('googleapis.com') ||
+                        url.includes('longtailvideo.com');
+
+    if (isDirectURL) {
+      const isM3u8 = url.includes('.m3u8');
+      setExtractedUrl(url);
+      setExtractedType(isM3u8 ? 'hls' : 'direct');
+      setExtractedSources([{ file: url, label: 'بث سحابي فائق السرعة (HD)', type: isM3u8 ? 'hls' : 'mp4' }]);
+      setExtracting(false);
+      return;
+    }
+    
     // Check client-side extraction cache
     try {
       const cached = sessionStorage.getItem(`client_extracted_${url}`);
@@ -210,7 +232,7 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
       const epCommentsId = `${anime._id}-ep-${episode.num}`;
       const commentPayload: any = {
         animeId: epCommentsId,
-        userId: user.uid,
+        userId: user.id,
         userDisplayName: userData?.displayName || user.displayName || 'نينجا مجهول',
         text: newChatText.trim(),
         likes: 0,
@@ -231,7 +253,7 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
       // Increment gamification points
       try {
         const { incrementInteraction } = await import('../services/gamificationService');
-        await incrementInteraction(user.uid, 'comment');
+        await incrementInteraction(user.id, 'comment');
       } catch (err) {}
     } catch (err) {
       console.error("Failed to post watchroom chat", err);
@@ -382,6 +404,7 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
 
       {/* Info & Controls */}
       <div className={`p-4 flex-1 overflow-y-auto pb-24 transition-all duration-500 ${isCinemaMode ? 'opacity-10 pointer-events-none filter blur-[1.5px]' : 'opacity-100'}`}>
+
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-2xl font-black text-white leading-tight mb-1 tracking-tight">
@@ -619,49 +642,165 @@ export default function WatchView({ onBack, episode: initialEpisode, anime, onEp
           )}
 
           {activeTab === 'servers' && (
-            <div className="grid gap-3">
-              {loadingServers ? (
-                <div className="flex flex-col items-center justify-center py-12 text-neutral-500 gap-3">
-                   <div className="h-0.5 w-16 bg-neutral-800 rounded overflow-hidden">
-                     <div className="h-full bg-purple-500 animate-pulse" style={{ width: '60%'}}></div>
-                   </div>
-                   <span className="text-xs font-bold tracking-wide">جاري فحص السيرفرات...</span>
-                </div>
-              ) : servers.length === 0 ? (
-                <div className="text-center text-red-400/80 font-bold p-8 border border-red-500/20 rounded-2xl bg-red-500/5">
-                  عذراً، لا توجد سيرفرات متاحة لهذه الحلقة حالياً.
-                </div>
-              ) : (
-                servers.map((s, i) => {
-                  const isActive = activeServerUrl === s.url;
-                  return (
-                    <button 
-                      key={i} 
-                      onClick={() => handleServerSelect(s.url)}
-                      className={`w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between group transition-all duration-300 border ${isActive ? 'bg-purple-900/20 border-purple-500 ring-1 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.1)]' : 'bg-[#0f0f0f] border-neutral-800/80 hover:bg-[#151515] hover:border-neutral-700'}`}
-                    >
-                      {isActive && <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent pointer-events-none" />}
-                      <div className="flex items-center gap-3 relative z-10">
-                        <div className={`p-2.5 rounded-lg transition-colors ${isActive ? 'bg-purple-500 shadow-lg shadow-purple-500/30 text-white' : 'bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white'}`}>
-                          <Server size={18} />
-                        </div>
-                        <div className="text-right">
-                          <h4 className={`font-black text-sm tracking-wide ${isActive ? 'text-white' : 'text-neutral-300'}`}>
-                            {s.serverName}
-                          </h4>
-                          <span className={`text-[10px] font-bold ${isActive ? 'text-purple-300' : 'text-neutral-500'}`}>
-                            {s.type === 'direct' ? 'تحميل مباشر' : 'مشاهدة'}
-                          </span>
+            <div className="flex flex-col gap-4">
+              {/* Sub-tabs selection */}
+              <div className="grid grid-cols-2 bg-[#0a0a0a] border border-neutral-900 rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => setServerSubTab('watch')}
+                  className={`py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                    serverSubTab === 'watch' 
+                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/10' 
+                      : 'text-neutral-400 hover:text-neutral-200 bg-transparent'
+                  }`}
+                >
+                  <span className="text-sm">📺</span>
+                  <span>سيرفرات المشاهدة</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setServerSubTab('download')}
+                  className={`py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                    serverSubTab === 'download' 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10' 
+                      : 'text-neutral-400 hover:text-neutral-200 bg-transparent'
+                  }`}
+                >
+                  <span className="text-sm">📥</span>
+                  <span>سيرفرات التحميل</span>
+                </button>
+              </div>
+
+              <div className="grid gap-3">
+                {loadingServers ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-neutral-500 gap-3">
+                     <div className="h-0.5 w-16 bg-neutral-800 rounded overflow-hidden">
+                       <div className="h-full bg-purple-500 animate-pulse" style={{ width: '60%'}}></div>
+                     </div>
+                     <span className="text-xs font-bold tracking-wide">جاري فحص السيرفرات المتوفرة...</span>
+                  </div>
+                ) : (() => {
+                  const filtered = servers.filter(s => {
+                    if (serverSubTab === 'download') {
+                      return s.category === 'download';
+                    } else {
+                      return s.category !== 'download';
+                    }
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="text-center text-neutral-400 font-bold p-8 border border-neutral-800/80 rounded-2xl bg-[#0f0f0f]/40">
+                        {serverSubTab === 'download' 
+                          ? 'جاك السيرفر المباشر! جاري تجهيز روابط التحميل السريعة...' 
+                          : 'عذراً، لا توجد سيرفرات بث مباشر متاحة حالياً.'}
+                      </div>
+                    );
+                  }
+
+                  return filtered.map((s, i) => {
+                    const isActive = activeServerUrl === s.url;
+                    
+                    // Style badges based on quality level (FHD, HD, SD, Auto)
+                    let qualityBadgeColor = 'bg-neutral-800 text-neutral-400';
+                    if (s.quality === '1080p') {
+                      qualityBadgeColor = 'bg-red-500/10 text-red-400 border border-red-500/20';
+                    } else if (s.quality === '720p') {
+                      qualityBadgeColor = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                    } else if (s.quality === '480p') {
+                      qualityBadgeColor = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                    } else if (s.quality === 'auto') {
+                      qualityBadgeColor = 'bg-green-500/10 text-green-400 border border-green-500/20';
+                    }
+
+                    return (
+                      <div
+                        key={i}
+                        className={`w-full relative overflow-hidden rounded-xl p-4 flex items-center justify-between group transition-all duration-300 border ${
+                          isActive 
+                            ? serverSubTab === 'download'
+                              ? 'bg-indigo-900/10 border-indigo-500 ring-1 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
+                              : 'bg-purple-900/10 border-purple-500 ring-1 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.1)]'
+                            : 'bg-[#0f0f0f] border-neutral-800/80 hover:bg-[#151515] hover:border-neutral-700'
+                        }`}
+                      >
+                        {isActive && (
+                          <div className={`absolute inset-0 bg-gradient-to-r ${serverSubTab === 'download' ? 'from-indigo-600/5' : 'from-purple-600/5'} to-transparent pointer-events-none`} />
+                        )}
+                        <div className="flex items-center gap-3 relative z-10 w-full justify-between">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (serverSubTab === 'download') {
+                                // For downloads, trigger standard system browser download / save dialog
+                                window.open(s.url, '_blank');
+                              } else {
+                                handleServerSelect(s.url);
+                              }
+                            }}
+                            className="flex items-center gap-3 text-right flex-1"
+                          >
+                            <div className={`p-2.5 rounded-lg transition-colors ${
+                              isActive 
+                                ? serverSubTab === 'download'
+                                  ? 'bg-indigo-500 shadow-lg shadow-indigo-500/30 text-white'
+                                  : 'bg-purple-500 shadow-lg shadow-purple-500/30 text-white' 
+                                : 'bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white'
+                            }`}>
+                              {serverSubTab === 'download' ? <Download size={18} /> : <Server size={18} />}
+                            </div>
+                            <div>
+                              <h4 className={`font-black text-xs sm:text-sm tracking-wide transition-colors ${
+                                isActive ? 'text-white' : 'text-neutral-300 group-hover:text-white'
+                              }`}>
+                                {s.serverName}
+                              </h4>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className={`text-[9px] font-bold ${isActive ? 'text-purple-300' : 'text-neutral-500'}`}>
+                                  {s.type === 'direct' ? 'بث سحابي مباشر' : 'سيرفر خارجي'}
+                                </span>
+                                {s.quality && (
+                                  <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${qualityBadgeColor}`}>
+                                    {s.quality}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                          
+                          {/* Dedicated download/copy link actions for download tab */}
+                          {serverSubTab === 'download' ? (
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(s.url);
+                                  alert('تم نسخ رابط التحميل المباشر بنجاح 📋');
+                                }}
+                                title="نسخ رابط التحميل لبرامج التحميل الخارجية"
+                                className="p-2 text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white rounded-lg transition-all border border-neutral-700/50"
+                              >
+                                نسخ الرابط 📋
+                              </button>
+                              <a
+                                href={s.url}
+                                download
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all shadow-md shadow-indigo-600/10"
+                              >
+                                تحميل 📥
+                              </a>
+                            </div>
+                          ) : (
+                            isActive && <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,1)] relative z-10 animate-pulse" />
+                          )}
                         </div>
                       </div>
-                      
-                      {isActive && (
-                        <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,1)] relative z-10 animate-pulse" />
-                      )}
-                    </button>
-                  );
-                })
-              )}
+                    );
+                  });
+                })()}
+              </div>
             </div>
           )}
         </motion.div>

@@ -55,6 +55,7 @@ export const awardXP = async (userId: string, xpAmount: number, giveCoins: boole
     if (!snap.exists()) return;
 
     const data = snap.data();
+    const isCoinsRestricted = data.isCoinsRestricted === true;
     let newXp = (data.xp || 0) + xpAmount;
     let newLevel = data.level || 1;
 
@@ -85,29 +86,24 @@ export const awardXP = async (userId: string, xpAmount: number, giveCoins: boole
       updateObj.level = newLevel;
       // Award modPoints and coins for leveling up
       updateObj.modPoints = increment(50);
-      updateObj.coins = increment((updateObj.coins ? 100 : 100)); // We adjust or set increment
-      // If we already had a coins increment in updateObj, we can combine increments
-      // In firestore, we don't easily sum two increments in js, so let's handle that safely:
-      if (additionalFields?.coins) {
-        // If there were already coins being incremented, level-up coins are added
-        // Actually, let's just do standard incremental updates safely
+      if (!isCoinsRestricted) {
+        updateObj.coins = increment((updateObj.coins ? 100 : 100)); // We adjust or set increment
       }
     }
     
     if (leveledUp) {
       updateObj.level = newLevel;
       updateObj.modPoints = increment(50);
-      if (updateObj.coins) {
-        // level-up is 100 coins, plus whatever was already there
-        // since we can't easily merge increment objects, we'll assign standard or combine
-        // but wait, is it simpler to just let them be or check if we can do custom increment?
-        // Instead of using 'increment(X)', let's just make updateObj.coins a flat value or handle it:
-      } else {
-        updateObj.coins = increment(100);
+      if (!isCoinsRestricted) {
+        if (updateObj.coins) {
+          // already set
+        } else {
+          updateObj.coins = increment(100);
+        }
       }
     }
 
-    if (giveCoins) {
+    if (giveCoins && !isCoinsRestricted) {
         if (typeof giveCoins === 'number') {
           if (updateObj.coins) {
              // If there's already a coins increment (from level up)

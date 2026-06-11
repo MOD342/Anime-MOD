@@ -126,7 +126,7 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
     if (!user || claimingId === milestone.claimedField) return;
     setClaimingId(milestone.claimedField);
     try {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', user.id);
       const updateObj: any = {
         claimedSeasonMilestones: arrayUnion(milestone.claimedField),
         coins: increment(milestone.rewardCoins)
@@ -137,7 +137,7 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
       }
 
       await updateDoc(userRef, updateObj);
-      await notificationsService.createUserNotification(user.uid, {
+      await notificationsService.createUserNotification(user.id, {
         title: '🏆 تم استلام جائزة تذكرة الموسم!',
         body: `مبروك! لقد استلمت جائزة المستوى ${milestone.level}: "${milestone.title}" وحصلت على +${milestone.rewardCoins} كوينز وتمت إضافة العنصر لممتلكاتك!`,
         type: 'tournament',
@@ -176,7 +176,7 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
     const reward = dailyCheckInRewards[newStreak - 1] || dailyCheckInRewards[0];
     
     try {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', user.id);
       const updateData: any = {
         lastDailyClaim: todayStr,
         dailyClaimStreak: newStreak,
@@ -191,9 +191,9 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
       await updateDoc(userRef, updateData);
       
       const { awardXP } = await import('../services/gamificationService');
-      await awardXP(user.uid, reward.xp);
+      await awardXP(user.id, reward.xp);
       
-      await notificationsService.createUserNotification(user.uid, {
+      await notificationsService.createUserNotification(user.id, {
         title: '📆 تسجيل حضور يومي ناجح!',
         body: `تم استلام مكافأة اليوم ${newStreak} من حضورك المتتالي! ربحت +${reward.coins} كوينز و +${reward.xp} خبرة.`,
         type: 'system',
@@ -212,7 +212,7 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
     if (!user || claimingId === questId) return;
     setClaimingId(questId);
     try {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', user.id);
       let claimField = '';
       if (questKey === 'episodesWatched') claimField = 'dailyStats.questWatchClaimed';
       else if (questKey === 'commentsAdded') claimField = 'dailyStats.questCommentClaimed';
@@ -227,9 +227,9 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
       await updateDoc(userRef, updateObj);
       
       const { awardXP } = await import('../services/gamificationService');
-      await awardXP(user.uid, rewardXp);
+      await awardXP(user.id, rewardXp);
 
-      await notificationsService.createUserNotification(user.uid, {
+      await notificationsService.createUserNotification(user.id, {
         title: '🎯 تم إكمال المهمة اليومية!',
         body: `رائع! لقد أنجزت المهمة واستلمت مكافأتها اليومية: +${rewardCoins} كوينز و +${rewardXp} نقطة خبرة.`,
         type: 'system',
@@ -256,8 +256,8 @@ export default function RewardsView({ onBack }: { onBack: () => void }) {
       if (ach.rewardType === 'xp') p.xp = increment(ach.rewardVal);
       if (ach.rewardType === 'modPoints') p.modPoints = increment(ach.rewardVal);
 
-      await updateDoc(doc(db, 'users', user.uid), p);
-      await notificationsService.createUserNotification(user.uid, {
+      await updateDoc(doc(db, 'users', user.id), p);
+      await notificationsService.createUserNotification(user.id, {
         title: '🎖️ إنجاز مميز مكتمل!',
         body: `تهانينا! لقد حققت إنجاز "${ach.title}" لكسب +${ach.rewardVal} من ${ach.rewardType === 'coins' ? 'الكوينز' : ach.rewardType === 'xp' ? 'نقاط الخبرة' : 'نقاط الإشراف'}!`,
         type: 'tournament',

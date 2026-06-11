@@ -14,8 +14,9 @@ service cloud.firestore {
     function isValidUser(data) {
       return data.keys().hasAll(['role', 'createdAt', 'xp', 'level', 'modPoints', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate']) 
         && (data.keys().size() >= 13 && data.keys().size() <= 40)
-        && data.role is string && data.role.size() <= 20
-        && data.xp is number && data.level is number && data.modPoints is number
+        && data.role == 'user'
+        && data.modPoints == 0
+        && data.xp is number && data.level is number
         && data.streakDays is number && data.likesReceived is number
         && data.commentsCount is number && data.recommendationsAccepted is number
         && data.aiGamesPoints is number && data.ratingsCount is number && data.chatMessagesCount is number
@@ -92,16 +93,13 @@ service cloud.firestore {
 
     function isValidRecommendation(data) {
       return data.keys().hasAll(['animeId', 'targetAnimeId', 'targetAnimeTitle', 'reason', 'userId', 'status', 'createdAt'])
-        && (data.keys().size() >= 7 && data.keys().size() <= 9)
-        && data.animeId is string && data.animeId.size() > 0 && data.animeId.size() <= 100
-        && data.targetAnimeId is string && data.targetAnimeId.size() <= 100
-        && data.targetAnimeTitle is string && data.targetAnimeTitle.size() > 0 && data.targetAnimeTitle.size() <= 500
-        && data.reason is string && data.reason.size() <= 1000
+        && data.animeId is string && data.animeId.size() > 0 && data.animeId.size() <= 512
+        && data.targetAnimeId is string && data.targetAnimeId.size() > 0 && data.targetAnimeId.size() <= 512
+        && data.targetAnimeTitle is string && data.targetAnimeTitle.size() > 0 && data.targetAnimeTitle.size() <= 1000
+        && data.reason is string && data.reason.size() > 0 && data.reason.size() <= 5000
         && data.userId is string && data.userId == request.auth.uid
         && data.status in ['pending', 'approved', 'rejected']
-        && data.createdAt == request.time
-        && (!data.keys().hasAny(['likes']) || data.likes is number)
-        && (!data.keys().hasAny(['dislikes']) || data.dislikes is number);
+        && data.createdAt == request.time;
     }
 
     function isValidRating(data) {
@@ -125,17 +123,48 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
-    function getUserRole(uid) {
-      return (request.auth != null && request.auth.token != null && request.auth.token.email != null && (request.auth.token.email == '342.mod@gmail.com' || request.auth.token.email == 'mod.mg.342@gmail.com')) ? 'owner' : (exists(/databases/$(database)/documents/globalRoles/$(uid)) ? get(/databases/$(database)/documents/globalRoles/$(uid)).data.role : 'user');
+    function isValidSuggestion(data) {
+      return data.keys().hasAll(['userId', 'email', 'displayName', 'type', 'message', 'createdAt', 'status'])
+        && data.keys().size() == 7
+        && data.userId is string && data.userId.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.displayName is string && data.displayName.size() <= 100
+        && data.type in ['suggestion', 'complaint']
+        && data.message is string && data.message.size() > 0 && data.message.size() <= 5000
+        && data.status == 'pending'
+        && data.createdAt == request.time;
     }
-    
-    function isOwnerAuth() { return isSignedIn() && getUserRole(request.auth.uid) == 'owner'; }
-    function isAdminAuth() { return isSignedIn() && getUserRole(request.auth.uid) in ['owner', 'admin']; }
-    function isModeratorAuth() { return isSignedIn() && getUserRole(request.auth.uid) in ['owner', 'admin', 'moderator']; }
+
+    function isOwnerAuth() {
+      return isSignedIn() && (
+        request.auth.uid == 'IYLv7bRb89W4rifLQFDAfYlf2fN2'
+        || (request.auth.token != null && request.auth.token.email != null && (request.auth.token.email == '342.mod@gmail.com' || request.auth.token.email == 'mod.mg.342@gmail.com'))
+        || (exists(/databases/$(database)/documents/globalRoles/$(request.auth.uid)) && get(/databases/$(database)/documents/globalRoles/$(request.auth.uid)).data.role == 'owner')
+      );
+    }
+
+    function isAdminAuth() {
+      return isSignedIn() && (
+        isOwnerAuth()
+        || (exists(/databases/$(database)/documents/globalRoles/$(request.auth.uid)) && get(/databases/$(database)/documents/globalRoles/$(request.auth.uid)).data.role in ['owner', 'admin'])
+      );
+    }
+
+    function isModeratorAuth() {
+      return isSignedIn() && (
+        isOwnerAuth()
+        || (exists(/databases/$(database)/documents/globalRoles/$(request.auth.uid)) && get(/databases/$(database)/documents/globalRoles/$(request.auth.uid)).data.role in ['owner', 'admin', 'moderator'])
+      );
+    }
 
     match /globalRoles/{userId} {
       allow read: if true;
       allow write: if isOwnerAuth();
+    }
+
+    match /globalSettings/{settingsId} {
+      allow read: if true;
+      allow write: if isModeratorAuth();
     }
     
     match /usernames/{username} {
@@ -188,8 +217,16 @@ service cloud.firestore {
       allow update: if isSignedIn() && isValidId(recommendationId)
         && (
           (isModeratorAuth() && 
-           incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
-           incoming().status in ['approved', 'rejected'])
+           incoming().diff(existing()).affectedKeys().hasOnly(['status', 'rejectionReason']) &&
+           incoming().status in ['approved', 'rejected']) ||
+          (
+            !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid)) &&
+            (incoming().diff(existing()).affectedKeys().hasOnly(['likes']) ||
+             incoming().diff(existing()).affectedKeys().hasOnly(['dislikes']) ||
+             incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'dislikes'])) &&
+            (!incoming().diff(existing()).affectedKeys().hasAny(['likes']) || incoming().likes is number) &&
+            (!incoming().diff(existing()).affectedKeys().hasAny(['dislikes']) || incoming().dislikes is number)
+          )
         );
       allow delete: if isModeratorAuth();
     }
@@ -223,39 +260,41 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
-      allow update: if isOwner(userId) && isValidId(userId) && 
-        incoming().diff(existing()).affectedKeys().hasOnly(['role', 'xp', 'level', 'modPoints', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate', 'coins', 'purchasedItems', 'claimedAchievements', 'dailyStats', 'equippedBanner', 'equippedAvatar', 'equippedFrame', 'equippedTitle', 'equippedBadge', 'lastSpinTimestamp', 'listCount', 'username', 'displayName', 'lastUsernameChange', 'lastDisplayNameChange', 'totalEpisodesWatched', 'completedAnimeCount', 'privacySettings', 'avatarAlignment', 'avatarShape', 'bannerSize', 'dislikesReceived', 'approvedRecommendationsCount']) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['role']) || (incoming().role is string && incoming().role.size() <= 20)) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['xp']) || incoming().xp is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['level']) || incoming().level is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['modPoints']) || incoming().modPoints is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['streakDays']) || incoming().streakDays is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['likesReceived']) || incoming().likesReceived is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['commentsCount']) || incoming().commentsCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['recommendationsAccepted']) || incoming().recommendationsAccepted is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['aiGamesPoints']) || incoming().aiGamesPoints is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['ratingsCount']) || incoming().ratingsCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['chatMessagesCount']) || incoming().chatMessagesCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['coins']) || incoming().coins is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['purchasedItems']) || incoming().purchasedItems is list) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['claimedAchievements']) || incoming().claimedAchievements is list) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['dailyStats']) || incoming().dailyStats is map) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBanner']) || incoming().equippedBanner is string || incoming().equippedBanner == null) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedAvatar']) || incoming().equippedAvatar is string || incoming().equippedAvatar == null) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedFrame']) || incoming().equippedFrame is string || incoming().equippedFrame == null) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedTitle']) || incoming().equippedTitle is string || incoming().equippedTitle == null) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBadge']) || incoming().equippedBadge is string || incoming().equippedBadge == null) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['lastSpinTimestamp']) || incoming().lastSpinTimestamp is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['listCount']) || incoming().listCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['totalEpisodesWatched']) || incoming().totalEpisodesWatched is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['completedAnimeCount']) || incoming().completedAnimeCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['privacySettings']) || incoming().privacySettings is map) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['avatarAlignment']) || incoming().avatarAlignment is string) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['avatarShape']) || incoming().avatarShape is string) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['bannerSize']) || incoming().bannerSize is string) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['dislikesReceived']) || incoming().dislikesReceived is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['approvedRecommendationsCount']) || incoming().approvedRecommendationsCount is number) &&
-        (!incoming().diff(existing()).affectedKeys().hasAny(['lastActiveDate']) || incoming().lastActiveDate is string);
+      allow update: if (isOwner(userId) || isModeratorAuth()) && isValidId(userId) && (
+        isModeratorAuth() || (
+          incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate', 'coins', 'purchasedItems', 'claimedAchievements', 'dailyStats', 'equippedBanner', 'equippedAvatar', 'equippedFrame', 'equippedTitle', 'equippedBadge', 'lastSpinTimestamp', 'listCount', 'username', 'displayName', 'lastUsernameChange', 'lastDisplayNameChange', 'totalEpisodesWatched', 'completedAnimeCount', 'privacySettings', 'avatarAlignment', 'avatarShape', 'bannerSize', 'dislikesReceived', 'approvedRecommendationsCount']) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['role', 'modPoints'])) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['xp']) || incoming().xp is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['level']) || incoming().level is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['streakDays']) || incoming().streakDays is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['likesReceived']) || incoming().likesReceived is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['commentsCount']) || incoming().commentsCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['recommendationsAccepted']) || incoming().recommendationsAccepted is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['aiGamesPoints']) || incoming().aiGamesPoints is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['ratingsCount']) || incoming().ratingsCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['chatMessagesCount']) || incoming().chatMessagesCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['coins']) || incoming().coins is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['purchasedItems']) || incoming().purchasedItems is list) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['claimedAchievements']) || incoming().claimedAchievements is list) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['dailyStats']) || incoming().dailyStats is map) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBanner']) || incoming().equippedBanner is string || incoming().equippedBanner == null) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['equippedAvatar']) || incoming().equippedAvatar is string || incoming().equippedAvatar == null) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['equippedFrame']) || incoming().equippedFrame is string || incoming().equippedFrame == null) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['equippedTitle']) || incoming().equippedTitle is string || incoming().equippedTitle == null) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['equippedBadge']) || incoming().equippedBadge is string || incoming().equippedBadge == null) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['lastSpinTimestamp']) || incoming().lastSpinTimestamp is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['listCount']) || incoming().listCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['totalEpisodesWatched']) || incoming().totalEpisodesWatched is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['completedAnimeCount']) || incoming().completedAnimeCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['privacySettings']) || incoming().privacySettings is map) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['avatarAlignment']) || incoming().avatarAlignment is string) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['avatarShape']) || incoming().avatarShape is string) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['bannerSize']) || incoming().bannerSize is string) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['dislikesReceived']) || incoming().dislikesReceived is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['approvedRecommendationsCount']) || incoming().approvedRecommendationsCount is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['lastActiveDate']) || incoming().lastActiveDate is string)
+        )
+      );
       allow delete: if false;
 
       match /customLists/{listId} {
@@ -280,6 +319,12 @@ service cloud.firestore {
           && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'customLists', 'score', 'isFavorite', 'animeId', 'updatedAt', 'title', 'posterUrl', 'releaseYear', 'completedXpClaimed', 'watchedEpisodes', 'episodesCount', 'progress', 'addedAt']);
         allow delete: if isOwner(userId) && isValidId(animeId);
       }
+    }
+
+    match /suggestions/{suggestionId} {
+      allow read: if isModeratorAuth();
+      allow create: if isValidId(suggestionId) && isValidSuggestion(incoming());
+      allow delete: if isModeratorAuth();
     }
   }
 }
