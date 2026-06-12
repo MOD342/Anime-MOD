@@ -4,22 +4,26 @@ import { motion, AnimatePresence } from 'motion/react';
 import { playSound, getIsMutedGlobal, toggleGlobalMute } from '../../utils/gameAudio';
 
 const ANIME_ROSTER = [
-  { id: '1', name: 'ناروتو', img: 'https://cdn.myanimelist.net/images/anime/13/17405.jpg' },
-  { id: '2', name: 'زورو', img: 'https://cdn.myanimelist.net/images/anime/6/73245.jpg' },
-  { id: '3', name: 'غوكو', img: 'https://cdn.myanimelist.net/images/anime/10/7751.jpg' },
-  { id: '4', name: 'ليفاى', img: 'https://cdn.myanimelist.net/images/anime/10/47347.jpg' },
-  { id: '5', name: 'سايتاما', img: 'https://cdn.myanimelist.net/images/anime/12/76049.jpg' },
-  { id: '6', name: 'غوجو', img: 'https://cdn.myanimelist.net/images/anime/1171/109222.jpg' },
-  { id: '7', name: 'إدوارد', img: 'https://cdn.myanimelist.net/images/anime/1208/94745.jpg' },
-  { id: '8', name: 'غون', img: 'https://cdn.myanimelist.net/images/anime/1337/99013.jpg' },
-  { id: '9', name: 'لايت', img: 'https://cdn.myanimelist.net/images/anime/9/864.jpg' },
-  { id: '10', name: 'لوفي', img: 'https://cdn.myanimelist.net/images/anime/6/73245.jpg' },
-  { id: '11', name: 'ساسكي', img: 'https://cdn.myanimelist.net/images/anime/13/17405.jpg' },
-  { id: '12', name: 'تانجيرو', img: 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg' },
-  { id: '13', name: 'إرين', img: 'https://cdn.myanimelist.net/images/anime/10/47347.jpg' },
-  { id: '14', name: 'كيلوا', img: 'https://cdn.myanimelist.net/images/anime/1337/99013.jpg' },
-  { id: '15', name: 'ميكاسا', img: 'https://cdn.myanimelist.net/images/anime/10/47347.jpg' },
-  { id: '16', name: 'ايتاتشي', img: 'https://cdn.myanimelist.net/images/anime/13/17405.jpg' }
+  { id: '1', name: 'لوفي', img: 'https://cdn.myanimelist.net/images/characters/9/310307.jpg' },
+  { id: '2', name: 'زورو', img: 'https://cdn.myanimelist.net/images/characters/15/271383.jpg' },
+  { id: '3', name: 'ناروتو', img: 'https://cdn.myanimelist.net/images/characters/9/131317.jpg' },
+  { id: '4', name: 'ساسكي', img: 'https://cdn.myanimelist.net/images/characters/15/304543.jpg' },
+  { id: '5', name: 'غوكو', img: 'https://cdn.myanimelist.net/images/characters/15/263399.jpg' },
+  { id: '6', name: 'فيجيتا', img: 'https://cdn.myanimelist.net/images/characters/3/302403.jpg' },
+  { id: '7', name: 'ليفاي', img: 'https://cdn.myanimelist.net/images/characters/2/241031.jpg' },
+  { id: '8', name: 'إرين', img: 'https://cdn.myanimelist.net/images/characters/3/218013.jpg' },
+  { id: '9', name: 'غوجو', img: 'https://cdn.myanimelist.net/images/characters/2/439744.jpg' },
+  { id: '10', name: 'سايتاما', img: 'https://cdn.myanimelist.net/images/characters/11/286916.jpg' },
+  { id: '11', name: 'غون', img: 'https://cdn.myanimelist.net/images/characters/11/242253.jpg' },
+  { id: '12', name: 'كيلوا', img: 'https://cdn.myanimelist.net/images/characters/13/214451.jpg' },
+  { id: '13', name: 'لايت', img: 'https://cdn.myanimelist.net/images/characters/6/275115.jpg' },
+  { id: '14', name: 'إل (L)', img: 'https://cdn.myanimelist.net/images/characters/10/63813.jpg' },
+  { id: '15', name: 'تانجيرو', img: 'https://cdn.myanimelist.net/images/characters/11/384795.jpg' },
+  { id: '16', name: 'نيزوكو', img: 'https://cdn.myanimelist.net/images/characters/3/384797.jpg' },
+  { id: '17', name: 'إدوارد', img: 'https://cdn.myanimelist.net/images/characters/9/72533.jpg' },
+  { id: '18', name: 'كانيكي', img: 'https://cdn.myanimelist.net/images/characters/2/324102.jpg' },
+  { id: '19', name: 'لولوش', img: 'https://cdn.myanimelist.net/images/characters/12/37996.jpg' },
+  { id: '20', name: 'جينتوكي', img: 'https://cdn.myanimelist.net/images/characters/3/53077.jpg' }
 ];
 
 function shuffleArray(array: any[]) {

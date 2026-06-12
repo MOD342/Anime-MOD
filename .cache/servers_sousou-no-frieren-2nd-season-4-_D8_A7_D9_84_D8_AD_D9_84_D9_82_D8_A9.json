@@ -1,0 +1,54 @@
+{
+  "data": [
+    {
+      "serverName": "سيرفر MOD السحابي فائق السرعة (FHD) 🚀",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "type": "direct",
+      "quality": "1080p",
+      "category": "watch"
+    },
+    {
+      "serverName": "البث السحابي المباشر (HD) ⚡",
+      "url": "https://playertest.longtailvideo.com/adaptive/vod-with-tricked-out-timeline/manifest.m3u8",
+      "type": "direct",
+      "quality": "720p",
+      "category": "watch"
+    },
+    {
+      "serverName": "سيرفر السحابة السريعة (SD) 🌟",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      "type": "direct",
+      "quality": "480p",
+      "category": "watch"
+    },
+    {
+      "serverName": "سيرفر Google Drive الاحتياطي ☁️",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "type": "direct",
+      "quality": "auto",
+      "category": "watch"
+    },
+    {
+      "serverName": "تحميل مباشر فائق السرعة (FHD 1080p) 📥",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "type": "direct",
+      "quality": "1080p",
+      "category": "download"
+    },
+    {
+      "serverName": "تحميل مباشر متوسط السرعة (HD 720p) 📥",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "type": "direct",
+      "quality": "720p",
+      "category": "download"
+    },
+    {
+      "serverName": "تحميل مباشر موفر للبيانات (SD 480p) 📥",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      "type": "direct",
+      "quality": "480p",
+      "category": "download"
+    }
+  ],
+  "expireAt": 1781226763436
+}

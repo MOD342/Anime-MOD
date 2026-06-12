@@ -18,7 +18,15 @@ const CHARACTERS = [
   { id: 12, name: 'سون غوكو', img: 'https://cdn.myanimelist.net/images/characters/15/263399.jpg', options: ['فيجيتا', 'سون غوكو', 'غوهان', 'ترانكس'], correct: 1 },
   { id: 13, name: 'لايت ياغامي', img: 'https://cdn.myanimelist.net/images/characters/6/275115.jpg', options: ['إل', 'لايت ياغامي', 'ريوك', 'ماتسو'], correct: 1 },
   { id: 14, name: 'تانجيرو كامادو', img: 'https://cdn.myanimelist.net/images/characters/11/384795.jpg', options: ['زينيتسو', 'إينوسكي', 'تانجيرو كامادو', 'توميوكا'], correct: 2 },
-  { id: 15, name: 'ميكاسا أكرمان', img: 'https://cdn.myanimelist.net/images/characters/9/215513.jpg', options: ['آني', 'ساشا', 'ميكاسا أكرمان', 'كريستا'], correct: 2 }
+  { id: 15, name: 'ميكاسا أكرمان', img: 'https://cdn.myanimelist.net/images/characters/9/215513.jpg', options: ['آني', 'ساشا', 'ميكاسا أكرمان', 'كريستا'], correct: 2 },
+  { id: 16, name: 'كاكاشي هاتاكي', img: 'https://cdn.myanimelist.net/images/characters/2/29288.jpg', options: ['ميناتو', 'كاكاشي هاتاكي', 'أوبيتو', 'جيرايا'], correct: 1 },
+  { id: 17, name: 'لولوش في بريطانيا', img: 'https://cdn.myanimelist.net/images/characters/12/37996.jpg', options: ['سوزاكو', 'لولوش في بريطانيا', 'شنايزل', 'رولو'], correct: 1 },
+  { id: 18, name: 'فيجيتا الكبرياء', img: 'https://cdn.myanimelist.net/images/characters/15/302403.jpg', options: ['غوكو', 'فيجيتا الكبرياء', 'ترانكس', 'نابا'], correct: 1 },
+  { id: 19, name: 'نيزوكو كامادو', img: 'https://cdn.myanimelist.net/images/characters/3/384797.jpg', options: ['كاناو', 'نيزوكو كامادو', 'شينوبو', 'تامايو'], correct: 1 },
+  { id: 20, name: 'هيسوكا مورو', img: 'https://cdn.myanimelist.net/images/characters/10/242255.jpg', options: ['إيلومي', 'هيسوكا مورو', 'كورولو', 'غينثرو'], correct: 1 },
+  { id: 21, name: 'كرولو لوسيلفر', img: 'https://cdn.myanimelist.net/images/characters/16/364233.jpg', options: ['هيسوكا', 'كرولو لوسيلفر', 'فيتان', 'شالبارك'], correct: 1 },
+  { id: 22, name: 'يامي سوكيهيرو', img: 'https://cdn.myanimelist.net/images/characters/14/333600.jpg', options: ['أستا', 'يونو', 'يامي سوكيهيرو', 'نوزيل'], correct: 2 },
+  { id: 23, name: 'أستا الشجاع', img: 'https://cdn.myanimelist.net/images/characters/14/333596.jpg', options: ['يونو', 'أستا الشجاع', 'نويل', 'ماغنا'], correct: 1 }
 ];
 
 export default function SilhouetteGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

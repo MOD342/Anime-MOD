@@ -29,6 +29,20 @@ const ANIME_LIST = [
   { id: '23', title: 'Monster', altTitles: ['مونستر', 'الوحش', 'دكتور تينما'], img: 'https://cdn.myanimelist.net/images/anime/10/11671.jpg' },
   { id: '24', title: 'Violet Evergarden', altTitles: ['فايوليت ايفرغاردن', 'فايوليت'], img: 'https://cdn.myanimelist.net/images/anime/1795/95088.jpg' },
   { id: '25', title: 'Your Name', altTitles: ['اسمك', 'كيمي نو نا وا', 'kimi no na wa'], img: 'https://cdn.myanimelist.net/images/anime/5/87048.jpg' },
+  { id: '26', title: 'Spy x Family', altTitles: ['عائلة الجاسوس', 'سباي اكس فاميلي', 'انيا', 'لويد', 'ير'], img: 'https://cdn.myanimelist.net/images/anime/1441/122795.jpg' },
+  { id: '27', title: 'Gintama', altTitles: ['جينتاما', 'جينتوكي', 'جنتاما'], img: 'https://cdn.myanimelist.net/images/anime/3/72078.jpg' },
+  { id: '28', title: 'Blue Lock', altTitles: ['القفل الأزرق', 'بلو لوك', 'ايساجي'], img: 'https://cdn.myanimelist.net/images/anime/1258/126926.jpg' },
+  { id: '29', title: 'Dr. Stone', altTitles: ['دكتور ستون', 'دكتور الصخر', 'سينكو'], img: 'https://cdn.myanimelist.net/images/anime/1619/103820.jpg' },
+  { id: '30', title: 'Fairy Tail', altTitles: ['ذيل الجنية', 'فيري تيل', 'ناتسو'], img: 'https://cdn.myanimelist.net/images/anime/1813/141707.jpg' },
+  { id: '31', title: 'JoJo\'s Bizarre Adventure', altTitles: ['مغامرات جوجو العجيبة', 'جوجو', 'jojo'], img: 'https://cdn.myanimelist.net/images/anime/3/40407.jpg' },
+  { id: '32', title: 'Re:Zero', altTitles: ['ري زيرو', 'سوبارو', 'ري:زيرو'], img: 'https://cdn.myanimelist.net/images/anime/1522/117645.jpg' },
+  { id: '33', title: 'Assassination Classroom', altTitles: ['فصل الاغتيال', 'كوروسينسي', 'كورو سينسي'], img: 'https://cdn.myanimelist.net/images/anime/10/73273.jpg' },
+  { id: '34', title: 'No Game No Life', altTitles: ['لا لعبة لا حياة', 'نو غيم نو لايف', 'سورا وشيرو'], img: 'https://cdn.myanimelist.net/images/anime/5/65135.jpg' },
+  { id: '35', title: 'Parasyte', altTitles: ['الطفيلي', 'باراسايت', 'شينيتشي'], img: 'https://cdn.myanimelist.net/images/anime/1105/119934.jpg' },
+  { id: '36', title: 'Dororo', altTitles: ['دورورو', 'هياكيمارو'], img: 'https://cdn.myanimelist.net/images/anime/1879/100465.jpg' },
+  { id: '37', title: 'Fate/Zero', altTitles: ['فيت زيرو', 'فيت/زيرو', 'كيريتسوغو'], img: 'https://cdn.myanimelist.net/images/anime/1522/114250.jpg' },
+  { id: '38', title: 'Cyberpunk: Edgerunners', altTitles: ['سايبربانك', 'سايبر بانك', 'ديفيد'], img: 'https://cdn.myanimelist.net/images/anime/1191/125011.jpg' },
+  { id: '39', title: 'Overlord', altTitles: ['أوفرلورد', 'اوفرلورد', 'أينز'], img: 'https://cdn.myanimelist.net/images/anime/7/74053.jpg' },
 ];
 
 interface PixelGuessGameProps {

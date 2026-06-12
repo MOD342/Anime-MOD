@@ -9,9 +9,25 @@ const ANIME_SCORES = [
   { id: 3, title: 'Attack on Titan Season 3 Part 2', score: 9.05, img: 'https://cdn.myanimelist.net/images/anime/1517/100633.jpg' },
   { id: 4, title: 'Gintama°', score: 9.06, img: 'https://cdn.myanimelist.net/images/anime/3/72078.jpg' },
   { id: 5, title: 'Hunter x Hunter (2011)', score: 9.04, img: 'https://cdn.myanimelist.net/images/anime/1337/99013.jpg' },
-  { id: 6, title: 'Bleach', score: 7.95, img: 'https://cdn.myanimelist.net/images/anime/3/40451.jpg' },
-  { id: 7, title: 'Naruto', score: 7.99, img: 'https://cdn.myanimelist.net/images/anime/13/17405.jpg' },
-  { id: 8, title: 'Sword Art Online', score: 7.20, img: 'https://cdn.myanimelist.net/images/anime/11/39717.jpg' }
+  { id: 6, title: 'Bleach: Thousand-Year Blood War', score: 9.02, img: 'https://cdn.myanimelist.net/images/anime/1764/126627.jpg' },
+  { id: 7, title: 'Kaguya-sama: Love is War - Ultra Romantic', score: 9.01, img: 'https://cdn.myanimelist.net/images/anime/1160/122627.jpg' },
+  { id: 8, title: 'Gintama\'', score: 9.04, img: 'https://cdn.myanimelist.net/images/anime/4/50363.jpg' },
+  { id: 9, title: 'Sousou no Frieren (Frieren: Beyond Journey\'s End)', score: 9.38, img: 'https://cdn.myanimelist.net/images/anime/1015/138029.jpg' },
+  { id: 10, title: 'Code Geass: Lelouch of the Rebellion R2', score: 8.91, img: 'https://cdn.myanimelist.net/images/anime/4/9313.jpg' },
+  { id: 11, title: 'Monster', score: 8.87, img: 'https://cdn.myanimelist.net/images/anime/10/11671.jpg' },
+  { id: 12, title: 'Naruto: Shippuden', score: 8.26, img: 'https://cdn.myanimelist.net/images/anime/1565/111305.jpg' },
+  { id: 13, title: 'One Piece', score: 8.71, img: 'https://cdn.myanimelist.net/images/anime/6/73245.jpg' },
+  { id: 14, title: 'Death Note', score: 8.62, img: 'https://cdn.myanimelist.net/images/anime/9/864.jpg' },
+  { id: 15, title: 'Jujutsu Kaisen Season 2', score: 8.82, img: 'https://cdn.myanimelist.net/images/anime/1792/138022.jpg' },
+  { id: 16, title: 'Demon Slayer: Entertainment District Arc', score: 8.78, img: 'https://cdn.myanimelist.net/images/anime/1908/120036.jpg' },
+  { id: 17, title: 'Chainsaw Man', score: 8.53, img: 'https://cdn.myanimelist.net/images/anime/1806/126216.jpg' },
+  { id: 18, title: 'Vinland Saga Season 2', score: 8.83, img: 'https://cdn.myanimelist.net/images/anime/1614/134001.jpg' },
+  { id: 19, title: 'Mob Psycho 100 III', score: 8.68, img: 'https://cdn.myanimelist.net/images/anime/1223/128539.jpg' },
+  { id: 20, title: 'Violet Evergarden', score: 8.67, img: 'https://cdn.myanimelist.net/images/anime/1795/95088.jpg' },
+  { id: 21, title: 'Sword Art Online', score: 7.20, img: 'https://cdn.myanimelist.net/images/anime/11/39717.jpg' },
+  { id: 22, title: 'My Hero Academia Season 6', score: 8.24, img: 'https://cdn.myanimelist.net/images/anime/1484/126622.jpg' },
+  { id: 23, title: 'Black Clover', score: 8.14, img: 'https://cdn.myanimelist.net/images/anime/2/88334.jpg' },
+  { id: 24, title: 'Cyberpunk: Edgerunners', score: 8.60, img: 'https://cdn.myanimelist.net/images/anime/1191/125011.jpg' }
 ];
 
 export default function TierBattleGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

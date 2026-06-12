@@ -13,7 +13,7 @@ service cloud.firestore {
 
     function isValidUser(data) {
       return data.keys().hasAll(['role', 'createdAt', 'xp', 'level', 'modPoints', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate']) 
-        && (data.keys().size() >= 13 && data.keys().size() <= 40)
+        && (data.keys().size() >= 13 && data.keys().size() <= 50)
         && data.role == 'user'
         && data.modPoints == 0
         && data.xp is number && data.level is number
@@ -31,8 +31,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['equippedBadge']) || data.equippedBadge is string || data.equippedBadge == null)
         && (!data.keys().hasAny(['lastSpinTimestamp']) || data.lastSpinTimestamp is number)
         && (!data.keys().hasAny(['listCount']) || data.listCount is number)
-        && (!data.keys().hasAny(['username']) || data.username is string && data.username.size() <= 30)
-        && (!data.keys().hasAny(['displayName']) || data.displayName is string && data.displayName.size() <= 50)
+        && (!data.keys().hasAny(['username']) || data.username is string && data.username.size() <= 100)
+        && (!data.keys().hasAny(['displayName']) || data.displayName is string && data.displayName.size() <= 200)
         && (!data.keys().hasAny(['lastUsernameChange']) || data.lastUsernameChange is number)
         && (!data.keys().hasAny(['lastDisplayNameChange']) || data.lastDisplayNameChange is number)
         && (!data.keys().hasAny(['totalEpisodesWatched']) || data.totalEpisodesWatched is number)
@@ -43,6 +43,10 @@ service cloud.firestore {
         && (!data.keys().hasAny(['bannerSize']) || data.bannerSize is string)
         && (!data.keys().hasAny(['dislikesReceived']) || data.dislikesReceived is number)
         && (!data.keys().hasAny(['approvedRecommendationsCount']) || data.approvedRecommendationsCount is number)
+        && (!data.keys().hasAny(['lastSpinDate']) || data.lastSpinDate is string)
+        && (!data.keys().hasAny(['lastDailyClaim']) || data.lastDailyClaim is string)
+        && (!data.keys().hasAny(['dailyClaimStreak']) || data.dailyClaimStreak is number)
+        && (!data.keys().hasAny(['claimedSeasonMilestones']) || data.claimedSeasonMilestones is list)
         && data.lastActiveDate is string
         && data.createdAt == request.time;
     }
@@ -135,6 +139,12 @@ service cloud.firestore {
         && data.createdAt == request.time;
     }
 
+    function isValidServerCache(data) {
+      return data.keys().hasAll(['data', 'expireAt'])
+        && data.keys().size() <= 3
+        && data.expireAt is number;
+    }
+
     function isOwnerAuth() {
       return isSignedIn() && (
         request.auth.uid == 'IYLv7bRb89W4rifLQFDAfYlf2fN2'
@@ -169,8 +179,8 @@ service cloud.firestore {
     
     match /usernames/{username} {
       allow read: if true;
-      allow create: if isSignedIn() && incoming().uid == request.auth.uid;
-      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
+      allow create: if isSignedIn() && incoming().id == request.auth.uid;
+      allow delete: if isSignedIn() && existing().id == request.auth.uid;
     }
 
     match /reports/{reportId} {
@@ -262,8 +272,13 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
       allow update: if (isOwner(userId) || isModeratorAuth()) && isValidId(userId) && (
         isModeratorAuth() || (
-          incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate', 'coins', 'purchasedItems', 'claimedAchievements', 'dailyStats', 'equippedBanner', 'equippedAvatar', 'equippedFrame', 'equippedTitle', 'equippedBadge', 'lastSpinTimestamp', 'listCount', 'username', 'displayName', 'lastUsernameChange', 'lastDisplayNameChange', 'totalEpisodesWatched', 'completedAnimeCount', 'privacySettings', 'avatarAlignment', 'avatarShape', 'bannerSize', 'dislikesReceived', 'approvedRecommendationsCount']) &&
-          (!incoming().diff(existing()).affectedKeys().hasAny(['role', 'modPoints'])) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['xp', 'level', 'streakDays', 'likesReceived', 'commentsCount', 'recommendationsAccepted', 'aiGamesPoints', 'ratingsCount', 'chatMessagesCount', 'lastActiveDate', 'coins', 'purchasedItems', 'claimedAchievements', 'dailyStats', 'equippedBanner', 'equippedAvatar', 'equippedFrame', 'equippedTitle', 'equippedBadge', 'lastSpinTimestamp', 'listCount', 'username', 'displayName', 'lastUsernameChange', 'lastDisplayNameChange', 'totalEpisodesWatched', 'completedAnimeCount', 'privacySettings', 'avatarAlignment', 'avatarShape', 'bannerSize', 'dislikesReceived', 'approvedRecommendationsCount', 'email', 'photoURL', 'id', 'modPoints', 'lastSpinDate', 'lastDailyClaim', 'dailyClaimStreak', 'claimedSeasonMilestones']) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['role'])) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['modPoints']) || incoming().modPoints is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['lastSpinDate']) || incoming().lastSpinDate is string) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['lastDailyClaim']) || incoming().lastDailyClaim is string) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['dailyClaimStreak']) || incoming().dailyClaimStreak is number) &&
+          (!incoming().diff(existing()).affectedKeys().hasAny(['claimedSeasonMilestones']) || incoming().claimedSeasonMilestones is list) &&
           (!incoming().diff(existing()).affectedKeys().hasAny(['xp']) || incoming().xp is number) &&
           (!incoming().diff(existing()).affectedKeys().hasAny(['level']) || incoming().level is number) &&
           (!incoming().diff(existing()).affectedKeys().hasAny(['streakDays']) || incoming().streakDays is number) &&
@@ -325,6 +340,11 @@ service cloud.firestore {
       allow read: if isModeratorAuth();
       allow create: if isValidId(suggestionId) && isValidSuggestion(incoming());
       allow delete: if isModeratorAuth();
+    }
+
+    match /server_cache/{cacheId} {
+      allow read: if true;
+      allow write: if isValidId(cacheId) && isValidServerCache(incoming());
     }
   }
 }

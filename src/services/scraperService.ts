@@ -19,12 +19,90 @@ export interface EpisodeServer {
 }
 
 export class ScraperService {
-  private readonly defaultBaseUrl = 'https://ristoanime.co';
+  private readonly defaultBaseUrls = [
+    'https://witanime.club',
+    'https://witanime.space',
+    'https://witanime.com.eg',
+    'https://witanime.online',
+    'https://witanime.me',
+    'https://witanime.cam',
+    'https://witanime.pics',
+    'https://witaanime.co',
+    'https://ristoanime.co'
+  ];
+  private currentBaseUrlIndex = 0;
+
+  private async fetchScraperHtml(path: string): Promise<{ html: string; actualBaseUrl: string }> {
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    let lastError: any = null;
+    const urlsToTry = [
+      ...this.defaultBaseUrls.slice(this.currentBaseUrlIndex),
+      ...this.defaultBaseUrls.slice(0, this.currentBaseUrlIndex)
+    ];
+
+    for (const baseUrl of urlsToTry) {
+      try {
+        const fullUrl = `${baseUrl}${cleanPath}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout per mirror
+        
+        const response = await fetch(fullUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Cache-Control': 'max-age=0',
+            'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'none',
+            'sec-fetch-user': '?1',
+            'Upgrade-Insecure-Requests': '1',
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const text = await response.text();
+          const foundIdx = this.defaultBaseUrls.indexOf(baseUrl);
+          if (foundIdx !== -1) {
+            this.currentBaseUrlIndex = foundIdx;
+          }
+          return { html: text, actualBaseUrl: baseUrl };
+        } else if (response.status === 404) {
+          throw new Error('404');
+        } else {
+          throw new Error(`Status ${response.status}`);
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[Scraper] Base URL ${baseUrl} failed for path "${cleanPath}":`, err.message || err);
+      }
+    }
+    
+    throw new Error(`All scraper mirrors failed. Last error: ${lastError?.message || lastError}`);
+  }
+
   private jikanQueuePromise: Promise<void> = Promise.resolve();
 
   private async safeFetchJikan(url: string, retries = 3, ttlMs = 15 * 60 * 1000): Promise<any> {
     const cached = await this.getCached<any>(url);
     if (cached) return cached;
+
+    // Use a stronger default cache lifetime for different URL formats to align stability with api endpoints
+    let finalTtl = ttlMs;
+    if (ttlMs === 15 * 60 * 1000 || ttlMs === 30 * 60 * 1000) {
+      if (url.includes('/schedules') || url.includes('/watch/episodes')) {
+        finalTtl = 6 * 60 * 60 * 1000; // 6 hours
+      } else if (url.includes('/anime/') && (url.includes('/full') || url.includes('/characters') || url.includes('/relations'))) {
+        finalTtl = 24 * 60 * 60 * 1000; // 24 hours
+      } else {
+        finalTtl = 2 * 60 * 60 * 1000; // 2 hours
+      }
+    }
 
     for (let attempt = 1; attempt <= retries; attempt++) {
       await this.jikanQueuePromise;
@@ -52,7 +130,7 @@ export class ScraperService {
 
         const data = await response.json();
         if (data) {
-          await this.setCache(url, data, ttlMs);
+          await this.setCache(url, data, finalTtl);
           return data;
         }
       } catch (err: any) {
@@ -134,7 +212,7 @@ export class ScraperService {
     const cached = await this.getCached<AnimeItem[]>(cacheKey);
     if (cached) return cached;
     try {
-      const html = await this.fetchHtml(this.defaultBaseUrl);
+      const { html } = await this.fetchScraperHtml('/');
       const $ = cheerio.load(html);
       const items: AnimeItem[] = [];
 
@@ -246,7 +324,7 @@ export class ScraperService {
     if (cached) return cached;
     try {
       // Witaanime uses /time/ schedule page
-      const html = await this.fetchHtml(`${this.defaultBaseUrl}/time/`);
+      const { html } = await this.fetchScraperHtml('/time/');
       const $ = cheerio.load(html);
       const items: AnimeItem[] = [];
 
@@ -378,8 +456,7 @@ export class ScraperService {
     const cached = await this.getCached<string | null>(cacheKey);
     if (cached !== null) return cached;
     try {
-      const url = `${this.defaultBaseUrl}/?s=${encodeURIComponent(query)}`;
-      const html = await this.fetchHtml(url);
+      const { html } = await this.fetchScraperHtml(`/?s=${encodeURIComponent(query)}`);
       const $ = cheerio.load(html);
       
       const results: { slug: string; title: string; href: string }[] = [];
@@ -493,8 +570,7 @@ export class ScraperService {
     if (cached) return cached;
     try {
       // Witaanime uses /series/ URL segment for anime pages
-      const url = `${this.defaultBaseUrl}/series/${animeId}/`;
-      const html = await this.fetchHtml(url);
+      const { html } = await this.fetchScraperHtml(`/series/${animeId}/`);
       const $ = cheerio.load(html);
 
        let title = $('h1').text().trim() || animeId;
@@ -742,8 +818,7 @@ export class ScraperService {
       if (!isJikanEp) {
         try {
           // Witaanime watch sub-page schema is ${episodeId}/watch
-          const url = `${this.defaultBaseUrl}/${episodeId}/watch`;
-          const html = await this.fetchHtml(url);
+          const { html } = await this.fetchScraperHtml(`/${episodeId}/watch`);
           const $ = cheerio.load(html);
           
           // Witaanime uses li[data-watch] to load server links or standard buttons

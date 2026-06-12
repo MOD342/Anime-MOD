@@ -145,9 +145,23 @@
         "status": { "type": "string" }
       },
       "required": ["userId", "email", "displayName", "type", "message", "createdAt", "status"]
+    },
+    "ServerCache": {
+      "title": "ServerCache",
+      "description": "Multi-layer cloud server cache entry",
+      "type": "object",
+      "properties": {
+        "data": { "type": "object" },
+        "expireAt": { "type": "number" }
+      },
+      "required": ["data", "expireAt"]
     }
   },
   "firestore": {
+    "/server_cache/{cacheId}": {
+      "schema": "ServerCache",
+      "description": "Distributed cloud server cache database"
+    },
     "/comments/{commentId}": {
       "schema": "Comment",
       "description": "Global comments per anime"

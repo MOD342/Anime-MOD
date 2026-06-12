@@ -4,18 +4,27 @@ import { motion, AnimatePresence } from 'motion/react';
 import { playSound, getIsMutedGlobal, toggleGlobalMute } from '../../utils/gameAudio';
 
 const WEAPONS = [
-  { id: 1, weapon: 'سيف إينما (Enma)', options: ['إيتشيغو', 'رورونوا زورو', 'ساسكي', 'ميهوك'], correct: 1 },
-  { id: 2, weapon: 'سيف الإكسكاليبر (Excalibur)', options: ['إيرزا', 'شيرو', 'سابر (Saber)', 'آرثر'], correct: 2 },
-  { id: 3, weapon: 'رمح غاي بولغ (Gae Bolg)', options: ['كوهين', 'لانسر (Lancer)', 'ديارمويد', 'غيلغامش'], correct: 1 },
-  { id: 4, weapon: 'مقص النصل العملاق (Scissor Blade)', options: ['ريوكو ماتوي', 'إيرزا', 'شينوا', 'ماكا ألبيرن'], correct: 0 },
-  { id: 5, weapon: 'سيف الزانباكتو زانغيتسو (Zangetsu)', options: ['بياكويا', 'ياماموتو', 'كوروساكي إيتشيغو', 'أوراهارا كيسكي'], correct: 2 },
-  { id: 6, weapon: 'سيف مصلح الليل (Elucidator)', options: ['كيريتو (Kirito)', 'آسونا', 'يوجيو', 'كلاين'], correct: 0 },
-  { id: 7, weapon: 'سيف الموراسامي الملعون (Murasame)', options: ['تاتسومي', 'أكامي (Akame)', 'إسديث', 'ليون'], correct: 1 },
-  { id: 8, weapon: 'سيف التتسايجا (Tessaiga)', options: ['سيشومارو', 'إينوياشا (Inuyasha)', 'ناراكو', 'كوجا'], correct: 1 },
-  { id: 9, weapon: 'مطرقة المسامير الطاقية', options: ['ميجومي', 'نوبارا كوجيساكي', 'ماكي زينين', 'يوجي إيتادوري'], correct: 1 },
-  { id: 10, weapon: 'سيف اللوكا الخشبي (Toyako)', options: ['هيجيكاتا', 'جينتوكي ساكاتا', 'أوكيتو', 'شينباتشي'], correct: 1 },
-  { id: 11, weapon: 'سلاسل النين الحمراء الملعونة', options: ['كورابيكا (Kurapika)', 'كيلوا', 'غون', 'هيسوكا'], correct: 0 },
-  { id: 12, weapon: 'سيف النيشيرين الأسود (Nichirin)', options: ['زينيتسو', 'إينوسكي', 'كامادو تانجيرو', 'غييو توميوكا'], correct: 2 },
+  { id: 1, weapon: 'سيف إينما (Enma) القادر على قطع الجحيم نفسه', options: ['إيتشيغو', 'رورونوا زورو', 'ساسكي', 'ميهوك'], correct: 1 },
+  { id: 2, weapon: 'سيف الملك الأسطوري الموعود الإكسكاليبر (Excalibur)', options: ['إيرزا', 'شيرو', 'سابر (Saber)', 'آرثر'], correct: 2 },
+  { id: 3, weapon: 'رمح غاي بولغ الأحمر ذو الجينات الملعونة (Gae Bolg)', options: ['كوهين', 'لانسر (Lancer)', 'ديارمويد', 'غيلغامش'], correct: 1 },
+  { id: 4, weapon: 'مقص النصل العملاق شاطر الخيوط (Scissor Blade)', options: ['ريوكو ماتوي', 'إيرزا', 'شينوا', 'ماكا ألبيرن'], correct: 0 },
+  { id: 5, weapon: 'سيف الزانباكتو الأسود زانغيتسو (Zangetsu)', options: ['بياكويا', 'ياماموتو', 'كوروساكي إيتشيغو', 'أوراهارا كيسكي'], correct: 2 },
+  { id: 6, weapon: 'سيف مصلح الليل داكن اللون (Elucidator)', options: ['كيريتو (Kirito)', 'آسونا', 'يوجيو', 'كلاين'], correct: 0 },
+  { id: 7, weapon: 'سيف المرآة السام الموراسامي المقصل (Murasame)', options: ['تاتسومي', 'أكامي (Akame)', 'إسديث', 'ليون'], correct: 1 },
+  { id: 8, weapon: 'سيف الفولاذ المجدد للتتسايجا وحش الريح (Tessaiga)', options: ['سيشومارو', 'إينوياشا (Inuyasha)', 'ناراكو', 'كوجا'], correct: 1 },
+  { id: 9, weapon: 'مطرقة المسامير المشحونة بالطاقة الملعونة', options: ['ميجومي', 'نوبارا كوجيساكي', 'ماكي زينين', 'يوجي إيتادوري'], correct: 1 },
+  { id: 10, weapon: 'سيف التوياكو الخشبي المنقوش عليه بحيرة تويا (Lake Toya)', options: ['هيجيكاتا', 'جينتوكي ساكاتا', 'أوكيتو', 'شينباتشي'], correct: 1 },
+  { id: 11, weapon: 'سلاسل الأحكام الملتفة بطاقة النين (Judgment Chain)', options: ['كورابيكا (Kurapika)', 'كيلوا', 'غون', 'هيسوكا'], correct: 0 },
+  { id: 12, weapon: 'سيف النيشيرين الأسود الغامق لاستنزاف الدماء', options: ['زينيتسو', 'إينوسكي', 'كامادو تانجيرو', 'غييو توميوكا'], correct: 2 },
+  { id: 13, weapon: 'سيف الظلام الأكبر يورو (Yoru) ذو الصليب الضخم', options: ['رورونوا زورو', 'جولاكيل ميهوك', 'ترافلغار لاو', 'دون كيهوتي'], correct: 1 },
+  { id: 14, weapon: 'كنز بوابة بابل الذهبية الحاضرة والماضية (Gate of Babylon)', options: ['إسكندر', 'غيلغامش (Gilgamesh)', 'شيرو وب', 'آرثر'], correct: 1 },
+  { id: 15, weapon: 'سيف الكوساناغي المفرغ للبرق الأبيض (Kusanagi)', options: ['ساسكي أوتشيها', 'ايتاتشي أوتشيها', 'أوروتشيمارو', 'كابوتو'], correct: 0 },
+  { id: 16, weapon: 'فأس الروح المقدسة ريتا ذات القوة الشمسية (Rhitta)', options: ['ميليوداس', 'بان', 'إسكانور (Escanor)', 'كينغ'], correct: 2 },
+  { id: 17, weapon: 'رمح الحكيم الروحي الكنز المقدس شاستيفول (Chastiefol)', options: ['كينغ (King)', 'ميليوداس', 'غولستار', 'غاوثر'], correct: 0 },
+  { id: 18, weapon: 'سيف النيشيرين لضوء اللهب المتقد (Flame Nichirin)', options: ['تانجيرو', 'كيو جورو رينغوكو', 'أوزوي تينجن', 'توميوكا'], correct: 1 },
+  { id: 19, weapon: 'منجل حصاد الأرواح الروحي (Soul Eater Scythe)', options: ['ماكا ألبيرن', 'شينوا', 'كرونا', 'موتو'], correct: 0 },
+  { id: 20, weapon: 'سيف اللستار القرمزي الملعون ذو الثقوب الخمسة (Lostvayne)', options: ['ميليوداس (Meliodas)', 'بان', 'كينغ', 'زيلدريس'], correct: 0 },
+  { id: 21, weapon: 'مقص بتر الحكايا العملاق المستحوذ إكستاز (Extase)', options: ['شيل (Sheele)', 'ليون', 'أكامي', 'ماين'], correct: 0 }
 ];
 
 export default function WeaponMatchGame({ onScoreUpdate }: { onScoreUpdate: (pts: number) => void }) {

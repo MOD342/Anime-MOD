@@ -6,15 +6,23 @@ import firebaseConfig from '../firebase-applet-config.json';
 const app = initializeApp(firebaseConfig);
 
 let dbInstance;
-try {
+const isBrowser = typeof window !== 'undefined';
+
+if (isBrowser) {
+  try {
+    dbInstance = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    }, firebaseConfig.firestoreDatabaseId);
+  } catch (error) {
+    console.warn("Firestore persistent cache not supported in this environment, falling back to default.", error);
+    dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  }
+} else {
   dbInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager()
-    })
+    experimentalForceLongPolling: true,
   }, firebaseConfig.firestoreDatabaseId);
-} catch (error) {
-  console.warn("Firestore persistent cache not supported in this environment, falling back to default.", error);
-  dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 }
 
 export const db = dbInstance;

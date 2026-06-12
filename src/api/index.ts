@@ -122,6 +122,33 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
+function getJikanTTL(url: string): number {
+  if (url.includes('/genres/')) {
+    return 7 * 24 * 60 * 60 * 1000; // 7 days (genres almost never change)
+  }
+  if (
+    url.includes('/top/') ||
+    url.includes('/relations') ||
+    url.includes('/characters') ||
+    url.includes('/recommendations') ||
+    url.includes('/pictures') ||
+    url.includes('/full') ||
+    /\/anime\/\d+$/.test(url)
+  ) {
+    return 24 * 60 * 60 * 1000; // 24 hours (highly static documents)
+  }
+  if (url.includes('/seasons/')) {
+    return 12 * 60 * 60 * 1000; // 12 hours (seasonal anime releases change daily)
+  }
+  if (url.includes('/schedules') || url.includes('filter=')) {
+    return 6 * 60 * 60 * 1000; // 6 hours (schedules list is stable per day)
+  }
+  if (url.includes('/episodes')) {
+    return 4 * 60 * 60 * 1000; // 4 hours (episodes metadata is updated daily)
+  }
+  return 2 * 60 * 60 * 1000; // 2 hours default fallback (instead of 1 hour)
+}
+
 async function fetchJikan(url: string, retries = 2, useCache = true): Promise<any> {
   if (useCache && !url.includes('random')) {
     const cached = await serverCache.get(url);
@@ -159,7 +186,8 @@ async function fetchJikan(url: string, retries = 2, useCache = true): Promise<an
       const data = await res.json();
       
       if (useCache && !url.includes('random')) {
-        await serverCache.set(url, data, CACHE_TTL);
+        const customTtl = getJikanTTL(url);
+        await serverCache.set(url, data, customTtl);
       }
       return data;
     } catch (error) {
@@ -567,7 +595,11 @@ async function extractDirectStream(targetUrl: string): Promise<{ directUrl: stri
       const match = html.match(/data-options="([^"]+)"/) || html.match(/OK\.Player\.initPlayer\([^,]+,\s*([^)]+)\)/);
       if (match) {
         try {
-          const decodedOptions = match[1].replace(/&quot;/g, '"');
+          const decodedOptions = match[1]
+            .replace(/&quot;/g, '"')
+            .replace(/&amp;/g, '&')
+            .replace(/\\"/g, '"')
+            .replace(/\\u0022/g, '"');
           const json = JSON.parse(decodedOptions);
           const videos = json?.flashvars?.metadata ? JSON.parse(json.flashvars.metadata)?.videos : json?.videos;
           if (Array.isArray(videos)) {
@@ -601,14 +633,28 @@ async function extractDirectStream(targetUrl: string): Promise<{ directUrl: stri
       }
     }
 
-    // 3.5. دعم إضافي للسيرفرات الشهيرة (Uqload, Streamwish, MP4Upload, Sibnet, Vidmoly)
+    // 3.5. دعم إضافي للسيرفرات الشهيرة (Uqload, Streamwish, MP4Upload, Sibnet, Vidmoly, Filemoon)
     // Uqload Direct Extraction
     if (currentUrl.includes('uqload')) {
       const uqMatch = html.match(/sources\s*:\s*\[\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i) || 
                       html.match(/file\s*:\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i) ||
+                      html.match(/video_url\s*:\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i) ||
+                      html.match(/src\s*:\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i) ||
+                      combinedCodeToScan.match(/video_url\s*:\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i) ||
                       combinedCodeToScan.match(/sources\s*:\s*\[\s*['"](https?:[^'"]+\.mp4[^'"]*)['"]/i);
       if (uqMatch) {
         sources.push({ file: uqMatch[1], label: 'سيرفر Uqload مباشر (HD)', type: 'mp4' });
+      }
+    }
+
+    // Filemoon Direct Extraction
+    if (currentUrl.includes('filemoon')) {
+      const fmMatch = html.match(/file\s*:\s*['"](https?:[^'"]+?\.m3u8[^'"]*)['"]/i) ||
+                      html.match(/src\s*:\s*['"](https?:[^'"]+?\.m3u8[^'"]*)['"]/i) ||
+                      combinedCodeToScan.match(/file\s*:\s*['"](https?:[^'"]+?\.m3u8[^'"]*)['"]/i) ||
+                      combinedCodeToScan.match(/(https?:\/\/[^\s'"]+?\.m3u8[^\s'"]*)/i);
+      if (fmMatch) {
+        sources.push({ file: fmMatch[1], label: 'سيرفر Filemoon مباشر (HLS)', type: 'hls' });
       }
     }
 

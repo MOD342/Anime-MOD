@@ -37,6 +37,7 @@ const AdSupportView = lazy(() => import('./views/AdSupportView'));
 const SupportPortalView = lazy(() => import('./views/SupportPortalView'));
 
 const AiChatWidget = lazy(() => import('./components/AiChatWidget'));
+import { MascotLoadingScreen, MascotOfflineScreen } from './components/MascotScreens';
 
 const ViewFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] text-neutral-400 gap-4" dir="rtl">
@@ -46,8 +47,9 @@ const ViewFallback = () => (
 );
 
 export default function App() {
-  const { banInfo, user, userRole } = useAuth();
+  const { banInfo, user, userRole, loading } = useAuth();
   const [activeTab, setActiveTab ] = useState('home');
+  const [showSplash, setShowSplash] = useState(true);
   const [viewStack, setViewStack] = useState<{name: string, props?: any}[]>([{ name: 'home' }]);
   const [activeToasts, setActiveToasts] = useState<any[]>([]);
 
@@ -278,6 +280,10 @@ export default function App() {
     return () => window.removeEventListener('open-ai-chat', handleOpenChat);
   }, []);
 
+  if (showSplash) {
+    return <MascotLoadingScreen authLoading={loading} onComplete={() => setShowSplash(false)} />;
+  }
+
   if (banInfo && banInfo.isBanned) {
     return (
       <div className="min-h-screen bg-[#070707] text-white flex flex-col items-center justify-center p-6 text-center select-none" dir="rtl">
@@ -417,6 +423,7 @@ export default function App() {
 
   return (
     <>
+      <MascotOfflineScreen />
       {/* Real-time Toast Notifications Overlay */}
       <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-6 sm:w-[380px] z-[99999] flex flex-col gap-2.5 pointer-events-none" dir="rtl">
         <AnimatePresence>
