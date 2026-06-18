@@ -342,8 +342,9 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
       )}
 
       {/* Elegant minimalist credits footer */}
-      <div className="text-center text-[10px] text-neutral-600 font-sans pt-6 border-t border-neutral-900">
-         منصة عالم الأوتوكو العربي الحصرية والذكية • إصدار 2026.6.6
+      <div className="text-center text-[10px] text-neutral-600 font-sans pt-6 border-t border-neutral-900 flex flex-col items-center justify-center gap-1 select-none" id="footer_signature_more">
+         <span>منصة عالم الأوتوكو العربي الحصرية والذكية • إصدار 2026.6.6</span>
+         <span className="font-mono text-[9px] text-[#FF1744]/70 font-black tracking-widest uppercase">بواسطة المطور الإشرافي: MOD-342 🛡️</span>
       </div>
     </div>
   );

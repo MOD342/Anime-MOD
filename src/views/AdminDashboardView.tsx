@@ -134,6 +134,13 @@ export default function AdminDashboardView({ onBack, onNavigate, initialTab }: A
   const [isResettingAll, setIsResettingAll] = useState(false);
   const [resetAllSuccess, setResetAllSuccess] = useState(false);
 
+  // Scraper Queue / BullMQ Custom State Hook Engine
+  const [queueStatus, setQueueStatus] = useState<any>(null);
+  const [queueTaskName, setQueueTaskName] = useState('preWarmDashboard');
+  const [queueTaskData, setQueueTaskData] = useState('');
+  const [isSubmitingQueueTask, setIsSubmitingQueueTask] = useState(false);
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+
   // Helper User Lookup Functions - Exposes Names and Custom IDs instead of Cryptic UIDs
   const getUserNameByUid = (uid: string) => {
     if (!uid) return 'غير معروف 👤';
@@ -333,6 +340,92 @@ export default function AdminDashboardView({ onBack, onNavigate, initialTab }: A
       unsubSuggestions();
     };
   }, []);
+
+  // Fetch Queue status periodically when activeTab is 'scraper_queue'
+  useEffect(() => {
+    if (activeTab !== 'scraper_queue') return;
+
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/api/queue/status');
+        const data = await res.json();
+        if (data.success) {
+          setQueueStatus(data);
+        }
+      } catch (err) {
+        console.error("Error fetching queue status:", err);
+      }
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000); // Poll every 3 seconds while active
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
+  const handleAddQueueJob = async () => {
+    try {
+      setIsSubmitingQueueTask(true);
+      
+      let parsedData = {};
+      if (queueTaskData.trim()) {
+        if (queueTaskName === 'fetchAnimeDetails') {
+          parsedData = { animeId: queueTaskData.trim() };
+        } else if (queueTaskName === 'fetchEpisodeServers') {
+          parsedData = { episodeId: queueTaskData.trim() };
+        } else {
+          try {
+            parsedData = JSON.parse(queueTaskData.trim());
+          } catch (e) {
+            parsedData = { rawInput: queueTaskData.trim() };
+          }
+        }
+      }
+
+      const response = await fetch('/api/queue/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: queueTaskName,
+          data: parsedData,
+          maxRetries: 2
+        })
+      });
+
+      const resData = await response.json();
+      if (resData.success) {
+        alert(`تمت إضافة العمل لصف الانتظار بنجاح! رقم المعرّف للعملية: ${resData.jobId}`);
+        setQueueTaskData('');
+        // Instantly invoke polling
+        const updateRes = await fetch('/api/queue/status');
+        const updateData = await updateRes.json();
+        if (updateData.success) {
+          setQueueStatus(updateData);
+        }
+      } else {
+        alert(`خطأ: ${resData.message}`);
+      }
+    } catch (e: any) {
+      alert(`فشل إرسال الطلب لجدولة مهام الـ Scraping: ${e.message}`);
+    } finally {
+      setIsSubmitingQueueTask(false);
+    }
+  };
+
+  const handleClearQueueLogs = async () => {
+    if (!window.confirm("هل أنت متأكد من رغبتك في تنظيف وإفراغ سجل العمليات المكتملة والمجمدة بقوائم الانتظار؟")) return;
+    try {
+      const response = await fetch('/api/queue/clear', { method: 'POST' });
+      const resData = await response.json();
+      if (resData.success) {
+        alert(resData.message);
+        setQueueStatus(prev => prev ? { ...prev, jobs: [], stats: { pending: 0, active: 0, completed: 0, failed: 0, total: 0 } } : null);
+      }
+    } catch (e: any) {
+      alert(`خطأ: ${e.message}`);
+    }
+  };
 
   // Backwards trigger fallback for manual syncs
   const loadData = async () => {
@@ -766,6 +859,7 @@ export default function AdminDashboardView({ onBack, onNavigate, initialTab }: A
     { id: 'suggestions_moderation', label: 'الاقتراحات والشكاوى', icon: MessageSquare, badge: suggestionsList.length, color: 'text-sky-400', desc: 'استعراض مقترحات وشكاوى الأعضاء المباشرة' },
     { id: 'notifications', label: 'بث تنبيه تفاعلي', icon: BellRing, color: 'text-indigo-400', desc: 'صياغة وإرسال رسائل توجيهية وحدثية عامة أو خاصة' },
     { id: 'settings', label: 'إعدادات المنصة', icon: Settings, color: 'text-amber-400', desc: 'تخصيص حدود السلايدر وبث شريط الإعلانات الصاعد' },
+    { id: 'scraper_queue', label: 'نظام صفوف الـ Scraping', icon: Activity, color: 'text-amber-300', desc: 'جدولة وضبط عمليات الـ Scraping والـ Pre-Warm لسرعة مضاعفة واستقرار كامل' },
     { id: 'stats', label: 'التحليلات والإحصائيات', icon: Activity, color: 'text-sky-400', desc: 'معاينة متكاملة للنشاط والاستقرار البرمجي العام' },
     { id: 'database_reset', label: 'مزامنة وتصفير الحسابات', icon: AlertTriangle, color: 'text-rose-500', desc: 'إجراء صيانة تصفيري لحسابات المشتركين ومستويات اللعب' }
   ];
@@ -2523,6 +2617,225 @@ export default function AdminDashboardView({ onBack, onNavigate, initialTab }: A
                               </div>
                             </div>
                           ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* SCRAPER QUEUE SYSTEM TAB */}
+                {activeTab === 'scraper_queue' && (role === 'owner' || role === 'admin') && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Activity size={18} className="text-amber-400 animate-pulse" />
+                          <h2 className="text-sm font-bold text-zinc-100">نظام قوائم الانتظار والـ Scraping (BullMQ Powered)</h2>
+                        </div>
+                        <p className="text-[11px] text-zinc-500 mt-1">تنظيم عمليات الـ Scraping الثقيلة وجدولتها بشكل غير متزامن لضمان سرعة تصفح فائقة وحماية من قيود الـ IP.</p>
+                      </div>
+                      
+                      <button
+                        onClick={handleClearQueueLogs}
+                        className="bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 hover:text-rose-400 transition text-[10px] text-zinc-400 py-2 px-3.5 rounded-xl cursor-pointer font-bold shrink-0 self-start md:self-auto"
+                      >
+                        تصفية سجل صف العمل 🗑️
+                      </button>
+                    </div>
+
+                    {/* Status & Engine Information Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-4 flex items-center justify-between">
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-zinc-500 block">محرك صفوف الجدولة:</span>
+                          <span className="text-xs font-bold text-zinc-200 block">
+                            {queueStatus?.isUsingBullMQ ? 'BullMQ (معتمد على Redis) 🚀' : 'مساعد مدمج عالي الصمود (In-Process) ⚙️'}
+                          </span>
+                        </div>
+                        <span className={`w-2.5 h-2.5 rounded-full ${queueStatus?.redisConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                      </div>
+
+                      <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-4">
+                        <span className="text-[9px] text-zinc-500 block">الحد الأقصى للتوازي:</span>
+                        <span className="text-xs font-bold text-indigo-400 block mt-1">{queueStatus?.concurrency || 2} مهام بالتوازي (Threads)</span>
+                      </div>
+
+                      <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-4">
+                        <span className="text-[9px] text-zinc-500 block">الحصيلة العريضة للمحرك:</span>
+                        <span className="text-xs font-bold text-zinc-300 block mt-1">
+                          {queueStatus?.stats?.total || 0} مهام مسجلة بسلسلة العمليات
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Jobs Counters Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-3 text-center">
+                        <span className="text-[9px] text-zinc-500 block font-semibold">بانتظار البدء (Queue)</span>
+                        <span className="text-base font-extrabold text-zinc-400 mt-1 block">{queueStatus?.stats?.pending || 0}</span>
+                      </div>
+                      <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-3 text-center border-amber-500/10 bg-amber-500/5">
+                        <span className="text-[9px] text-amber-500 block font-semibold">جاري المعالجة (Active)</span>
+                        <span className="text-base font-extrabold text-amber-400 mt-1 block animate-pulse">{queueStatus?.stats?.active || 0}</span>
+                      </div>
+                      <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-3 text-center border-emerald-500/10 bg-emerald-500/5">
+                        <span className="text-[9px] text-emerald-500 block font-semibold font-bold">المكتملة (Completed)</span>
+                        <span className="text-base font-extrabold text-emerald-400 mt-1 block">{queueStatus?.stats?.completed || 0}</span>
+                      </div>
+                      <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-3 text-center border-rose-500/10 bg-rose-500/5">
+                        <span className="text-[9px] text-rose-500 block font-semibold">الفاشلة والمستبعدة (Failed)</span>
+                        <span className="text-base font-extrabold text-rose-400 mt-1 block">{queueStatus?.stats?.failed || 0}</span>
+                      </div>
+                    </div>
+
+                    {/* Submit New Manual Scraping Job Card */}
+                    <div className="bg-zinc-950/60 border border-zinc-900 p-5 rounded-2xl space-y-4">
+                      <div className="border-b border-zinc-900 pb-2">
+                        <h3 className="text-xs font-bold text-zinc-300">أداة جدولة العمليات اليدوية 🛠️</h3>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">يمكنك إرسال مهمة معينة لصف الانتظار للتجربة وملاحظة استقرار المعالجة بالخلفية.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-zinc-400 block font-semibold">نوع العملية (Task Type):</label>
+                          <select 
+                            value={queueTaskName}
+                            onChange={(e) => setQueueTaskName(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-850 rounded-xl py-2 px-3 text-xs text-zinc-100 focus:outline-none focus:border-zinc-700 cursor-pointer text-right"
+                          >
+                            <option value="preWarmDashboard">تحديث وتهيئة الصفحة الرئيسية (preWarmDashboard)</option>
+                            <option value="fetchAnimeDetails">سحب تفاصيل أنمي كاملة (fetchAnimeDetails)</option>
+                            <option value="fetchEpisodeServers">البحث عن روابط البث المباشر (fetchEpisodeServers)</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1 md:col-span-2">
+                          <label className="text-[10px] text-zinc-400 block font-semibold">
+                            {queueTaskName === 'preWarmDashboard' 
+                              ? 'البيانات الاختيارية (متروكة فارغة للدفعة الكاملة):' 
+                              : queueTaskName === 'fetchAnimeDetails' 
+                                ? 'رقم الأنمي MAL ID (مثال: 5114):' 
+                                : 'مفتاح الحلقة ID (مثال: 5114/ep1):'}
+                          </label>
+                          <input 
+                            type="text" 
+                            disabled={queueTaskName === 'preWarmDashboard'}
+                            placeholder={queueTaskName === 'preWarmDashboard' ? 'لا يتطلب مدخلات يدوية...' : 'مثال: 5114'}
+                            value={queueTaskData}
+                            onChange={(e) => setQueueTaskData(e.target.value)}
+                            className="w-full bg-zinc-950 border border-zinc-850 rounded-xl py-2 px-3 text-xs text-zinc-100 font-mono text-left focus:outline-none focus:border-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleAddQueueJob}
+                        disabled={isSubmitingQueueTask || (queueTaskName !== 'preWarmDashboard' && !queueTaskData.trim())}
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        {isSubmitingQueueTask ? 'جاري إرسال المهمة للـ Queue...' : 'إرسال المهمة لـصف الجدولة 🚀'}
+                      </button>
+                    </div>
+
+                    {/* Jobs Queue Monitor List */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                        <span className="text-xs font-bold text-zinc-300">قائمة المهام وسجل المنظومة الأخير :</span>
+                        <span className="text-[10px] text-zinc-500">محدثة تلقائياً كل 3 ثوانٍ</span>
+                      </div>
+
+                      {(!queueStatus || !queueStatus.jobs || queueStatus.jobs.length === 0) ? (
+                        <div className="text-center py-10 bg-zinc-900/10 border border-zinc-905 rounded-xl">
+                          <Activity size={24} className="mx-auto text-zinc-700 mb-2" />
+                          <h4 className="text-xs font-semibold text-zinc-500">لا يوجد عمليات بصف الجدولة</h4>
+                          <p className="text-[10px] text-zinc-600 mt-1">ابدأ بجدولة عملية جديدة لرصد أدائها والولوج لسجلاتها.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                          {queueStatus.jobs.map((job: any) => {
+                            const isExpanded = expandedJobId === job.id;
+                            return (
+                              <div key={job.id} className="bg-zinc-900/30 border border-zinc-900/80 rounded-xl overflow-hidden transition-all duration-250">
+                                {/* Header Info */}
+                                <div className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold text-zinc-200">{job.name}</span>
+                                      <span className="text-[9px] text-zinc-500 font-mono">({job.id})</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[9px] text-zinc-500">تاريخ الإضافة: {new Date(job.createdAt).toLocaleTimeString()}</span>
+                                      {job.data && Object.keys(job.data).length > 0 && (
+                                        <span className="text-[9px] text-indigo-400 font-mono">Data: {JSON.stringify(job.data)}</span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-3 self-end sm:self-auto">
+                                    {/* Progress percent with color badge */}
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded ${
+                                        job.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' :
+                                        job.status === 'failed' ? 'bg-rose-500/15 text-rose-400' :
+                                        job.status === 'active' ? 'bg-amber-500/15 text-amber-400' :
+                                        'bg-zinc-800 text-zinc-400'
+                                      }`}>
+                                        {job.status === 'completed' ? 'تمت بنجاح ✓' :
+                                         job.status === 'failed' ? 'فشلت !' :
+                                         job.status === 'active' ? 'جاري المعالجة...' : 'معلّقة صف'}
+                                      </span>
+                                      <span className="font-mono text-zinc-400 text-[10px]">{job.progress}%</span>
+                                    </div>
+
+                                    {/* Action expand logs */}
+                                    <button
+                                      onClick={() => setExpandedJobId(isExpanded ? null : job.id)}
+                                      className="text-[10px] font-bold text-zinc-400 hover:text-zinc-200 bg-zinc-950 border border-zinc-850 px-2.5 py-1 rounded-lg transition shrink-0 cursor-pointer"
+                                    >
+                                      {isExpanded ? 'طي السجلات ▲' : 'عرض السجلات ▼'}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Progress bar */}
+                                <div className="w-full bg-zinc-950 h-1">
+                                  <div 
+                                    className={`h-full transition-all duration-300 ${
+                                      job.status === 'completed' ? 'bg-emerald-500' :
+                                      job.status === 'failed' ? 'bg-rose-500' :
+                                      'bg-amber-500'
+                                    }`}
+                                    style={{ width: `${job.progress}%` }}
+                                  />
+                                </div>
+
+                                {/* Collapsible logs console */}
+                                {isExpanded && (
+                                  <div className="p-3 bg-zinc-950/80 border-t border-zinc-900 leading-relaxed space-y-2">
+                                    <div className="flex justify-between text-[9px] text-zinc-500 border-b border-zinc-900 pb-1 font-mono">
+                                      <span>Console Output Logs for Thread Background Worker:</span>
+                                      <span>Job execution state outputs</span>
+                                    </div>
+                                    <pre className="text-[10px] text-zinc-300 font-mono overflow-x-auto whitespace-pre-wrap max-h-48 text-left leading-relaxed">
+                                      {job.logs && job.logs.length > 0 
+                                        ? job.logs.join('\n') 
+                                        : 'لا يوجد تسلسلات مسجلة بعد...'}
+                                      {job.error && (
+                                        <div className="text-rose-400 font-bold mt-1 max-w-full">
+                                          [Crash Error Log]: {job.error}
+                                        </div>
+                                      )}
+                                      {job.result && (
+                                        <div className="text-emerald-400 font-bold mt-1">
+                                          [Result Matrix Pack]: {JSON.stringify(job.result)}
+                                        </div>
+                                      )}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
                   </div>

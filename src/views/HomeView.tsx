@@ -79,6 +79,27 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
     setLoading(false);
   };
 
+  const handleOnDemandRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const clientDay = daysMap[new Date().getDay()];
+      const activeSeason = sliderSettings.season || 'auto';
+      
+      clientCache.delete(`client_dashboard_cache_${activeSeason}_${clientDay}`);
+      
+      const r = await fetch(`/api/dashboard?day=${clientDay}&season=${activeSeason}&bypass=true`);
+      const res = await r.json();
+      if (res.success && res.data) {
+        setDashboard(res.data);
+        clientCache.set(`client_dashboard_cache_${activeSeason}_${clientDay}`, res.data, 15 * 60 * 1000);
+      }
+    } catch (e) {
+      console.error("On-demand refresh error:", e);
+    }
+    setIsRefreshing(false);
+  };
+
   useEffect(() => {
     // Real-time listener for slider configurations so they apply instantly to all active devices!
     const unsub = onSnapshot(doc(db, 'globalSettings', 'slider'), (snap) => {
@@ -267,7 +288,7 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
         <div className="flex justify-between items-end mb-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <h3 className="text-white font-black text-lg border-r-4 border-red-500 pr-2">أحدث الحلقات</h3>
-            <button onClick={fetchDashboard} className={`text-neutral-400 hover:text-white transition p-1.5 rounded-full hover:bg-neutral-800 ${isRefreshing ? 'animate-spin text-purple-500' : ''}`}>
+            <button onClick={handleOnDemandRefresh} className={`text-neutral-400 hover:text-white transition p-1.5 rounded-full hover:bg-neutral-800 ${isRefreshing ? 'animate-spin text-purple-500' : ''}`}>
               <RefreshCw size={14} />
             </button>
           </div>
@@ -299,8 +320,10 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
                 alt="poster" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-3 pointer-events-none">
-                <span className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1"><Tv size={10} /> جديد</span>
-                <span className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1">حلقة {ep.episodeNumber || '1'}</span>
+                <div className="absolute top-2 left-2 right-2 flex justify-between items-center gap-1 flex-wrap">
+                  <span className="bg-purple-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0"><Tv size={10} /> جديد</span>
+                  <span className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0">حلقة {ep.episodeNumber || '1'}</span>
+                </div>
                 <h5 className="font-bold text-xs md:text-sm text-white drop-shadow line-clamp-2 text-right dir-rtl">{ep.animeId?.title || 'أنمي غير معروف'}</h5>
               </div>
             </motion.div>

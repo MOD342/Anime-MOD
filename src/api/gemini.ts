@@ -5,6 +5,208 @@ const router = Router();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = 'gemini-3.5-flash';
 
+const FALLBACK_GAMES: Record<string, any[]> = {
+  quotes: [
+    {
+      text: "أنا لست بطلاً لأنني أريد ذلك، بل لأنني يجب أن أكون كذلك!",
+      options: ['سون غوكو', 'مونكي دي لوفي', 'ميدوريا إيزوكو', 'أوزوماكي ناروتو'],
+      correct: 1,
+      anime: 'ون بيس'
+    },
+    {
+      text: "الخوف ليس سيئاً، بل يخبرك بما هي نقاط ضعفك الحقيقية.",
+      options: ['جراي فورستار', 'جيلدارتس كليف', 'ماكاروف', 'ناتسو دراغنيل'],
+      correct: 1,
+      anime: 'فيفي تيل'
+    },
+    {
+      text: "إذا كنت لا تشارك شخصًا ما ألمه، فلن تفهمه أبدًا.",
+      options: ['هاتاكي كاكاشي', 'أوتشيها إيتاتشي', 'باين (ناغاتو)', 'أوزوماكي ناروتو'],
+      correct: 2,
+      anime: 'ناروتو شيبودن'
+    },
+    {
+      text: "البشر لديهم الحق في البحث عن السعادة، لكن الصعوبة تكمن في العثور عليها وتثبيتها.",
+      options: ['جيرايا (الناسك المنحرف)', 'سينجو توبيراما', 'أوروتشيمارو', 'أوتشيها مادارا'],
+      correct: 0,
+      anime: 'ناروتو'
+    },
+    {
+      text: "الاستسلام هو ما يقتل الناس، عندما يرفض الناس الاستسلام... يكتسبون الحق في تجاوز حدودهم!",
+      options: ['أوسوب', 'رورونوا زورو', 'مونكي دي لوفي', 'نامي'],
+      correct: 2,
+      anime: 'ون بيس'
+    }
+  ],
+  imposter: [
+    {
+      anime: 'ناروتو شيبودن',
+      options: ['أوزوماكي ناروتو', 'أوتشيها ساسكي', 'هارونو ساكورا', 'مونكي دي لوفي'],
+      correct: 3
+    },
+    {
+      anime: 'هجوم العمالقة',
+      options: ['ليفاي أكرمان', 'ميكاسا أكرمان', 'إرين ييغر', 'سون غوكو'],
+      correct: 3
+    },
+    {
+      anime: 'قاتل الشياطين',
+      options: ['كامادو تانجيرو', 'كامادو نيزوكو', 'أوتشيها إيتاتشي', 'أغنيس زينيتسو'],
+      correct: 2
+    },
+    {
+      anime: 'مذكرة الموت',
+      options: ['إل (L)', 'ياغامي لايت', 'ريوك', 'كيلوا زولديك'],
+      correct: 3
+    },
+    {
+      anime: 'هنتر x هنتر',
+      options: ['غون فريكس', 'كيلوا زولديك', 'كورابيكا', 'هاتاكي كاكاشي'],
+      correct: 3
+    }
+  ],
+  emoji: [
+    {
+      emojis: '☠️ 🍖 👒 ⚔️',
+      options: ['دراغون بول', 'ون بيس', 'ناروتو', 'بليتش'],
+      correct: 1
+    },
+    {
+      emojis: '📓 🍎 🧠 🕵️‍♂️',
+      options: ['مذكرة الموت', 'المحقق كونان', 'طوكيو غول', 'هجوم العمالقة'],
+      correct: 0
+    },
+    {
+      emojis: '🦊 🧡 🍥 🌀',
+      options: ['قاتل الشياطين', 'ناروتو شيبودن', 'هنتر x هنتر', 'ون بيس'],
+      correct: 1
+    },
+    {
+      emojis: '🗡️ 🐗 ⚡ 👹',
+      options: ['ون بيس', 'بليتش', 'قاتل الشياطين', 'جوجوتسو كايسن'],
+      correct: 2
+    },
+    {
+      emojis: '🧑‍🦲 👊 💥 🦸‍♂️',
+      options: ['ون بنش مان', 'أكاديمية بطلي', 'موب سايكو 100', 'دراغون بول Z'],
+      correct: 0
+    }
+  ],
+  lyrics: [
+    {
+      text: "شرف الوطن، أغلى من شرف حياتي... عهد الأصدقاء مرسوم في وجداني",
+      options: ['عهد الأصدقاء', 'روبن هود', 'صقور الأرض', 'دروب ريمي'],
+      correct: 0
+    },
+    {
+      text: "قد تلمع صور في مخيلتنا تلوح معلنة أن روح الأمل ما زالت حية لم تمت",
+      options: ['أنا وأخي', 'أبطال الديجيتال', 'سابق ولاحق', 'سيف النار'],
+      correct: 1
+    },
+    {
+      text: "حلمنا نهار، نهارنا عمل... نملك الخيار وخيارنا الأمل",
+      options: ['أبطال الديجيتال', 'القناص (Hunter x Hunter)', 'فرسان الأرض', 'صقور الأرض'],
+      correct: 1
+    },
+    {
+      text: "في جعبتي حكاية، يرويها حكيم... عن قصص قديمة، من زمن قديم",
+      options: ['في جعبتي حكاية', 'سندباد', 'ماوكلي فتى الكهوف', 'أمينة الأنيقة'],
+      correct: 0
+    },
+    {
+      text: "لا تبكِ يا صغيري، لا انظر نحو السماء... يمنحنا الدفء ويزيل عنا العناء",
+      options: ['أنا وأخي', 'دروب ريمي', 'عهد الأصدقاء', 'سالي القديمة'],
+      correct: 1
+    }
+  ],
+  trivia: [
+    {
+      text: "لوفي استغرق سنتين كاملتين للتدريب برفقة سيلفرز رايلي في جزيرة روسكاينا المهجورة لتعلم الهاكي.",
+      isTrue: true,
+      explanation: "صحيح، لوفي اعتزل العالم برفقة رايلي للتدريب الشاق لمدة عامين كاملين قبل العودة إلى أرخبيل شابوندي."
+    },
+    {
+      text: "مانغا وأنمي 'مذكرة الموت' (Death Note) من تأليف الكاتب الأسطوري والرسام إيتشيرو أودا.",
+      isTrue: false,
+      explanation: "خاطئ تماماً، إيتشيرو أودا هو مؤلف ون بيس. بينما مؤلف مذكرة الموت هو تسوغومي أوبا والرسام هو تاكيشي أوباتا."
+    },
+    {
+      text: "هاتاكي كاكاشي تم تعيينه كالهوكاجي الخامس لقرية كونوها بعد نهاية حرب النينجا العظمى مباشرة.",
+      isTrue: false,
+      explanation: "خاطئ، تسونادي هي من تولت منصب الهوكاجي الخامس، كاكاشي تم تعيينه الهوكاجي السادس، وناروتو الأوزوماكي هو السابع."
+    },
+    {
+      text: "نجح غون فريكس في المرة المئة فقط من اجتياز اختبار الصيادين المهيب بعد مواجهات ملحمية مع هيسوكا.",
+      isTrue: false,
+      explanation: "خاطئ، غون نجح في المرة الأولى التي تقدم فيها للبطولة والامتحان بينما كيلوا نجح في المحاولة الثانية بعد استبعاد سابقتها."
+    },
+    {
+      text: "في عالم جوجوتسو كايسن، ريومين سوكونا المشهور بملك اللعنات يمتلك بالكامل 20 إصبعاً تم تفريقها وختمها عبر العصور.",
+      isTrue: true,
+      explanation: "صحيح، كل إصبع يحتوي على جزء غامض من طاقة سوكونا، وابتلاع يوجي إيتادوري لإصبع واحد منه جعله وعاءً لملك اللعنات."
+    }
+  ],
+  math: [
+    {
+      text: "عدد كرات التنين في كوكبة الأرض (7) كرات + عدد السيوف التي يحملها رورونوا زورو دائماً في قتالاته (3)",
+      answer: 10,
+      options: [7, 8, 10, 12],
+      correct: 2
+    },
+    {
+      text: "أقصى عدد من البوابات الثمانية التي يستطيع مايت غاي فتحها (8) - رتبة الهوكاجي لناروتو أوزوماكي كمنصب رسمي (7)",
+      answer: 1,
+      options: [0, 1, 2, 3],
+      correct: 1
+    },
+    {
+      text: "عدد أعضاء فريق السبعة الأسطوري الأصليين (3) أفراد + عدد الأعين التي تملكها البومة العملاقة في طاقم كاكاشي (1)",
+      answer: 4,
+      options: [2, 3, 4, 5],
+      correct: 2
+    },
+    {
+      text: "عدد أفراد طاقم قبعة القش حتى نهاية أرك وانو بما فيهم جينبي (10) * عدد عيون ليفاي أكرمان السليمة تماماً بالقصة (1)",
+      answer: 10,
+      options: [10, 20, 5, 0],
+      correct: 0
+    },
+    {
+      text: "الحلقة التي ظهر فيها الجير فايف للوفي لأول مرة (1071) - الرقم المطابق لسنة تأسيس الاستوديو توي أنيميشن بالكامل (1956)",
+      answer: 885,
+      options: [885, 915, 1071, 1000],
+      correct: 0
+    }
+  ],
+  timeline: [
+    {
+      e1: "قيام إيتاتشي أوتشيها بالقضاء على العشيرة لإنقاذ قرية كونوها وتأمين حماية ساسكي",
+      e2: "مواجهة ساسكي أوتشيها لإيتاتشي بغرض الثأر والانتقام في المقر السري",
+      first: 1
+    },
+    {
+      e1: "انفجار سفينة الجوينج ميري واحتراقها بصورة مؤلمة بعد إنقاذ الطاقم من إينيس لوبي",
+      e2: "بناء سفينة الثاوزند ساني (Thousand Sunny) على يد فرانكي ودخولها المياه الإقليمية",
+      first: 1
+    },
+    {
+      e1: "إعدام ملك القراصنة غول دي روجر وإعلانه عن الكنز الأسطوري ون بيس",
+      e2: "انطلاق مونكي دي لوفي في رحلته بعمر 17 عاماً للحصول على طاقم قراصنة خاص به",
+      first: 1
+    },
+    {
+      e1: "انضمام غراي فولستار لنقابة فيري تيل كطفل يتيم يبحث عن معلمة",
+      e2: "لقاء ناتسو دراغنيل بلوسي هارتفيليا وعرض الانضمام إلى نقابة فيري تيل الشهيرة",
+      first: 1
+    },
+    {
+      e1: "اجتياز غون فريكس لامتحان الصيادين الصعب وامتلاك رخصة صيد مرخصة",
+      e2: "صعود غون وكيلوا لبرج السماء (Heavens Arena) لتعلم أسرار الطاقة والنين قتالياً",
+      first: 1
+    }
+  ]
+};
+
 const handleAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => (req: Request, res: Response, next: NextFunction) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
@@ -190,26 +392,38 @@ router.get('/games/generate', handleAsync(async (req: Request, res: Response) =>
         return res.status(400).json({ success: false, message: 'Unknown type.' });
     }
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
-        temperature: 0.9,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: schemaProperties,
-          required: ["questions"]
-        }
+    let response;
+    const retries = 2;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        response = await ai.models.generateContent({
+          model: model,
+          contents: prompt,
+          config: {
+            temperature: 0.9,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: schemaProperties,
+              required: ["questions"]
+            }
+          }
+        });
+        break;
+      } catch (err: any) {
+        if (attempt === retries) throw err;
+        console.warn(`[Gemini Games] Attempt ${attempt} failed with: ${err.message || err}. Retrying in 1.5s...`);
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
-    });
+    }
 
-    const parsed = JSON.parse(response.text || '{}');
+    const parsed = JSON.parse(response?.text || '{}');
     res.json({ success: true, data: parsed.questions || [] });
 
   } catch (error: any) {
-    console.error('Gemini Games Error:', error);
-    res.status(500).json({ success: false, message: 'فشل توليد أسئلة الألعاب.' });
+    console.warn(`[Gemini Games fallback] Gemini Games generation failed: ${error.message || error}. Serving high-quality offline fallback questions.`);
+    const fallbackQuestions = FALLBACK_GAMES[type as string] || FALLBACK_GAMES.quotes;
+    res.json({ success: true, data: fallbackQuestions });
   }
 }));
 

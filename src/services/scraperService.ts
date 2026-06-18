@@ -1,6 +1,8 @@
 import * as cheerio from 'cheerio';
 import { serverCache } from './cacheService';
 
+const activeScraperJikanLocks = new Map<string, Promise<any>>();
+
 export interface AnimeItem {
   id: string;
   title: string;
@@ -20,6 +22,7 @@ export interface EpisodeServer {
 
 export class ScraperService {
   private readonly defaultBaseUrls = [
+    'https://ristoanime.co',
     'https://witanime.club',
     'https://witanime.space',
     'https://witanime.com.eg',
@@ -27,8 +30,7 @@ export class ScraperService {
     'https://witanime.me',
     'https://witanime.cam',
     'https://witanime.pics',
-    'https://witaanime.co',
-    'https://ristoanime.co'
+    'https://witaanime.co'
   ];
   private currentBaseUrlIndex = 0;
 
@@ -67,6 +69,9 @@ export class ScraperService {
 
         if (response.ok) {
           const text = await response.text();
+          if (text.length < 5000) {
+            throw new Error(`Response content size too small (${text.length} chars). Possible parked or empty domain.`);
+          }
           const foundIdx = this.defaultBaseUrls.indexOf(baseUrl);
           if (foundIdx !== -1) {
             this.currentBaseUrlIndex = foundIdx;
@@ -89,9 +94,8 @@ export class ScraperService {
   private jikanQueuePromise: Promise<void> = Promise.resolve();
 
   private async safeFetchJikan(url: string, retries = 3, ttlMs = 15 * 60 * 1000): Promise<any> {
-    const cached = await this.getCached<any>(url);
-    if (cached) return cached;
-
+    const isRandom = url.includes('random');
+    
     // Use a stronger default cache lifetime for different URL formats to align stability with api endpoints
     let finalTtl = ttlMs;
     if (ttlMs === 15 * 60 * 1000 || ttlMs === 30 * 60 * 1000) {
@@ -103,6 +107,52 @@ export class ScraperService {
         finalTtl = 2 * 60 * 60 * 1000; // 2 hours
       }
     }
+
+    if (!isRandom) {
+      // 1. Try Fresh Cache
+      const fresh = await this.getCached<any>(url);
+      if (fresh) return fresh;
+
+      // 2. Try Stale Cache with background SWR update
+      const stale = await serverCache.get<any>(url, true);
+      if (stale) {
+        if (!activeScraperJikanLocks.has(url)) {
+          const bgPromise = this.performRawJikanFetch(url, retries, finalTtl)
+            .then((data) => {
+              activeScraperJikanLocks.delete(url);
+              console.log(`[Scraper Background SWR] Cache refreshed for "${url}"`);
+              return data;
+            })
+            .catch((err) => {
+              activeScraperJikanLocks.delete(url);
+              console.log(`[Scraper Background SWR Error] "${url}":`, err.message || err);
+            });
+          activeScraperJikanLocks.set(url, bgPromise);
+        }
+        return stale;
+      }
+    }
+
+    // 3. Absolute Cache Miss or Random: Collapse duplicate concurrent requests
+    let pendingPromise = activeScraperJikanLocks.get(url);
+    if (pendingPromise) return pendingPromise;
+
+    const freshFetchPromise = this.performRawJikanFetch(url, retries, finalTtl)
+      .then((data) => {
+        activeScraperJikanLocks.delete(url);
+        return data;
+      })
+      .catch((err) => {
+        activeScraperJikanLocks.delete(url);
+        throw err;
+      });
+
+    activeScraperJikanLocks.set(url, freshFetchPromise);
+    return freshFetchPromise;
+  }
+
+  private async performRawJikanFetch(url: string, retries: number, finalTtl: number): Promise<any> {
+    const isRandom = url.includes('random');
 
     for (let attempt = 1; attempt <= retries; attempt++) {
       await this.jikanQueuePromise;
@@ -130,7 +180,9 @@ export class ScraperService {
 
         const data = await response.json();
         if (data) {
-          await this.setCache(url, data, finalTtl);
+          if (!isRandom) {
+            await this.setCache(url, data, finalTtl);
+          }
           return data;
         }
       } catch (err: any) {
@@ -138,6 +190,11 @@ export class ScraperService {
         setTimeout(resolveQueue, 500);
         if (attempt === retries) {
           console.warn(`[safeFetchJikan] All ${retries} attempts failed for: ${url}`, err.message || err);
+          const staleFallback = await serverCache.get(url, true);
+          if (staleFallback !== null) {
+            console.log(`[safeFetchJikan] Returning stale fallback cache for: ${url}`);
+            return staleFallback;
+          }
           return null;
         }
         await new Promise(r => setTimeout(r, 500 * attempt));

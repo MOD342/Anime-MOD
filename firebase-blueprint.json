@@ -109,6 +109,23 @@
       },
       "required": ["type", "questionData", "createdAt", "author", "likes", "dislikes"]
     },
+    "AnimeTrivia": {
+      "title": "AnimeTrivia",
+      "description": "Multi-choice trivia questions about anime",
+      "type": "object",
+      "properties": {
+        "question": { "type": "string" },
+        "options": { "type": "array" },
+        "correctIndex": { "type": "number" },
+        "animeName": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "author": { "type": "string" },
+        "likes": { "type": "number" },
+        "dislikes": { "type": "number" }
+      },
+      "required": ["question", "options", "correctIndex", "animeName", "difficulty", "createdAt", "author", "likes", "dislikes"]
+    },
     "GlobalSettings": {
       "title": "GlobalSettings",
       "description": "Global options like slider settings and announcements",
@@ -189,6 +206,10 @@
     "/gameQuestions/{questionId}": {
       "schema": "GameQuestion",
       "description": "Smart persistent questions pool for games"
+    },
+    "/animeTrivia/{triviaId}": {
+      "schema": "AnimeTrivia",
+      "description": "Collection of multiple choice trivia questions about anime"
     },
     "/globalSettings/{settingsId}": {
       "schema": "GlobalSettings",

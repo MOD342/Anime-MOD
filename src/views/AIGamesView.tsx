@@ -3,7 +3,8 @@ import {
   ChevronRight, Gamepad2, Trophy, Brain, Zap, Search, Eye, Users, 
   SearchX, Quote, Clock, Dices, ShoppingCart, Target, CheckCircle2, 
   User, Calculator, Sword, Lock, Sparkles, Flame, Shield, HelpCircle, 
-  Coins, Star, Award, ChevronDown, Play, AlertCircle, RefreshCw, X
+  Coins, Star, Award, ChevronDown, Play, AlertCircle, RefreshCw, X,
+  Database, Bell, Info
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { awardXP } from '../services/gamificationService';
@@ -20,6 +21,7 @@ import TimelineGame from '../components/games/TimelineGame';
 import SilhouetteGame from '../components/games/SilhouetteGame';
 import AnimeMathGame from '../components/games/AnimeMathGame';
 import WeaponMatchGame from '../components/games/WeaponMatchGame';
+import AnimeTriviaGame from '../components/games/AnimeTriviaGame';
 import DailySpin from '../components/DailySpin';
 import QuestionContributionForm from '../components/QuestionContributionForm';
 import { doc, updateDoc, increment, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -63,14 +65,170 @@ const BOSS_QUESTIONS = [
   { q: 'في هنتر x هنتر، ما هو نوع نين الشخصية كورابيكا عندما تصبح عيناه قرمزية؟', options: ['تجسيد', 'تحويل', 'متخصص', 'تلاعب'], correct: 2 }
 ];
 
+interface GameNotification {
+  id: string;
+  title: string;
+  body: string;
+  category: 'weekly_challenge' | 'level_renewal' | 'achievement' | 'rewards';
+  isRead: boolean;
+  time: string;
+  actionLabel?: string;
+  rewardCoins?: number;
+  rewardXp?: number;
+  isClaimed?: boolean;
+}
+
 export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigateToStore, onNavigateToRewards }: AIGamesViewProps) {
   const { userData, user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'lobby' | 'game'>('lobby');
-  const [lobbySubTab, setLobbySubTab] = useState<'games' | 'perks' | 'profiles' | 'contribute'>('games');
+  const [lobbySubTab, setLobbySubTab] = useState<'games' | 'perks' | 'profiles' | 'bank'>('games');
   
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showSpin, setShowSpin] = useState(false);
+  
+  // Local Notifications Engine States
+  const [notifications, setNotifications] = useState<GameNotification[]>([]);
+  const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const [activeToast, setActiveToast] = useState<{title: string, body: string} | null>(null);
+
+  // Initialize notifications
+  useEffect(() => {
+    const saved = localStorage.getItem('games_local_notifications');
+    if (saved) {
+      setNotifications(JSON.parse(saved));
+    } else {
+      const defaults: GameNotification[] = [
+        {
+          id: 'notif_weekly_challenge',
+          title: '🔥 فعاليات التحدي الأسبوعي: ذكاء قادة الفيلق',
+          body: 'انطلق الآن تحدي المعرفة الأسبوعي الكبير! أجب عن أسئلة قاطعي العمالقة وقادة الاستطلاع اليوم لمضاعفة نقاط كسب الكوينز x2 بالكامل والارتقاء السريع.',
+          category: 'weekly_challenge',
+          isRead: false,
+          time: 'منذ دقيقة واحدة',
+          actionLabel: 'تنشيط التحدي 🗡️'
+        },
+        {
+          id: 'notif_level_renewal',
+          title: '🆙 تجديد وصيانة مستويات وألغاز الألعاب',
+          body: 'بشرى سارة! تمت تصفية وتحديث صومعة الأسئلة وتنزيل 50 لغزاً جديداً ممتداً عبر سائر الألعاب المصغرة لتخطي الروتين واكتساب هيبة معرفية مضاعفة.',
+          category: 'level_renewal',
+          isRead: false,
+          time: 'منذ ساعة',
+          actionLabel: 'تصفح قائمة الألعاب'
+        },
+        {
+          id: 'notif_weekly_box',
+          title: '🎁 هدية تجديد وصيانة المحتوى المعرفي',
+          body: 'تقديراً لمثابرتك في اللعب وبسط نفوذك بالأكاديمية؛ استلم صندوق الهدايا الأسبوعي المجاني الذي يشتمل على كوينز وتطوير الخبرة الفورية!',
+          category: 'rewards',
+          isRead: false,
+          time: 'منذ ساعتين',
+          actionLabel: 'مطالبة بالهدية الكبرى 🪙',
+          rewardCoins: 50,
+          rewardXp: 150,
+          isClaimed: false
+        }
+      ];
+      setNotifications(defaults);
+      localStorage.setItem('games_local_notifications', JSON.stringify(defaults));
+    }
+  }, []);
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter(n => !n.isRead).length;
+  }, [notifications]);
+
+  const markAllAsRead = () => {
+    const updated = notifications.map(n => ({ ...n, isRead: true }));
+    setNotifications(updated);
+    localStorage.setItem('games_local_notifications', JSON.stringify(updated));
+  };
+
+  const markAsRead = (id: string) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, isRead: true } : n);
+    setNotifications(updated);
+    localStorage.setItem('games_local_notifications', JSON.stringify(updated));
+  };
+
+  const deleteNotification = (id: string) => {
+    const updated = notifications.filter(n => n.id !== id);
+    setNotifications(updated);
+    localStorage.setItem('games_local_notifications', JSON.stringify(updated));
+  };
+
+  // Helper trigger dynamically to inject simulated alert for testing
+  const handleSimulateNotification = (type: 'weekly' | 'renewal' | 'boss') => {
+    let newNotif: GameNotification;
+    if (type === 'weekly') {
+      newNotif = {
+        id: `notif_sim_${Date.now()}`,
+        title: '🔥 تحدي الأسبوع الجديد: نينجا كونوها الغامض',
+        body: 'تم تجديد تحدي الأسبوع الآن! اختبر جودتك وخططك السرية لمعلومات قرية الأوراق المخفية واحصل على مكافأة مضاعفة x2 للخبرة والكوينز.',
+        category: 'weekly_challenge',
+        isRead: false,
+        time: 'الآن',
+        actionLabel: 'تنشيط التحدي 🗡️'
+      };
+    } else if (type === 'renewal') {
+      newNotif = {
+        id: `notif_sim_${Date.now()}`,
+        title: '🆙 تجديد فوري لـ مستويات المعركة وغرف اللعب',
+        body: 'قام الحكماء والمنسقون بتجديد كامل لجميع الألغاز ومسائل الرياضيات المعقدة وأغاني البداية في بنك الألعاب!',
+        category: 'level_renewal',
+        isRead: false,
+        time: 'الآن',
+        actionLabel: 'عرض صالة الألعاب 🎮'
+      };
+    } else {
+      newNotif = {
+        id: `notif_sim_${Date.now()}`,
+        title: '☠️ غارة غضب من الزعيم الأسطوري مادارا أوتشيها',
+        body: 'انبثقت للتو غارة زعيم جديدة ومرعبة بالساحة المعرفية الكبرى! كابد نيران السوسانو واصطحب فريقك للقتال الآن.',
+        category: 'weekly_challenge',
+        isRead: false,
+        time: 'الآن',
+        actionLabel: 'مواجهة الزعيم ⚔️'
+      };
+    }
+
+    const updated = [newNotif, ...notifications];
+    setNotifications(updated);
+    localStorage.setItem('games_local_notifications', JSON.stringify(updated));
+    
+    // Set active toast to pop up immediately!
+    setActiveToast({ title: newNotif.title, body: newNotif.body });
+    setTimeout(() => {
+      setActiveToast(null);
+    }, 4500);
+  };
+
+  const handleClaimNotifReward = async (id: string, coins?: number, xp?: number) => {
+    if (!user) {
+      alert('الرجاء تسجيل الدخول أولاً للحصول على المكافأة وحفظها بسجل حسابك!');
+      return;
+    }
+    try {
+      const targetNotif = notifications.find(n => n.id === id);
+      if (!targetNotif || targetNotif.isClaimed) return;
+
+      const updates: any = {};
+      if (coins) updates.coins = increment(coins);
+      
+      await updateDoc(doc(db, 'users', user.id), updates);
+      if (xp) {
+        await awardXP(user.id, xp);
+      }
+
+      const updated = notifications.map(n => n.id === id ? { ...n, isRead: true, isClaimed: true } : n);
+      setNotifications(updated);
+      localStorage.setItem('games_local_notifications', JSON.stringify(updated));
+      alert(`🎉 تهانينا! لقد حصلت على +${coins || 0} كوينز و +${xp || 0} XP بنجاح.`);
+    } catch (error: any) {
+      console.error(error);
+      alert(`حدث خطأ أثناء استبيان المطلب: ${error.message}`);
+    }
+  };
   
   // High score leaderboard state
   const [gameLeaders, setGameLeaders] = useState<any[]>([]);
@@ -225,6 +383,7 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
   }, [lobbySubTab]);
 
   const gamesList = [
+    { id: 'trivia', title: 'الألغاز الثقافية للأنمي', desc: 'اختبر ثقافتك في عالم الأنمي الشاسع واكسب كوينز ونقاط خبرة كاملة', icon: HelpCircle, color: 'text-pink-500', bg: 'bg-pink-500/20', minLevel: 1 },
     { id: 'pixel_guess', title: 'تخمين من صورة مموهة', desc: 'خمن الأنمي من صورة مغبشة ومموهة ذكائياً', icon: Eye, color: 'text-blue-500', bg: 'bg-blue-500/20', minLevel: 1 },
     { id: 'who_said', title: 'من القائل الخارق؟', desc: 'تخمين بطل وعالم الشخصية من الاقتباس المأثور', icon: Quote, color: 'text-purple-500', bg: 'bg-purple-500/20', minLevel: 3 },
     { id: 'silhouette', title: 'خمن من الظل المغلق', desc: 'خمن الشخصية الشهيرة من ظلها الأسود الغامض والذكي', icon: User, color: 'text-amber-500', bg: 'bg-amber-500/20', minLevel: 5 },
@@ -477,7 +636,9 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
          </div>
 
          <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
-            {selectedGame === 'pixel_guess' ? (
+            {selectedGame === 'trivia' ? (
+              <AnimeTriviaGame onScoreUpdate={handleScoreUpdate} />
+            ) : selectedGame === 'pixel_guess' ? (
               <PixelGuessGame onScoreUpdate={handleScoreUpdate} />
             ) : selectedGame === 'who_said' ? (
               <WhoSaidGame onScoreUpdate={handleScoreUpdate} />
@@ -536,6 +697,20 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Bell Icon for Local Notifications */}
+          <button 
+            onClick={() => setShowNotifMenu(!showNotifMenu)}
+            className="p-2.5 bg-white/5 rounded-xl hover:bg-white/10 border border-white/5 hover:border-blue-500/20 transition-all text-white relative shadow-sm cursor-pointer"
+            title="التنبيهات المحلية والأحداث"
+          >
+            <Bell size={18} className={unreadCount > 0 ? 'text-amber-400 animate-bounce' : 'text-neutral-300'} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center animate-pulse border border-neutral-950">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
           <div className="bg-gradient-to-r from-yellow-500/20 to-amber-600/20 px-3 py-1.5 rounded-xl border border-yellow-500/30 flex items-center gap-2 shadow-inner">
              <span className="text-yellow-500 font-black text-sm">{userData?.coins || 0}</span>
              <span className="text-yellow-500 text-xs shadow-none">🪙</span>
@@ -621,15 +796,15 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
           </button>
 
           <button
-            onClick={() => setLobbySubTab('contribute')}
+            onClick={() => setLobbySubTab('bank')}
             className={`py-3 px-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              lobbySubTab === 'contribute'
-                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md shadow-green-500/25'
+              lobbySubTab === 'bank'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <Sparkles size={15} className="text-green-450 fill-current" />
-            <span>المساهمة بأسئلة</span>
+            <Database size={15} />
+            <span>بنك ومستودع الألعاب 💎</span>
           </button>
         </div>
 
@@ -1088,12 +1263,199 @@ export default function AIGamesView({ onBack, onNavigateToLeaderboard, onNavigat
           </div>
         )}
 
-        {lobbySubTab === 'contribute' && (
+        {lobbySubTab === 'bank' && (
           <QuestionContributionForm userId={user?.uid} username={userData?.displayName || userData?.username || user?.displayName || 'الأوتوكو المساهم ⚔️'} />
         )}
       </div>
 
       {showSpin && <DailySpin onClose={() => setShowSpin(false)} />}
+
+      {/* Local Notifications Center Modal */}
+      {showNotifMenu && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#121215] border border-white/10 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative text-right flex flex-col max-h-[85vh] animate-in fade-in-50 zoom-in-95 duration-200">
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
+                  <Bell size={18} />
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-xs sm:text-sm">مركز التنبيهات والأحداث المحلية 🔔</h3>
+                  <p className="text-[10px] text-neutral-450 mt-0.5">تابع تحديات الأسبوع وصيانة مستويات اللعب أولاً بأول</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowNotifMenu(false)}
+                className="p-2 bg-white/5 rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* List and Actions */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1">
+              <div className="flex justify-between items-center text-[11px] font-bold text-neutral-400 border-b border-white/5 pb-2">
+                <span>تنبيهات ({notifications.length})</span>
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={markAllAsRead}
+                    className="text-blue-400 hover:underline cursor-pointer"
+                  >
+                    تحديد الكل كمقروء ✓
+                  </button>
+                )}
+              </div>
+
+              {notifications.length === 0 ? (
+                <div className="text-center py-10 space-y-2">
+                  <Bell className="mx-auto text-neutral-600 animate-pulse" size={32} />
+                  <p className="text-xs text-neutral-400">لا توجد تنبيهات حالية</p>
+                  <p className="text-[10px] text-neutral-500">استخدم المحاكاة الذكية بالأسفل لتجربة التنبيهات!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {notifications.map((notif) => (
+                    <div 
+                      key={notif.id}
+                      className={`p-4 rounded-2xl border transition-all text-right relative overflow-hidden ${
+                        notif.isRead 
+                          ? 'bg-[#18181c]/45 border-white/5 opacity-75' 
+                          : 'bg-[#18181c] border-amber-500/20 shadow-md shadow-amber-500/5'
+                      }`}
+                    >
+                      {/* Unread Indicator */}
+                      {!notif.isRead && (
+                        <span className="absolute top-4 left-4 w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      )}
+
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl mt-0.5 select-none">
+                          {notif.category === 'weekly_challenge' ? '⚔️' : 
+                           notif.category === 'level_renewal' ? '🆙' : 
+                           notif.category === 'rewards' ? '🎁' : '🔔'}
+                        </span>
+                        <div className="space-y-1.5 flex-1">
+                          <h4 className="text-white font-black text-xs leading-snug">{notif.title}</h4>
+                          <p className="text-[11px] text-neutral-450 leading-relaxed font-semibold">{notif.body}</p>
+                          <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/5 mt-2">
+                            <span className="text-neutral-550 font-bold">{notif.time}</span>
+                            <div className="flex gap-2">
+                              {!notif.isRead && (
+                                <button 
+                                  onClick={() => markAsRead(notif.id)}
+                                  className="text-amber-500 hover:underline font-bold"
+                                >
+                                  تعليم كمقروء
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => deleteNotification(notif.id)}
+                                className="text-neutral-550 hover:text-red-400 font-bold"
+                              >
+                                حذف
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Call-to-action rewards button or challenge triggers */}
+                      {notif.actionLabel && (
+                        <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-end">
+                          {notif.rewardCoins || notif.rewardXp ? (
+                            <button
+                              disabled={notif.isClaimed}
+                              onClick={() => {
+                                handleClaimNotifReward(notif.id, notif.rewardCoins, notif.rewardXp);
+                              }}
+                              className={`px-4 py-1.5 rounded-xl text-[10.5px] font-black transition cursor-pointer ${
+                                notif.isClaimed
+                                  ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-white/5'
+                                  : 'bg-gradient-to-r from-yellow-500 to-amber-500 text-neutral-950 font-extrabold hover:shadow-lg shadow-yellow-500/20'
+                              }`}
+                            >
+                              {notif.isClaimed ? 'تمت المطالبة وإيداع المكافأة ✓' : notif.actionLabel}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                markAsRead(notif.id);
+                                setShowNotifMenu(false);
+                                if (notif.category === 'weekly_challenge') {
+                                  setSelectedGame('who_said');
+                                  setActiveTab('game');
+                                } else {
+                                  setLobbySubTab('games');
+                                }
+                              }}
+                              className="px-4 py-1.5 rounded-xl text-[10.5px] font-black bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
+                            >
+                              {notif.actionLabel}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* SIMULATOR TOOLBAR FOR GAMING NOTIFICATIONS */}
+              <div className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs text-neutral-300 font-black border-b border-white/5 pb-2">
+                  <Info size={14} className="text-blue-400 font-black" />
+                  <span>محاكاة نظام التنبيهات والأحداث (Simulator)</span>
+                </div>
+                <p className="text-[10px] text-neutral-500 leading-relaxed font-bold">انقر على أحد الأزرار لتوليد وبث تنبيه فوري بالخلفية للتحقق من التنبيهات المحلية:</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    onClick={() => handleSimulateNotification('weekly')}
+                    className="py-2.5 px-1 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-450 border border-blue-500/20 hover:border-blue-500/30 text-[9.5px] font-black tracking-tight transition cursor-pointer text-center"
+                  >
+                    تنبيه التحدي الأسبوعي ⚔️
+                  </button>
+                  <button 
+                    onClick={() => handleSimulateNotification('renewal')}
+                    className="py-2.5 px-1 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-450 border border-purple-500/20 hover:border-purple-500/30 text-[9.5px] font-black tracking-tight transition cursor-pointer text-center"
+                  >
+                    تجديد مستويات الأوتوكو 🆙
+                  </button>
+                  <button 
+                    onClick={() => handleSimulateNotification('boss')}
+                    className="py-2.5 px-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-450 border border-red-500/20 hover:border-red-500/30 text-[9.5px] font-black tracking-tight transition cursor-pointer text-center"
+                  >
+                    غارة تحدي جديدة ☠️
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-white/5 bg-neutral-950/50 flex justify-between items-center text-[10px] text-neutral-500">
+              <span>تعتمد التنبيهات على البيانات المحلية الصامدة</span>
+              <span>تنبيهات في النطاق</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up Live Toast Message Alert */}
+      {activeToast && (
+        <div className="fixed bottom-6 left-6 z-50 max-w-sm bg-gradient-to-r from-neutral-900 to-[#121215] border-2 border-amber-500/30 p-4 rounded-2xl shadow-2xl flex items-start gap-3 animate-slide-up hover:scale-[1.02] transition-transform text-right" dir="rtl">
+          <div className="w-9 h-9 shrink-0 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 animate-bounce">
+            <Bell size={18} />
+          </div>
+          <div className="space-y-1 pr-1">
+            <h4 className="text-white font-black text-xs">{activeToast.title}</h4>
+            <p className="text-[10.5px] text-neutral-450 leading-normal">{activeToast.body}</p>
+          </div>
+          <button 
+            onClick={() => setActiveToast(null)}
+            className="text-neutral-550 hover:text-white shrink-0 p-1"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
