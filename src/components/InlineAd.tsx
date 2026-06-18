@@ -26,7 +26,7 @@ export default function InlineAd({ location = 'general' }: InlineAdProps) {
           setMonetization(docSnap.data());
         }
       } catch (e) {
-        console.error("Error fetching inline ad settings:", e);
+        console.warn("Could not load inline ad settings, using defaults:", e);
       } finally {
         setLoading(false);
       }

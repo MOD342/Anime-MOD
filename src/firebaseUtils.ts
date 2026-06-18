@@ -43,6 +43,15 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
+
+  const isOptionalGet = (operationType === OperationType.GET || operationType === OperationType.LIST) && 
+    (path && (path.includes('globalSettings') || path.includes('bannedUsers') || path.includes('globalRoles') || path.includes('usernames')));
+
+  if (isOptionalGet) {
+    console.warn('Firestore Non-critical Read Info (using system fallbacks):', JSON.stringify(errInfo));
+    return;
+  }
+
+  console.warn('Firestore Operation Error:', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }

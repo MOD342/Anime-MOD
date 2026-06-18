@@ -113,7 +113,7 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
         fetchDashboard('auto');
       }
     }, (err) => {
-      console.error("Failed to query real-time slider configs:", err);
+      console.warn("Failed to query real-time slider configs, using fallback:", err);
       fetchDashboard();
       try {
         handleFirestoreError(err, OperationType.GET, 'globalSettings/slider');

@@ -25,7 +25,7 @@ export function AppLayout({ children, activeTab, setActiveTab, onNavigateTo }: {
         setUnreadNotifsCount(count);
       },
       (err) => {
-        console.error("Real-time notifications counter error:", err);
+        console.warn("Real-time notifications counter error:", err);
       }
     );
 

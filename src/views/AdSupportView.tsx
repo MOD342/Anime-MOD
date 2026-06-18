@@ -142,7 +142,7 @@ export default function AdSupportView({ onBack }: AdSupportViewProps) {
           });
         }
       } catch (e) {
-        console.error("Error loading monetization config in user view:", e);
+        console.warn("Could not load monetization config in user view, using default settings:", e);
       }
     };
     loadMonetization();

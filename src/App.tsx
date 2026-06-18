@@ -112,7 +112,7 @@ export default function App() {
           }
         });
       },
-      (err) => console.error("Real-time toast error:", err)
+      (err) => console.warn("Real-time toast error:", err)
     );
 
     // 2. Listen to real-time Global Notifications
@@ -133,7 +133,7 @@ export default function App() {
           }
         });
       },
-      (err) => console.error("Real-time global toast error:", err)
+      (err) => console.warn("Real-time global toast error:", err)
     );
 
     // 3. Listen to Administration Events (Reports, Suggestions, Recommendations) in Real-time
@@ -167,7 +167,7 @@ export default function App() {
             }
           });
         },
-        (err) => console.error("Admin real-time reports error:", err)
+        (err) => console.warn("Admin real-time reports error:", err)
       );
 
       unsubAdminSuggestions = onSnapshot(
@@ -194,7 +194,7 @@ export default function App() {
             }
           });
         },
-        (err) => console.error("Admin real-time suggestions error:", err)
+        (err) => console.warn("Admin real-time suggestions error:", err)
       );
 
       unsubAdminRecommendations = onSnapshot(
@@ -220,7 +220,7 @@ export default function App() {
             }
           });
         },
-        (err) => console.error("Admin real-time recommendations error:", err)
+        (err) => console.warn("Admin real-time recommendations error:", err)
       );
     }
 

@@ -1,10 +1,10 @@
 {
-  "projectId": "wise-resource-w07pf",
-  "appId": "1:687230820445:web:e2a9a18f7561e21e316db4",
-  "apiKey": "AIzaSyD8kIaSOC3b7sogCw5fXVvlL1pWMs0t5EA",
-  "authDomain": "wise-resource-w07pf.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-e7753a6d-40ab-46a7-8917-2d049b0d59b5",
-  "storageBucket": "wise-resource-w07pf.firebasestorage.app",
-  "messagingSenderId": "687230820445",
+  "projectId": "gen-lang-client-0027450047",
+  "appId": "1:944497586914:web:f595a637cfa15976c3e4bb",
+  "apiKey": "AIzaSyCyhKrR88cPlxee1STUp6iES3GZxNwSz_c",
+  "authDomain": "gen-lang-client-0027450047.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "gen-lang-client-0027450047.firebasestorage.app",
+  "messagingSenderId": "944497586914",
   "measurementId": ""
 }
