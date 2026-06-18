@@ -3,6 +3,8 @@ import {
   User, 
   onAuthStateChanged, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
@@ -77,6 +79,60 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     setAuthSuccess('');
     setShowPassword(false);
   };
+
+  // Listen for Google Redirect authentication and deep-linking URLs
+  useEffect(() => {
+    // 1. Handle Firebase Auth Redirect results
+    setAuthModalLoading(true);
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result && result.user) {
+          console.log("Logged in successfully via Redirect callback:", result.user.displayName);
+          setAuthSuccess(`أهلاً بك مجدداً ${result.user.displayName || 'يا صديقي'}! تم تسجيل الدخول بنجاح عبر حساب Google.`);
+          setIsAuthModalOpen(false);
+        }
+      })
+      .catch((error: any) => {
+        console.warn("Getting redirect result failed:", error);
+        if (error.code && error.code !== 'auth/redirect-cancelled-by-user') {
+          setAuthError('تعذر تكوين جلسة المصادقة عبر Google. يرجى استخدام البريد الإلكتروني وكلمة المرور إن تكرر الخطأ: ' + (error.message || error));
+        }
+      })
+      .finally(() => {
+        setAuthModalLoading(false);
+      });
+
+    // 2. Custom deep linking intent parsing (e.g., scheme and intent listeners)
+    const handleDeepLink = (url: string) => {
+      try {
+        const parsedUrl = new URL(url);
+        // If there's an action or custom callback in the deep link parameters
+        const token = parsedUrl.searchParams.get('token');
+        const mode = parsedUrl.searchParams.get('mode');
+        if (token && mode === 'auth') {
+          console.log("Deep link auth parameters captured:", token);
+          // Can handle manual auth or tokens if needed
+        }
+      } catch (err) {
+        console.warn("Parsing deep link failed:", err);
+      }
+    };
+
+    // If initial window state contains custom launch patterns
+    if (typeof window !== 'undefined' && window.location.href) {
+      handleDeepLink(window.location.href);
+    }
+
+    // Capture standard popstate
+    const onPopState = () => {
+      handleDeepLink(window.location.href);
+    };
+    window.addEventListener('popstate', onPopState);
+
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
 
   useEffect(() => {
     let unsubSnapshot: (() => void) | null = null;
@@ -590,14 +646,35 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     onClick={async () => {
                       setAuthError('');
                       setAuthSuccess('');
+                      setAuthModalLoading(true);
                       try {
                         const provider = new GoogleAuthProvider();
-                        await signInWithPopup(auth, provider);
-                        setIsAuthModalOpen(false);
-                        resetAuthForm();
+                        // Detect mobile / webview environment
+                        const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+                        const isMobile = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+                        const isWebView = /wv|webview|xwalk|chromium|messenger|fb_iab|instagram/i.test(userAgent.toLowerCase()) || 
+                                          (isMobile && !/chrome|safari/i.test(userAgent.toLowerCase()));
+                        
+                        if (isMobile || isWebView) {
+                          console.log("Mobile/WebView environment detected - Initiating signInWithRedirect...");
+                          await signInWithRedirect(auth, provider);
+                        } else {
+                          console.log("Standard browser detected - Initiating signInWithPopup...");
+                          try {
+                            await signInWithPopup(auth, provider);
+                            setIsAuthModalOpen(false);
+                            resetAuthForm();
+                          } catch (popupErr: any) {
+                            console.warn("Popup failed or blocked, falling back to Redirect:", popupErr);
+                            // Fallback to redirect if popup fails
+                            await signInWithRedirect(auth, provider);
+                          }
+                        }
                       } catch (error: any) {
-                        console.warn("Google authentication from modal failed:", error);
-                        setAuthError('تعذر استخدام نافذة جوجل في البيئة الحالية. يرجى ملء البريد وكلمة المرور أعلاه، إنه آمن وأسرع!');
+                        console.warn("Google authentication trigger failed:", error);
+                        setAuthError('تنبيه: محرك تسجيل جوجل واجه صعوبة في التهيئة. يرجى استخدام خيار البريد وكلمة المرور إن تكرر الأمر لحين استكمال إعدادات الويب في جهازك!');
+                      } finally {
+                        setAuthModalLoading(false);
                       }
                     }}
                     className="w-full bg-zinc-900/50 hover:bg-zinc-900 hover:border-white/10 border border-zinc-800 text-white font-bold text-[10px] py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
@@ -607,6 +684,16 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     </svg>
                     <span>تسجيل عبر حساب Google</span>
                   </button>
+
+                  <div className="bg-[#101017] border border-white/5 rounded-xl p-2.5 mt-2 text-right">
+                    <span className="text-[9px] font-black text-amber-500 flex items-center gap-1">
+                      ⚠️ زوار تطبيق الهاتف (APK):
+                    </span>
+                    <p className="text-[8px] text-zinc-400 leading-normal font-medium mt-1">
+                      تسجيل الدخول عبر Google يتطلب فتح متصفح خارجي ولن يعود تلقائياً للتطبيق في بيئات الـ WebViews البسيطة لعدم توفر ربط عميق بالـ APK.
+                      نوصي بشدة باستخدام <strong>البريد الإلكتروني وكلمة المرور</strong> (عبر خيار "إنشاء حساب أوتاكو") داخل التطبيق ليعمل معك بسلاسة وبشكل فوري!
+                    </p>
+                  </div>
                 </>
               )}
 

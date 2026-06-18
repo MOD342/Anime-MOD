@@ -226,6 +226,52 @@ export default function NotificationsView({ onBack, onNavigate }: NotificationsV
         </div>
 
         {/* Categories Tab Swiper */}
+        {typeof window !== 'undefined' && 'Notification' in window && (
+          <div className="bg-gradient-to-r from-purple-950/20 via-[#FF1744]/15 to-blue-950/20 border border-[#FF1744]/20 rounded-2xl p-3.5 mb-4 text-right flex items-center justify-between gap-3">
+            <div className="flex-1">
+              <h3 className="text-xs font-black text-white flex items-center gap-1.5">
+                🔔 تفعيل الإشعارات في النظام
+              </h3>
+              <p className="text-[10px] text-zinc-400 mt-1 font-medium leading-relaxed">
+                تأكد من تفعيل صلاحيات التنبيهات في جهازك أو هاتفك المحمول لاستقبال الأخبار والتحذيرات كإشعارات نظام خارجية فورية!
+              </p>
+            </div>
+            <button
+               type="button"
+               onClick={async () => {
+                 if (Notification.permission !== 'granted') {
+                   const perm = await Notification.requestPermission();
+                   if (perm === 'granted') {
+                     try {
+                       new Notification("تم تفعيل الإشعارات بنجاح! 🎉", {
+                         body: "سوف تتلقى كل التنبيهات والأخبار كإشعارات نظامية خارجية من الآن فصاعداً.",
+                         dir: 'rtl'
+                       });
+                     } catch (e) {
+                       console.warn("Standard notification not supported directly inside some WebView sandboxes:", e);
+                     }
+                   } else {
+                     alert("صلاحية الإشعارات لم تمنح بعد. يرجى تفعيلها من إعدادات النظام أو المتصفح.");
+                   }
+                 } else {
+                   try {
+                     new Notification("اختبار نظام الإشعارات ⚡", {
+                       body: "نظام الإشعارات الخارجية يعمل بكفاءة تامة وهي مستعدة تماماً لاستقبال إشعارات الأنمي والبطولات!",
+                       dir: 'rtl'
+                     });
+                   } catch (e) {
+                     console.warn("Standard notification not supported directly inside some WebView sandboxes:", e);
+                   }
+                 }
+               }}
+               className="bg-neutral-900/80 hover:bg-[#FF1744] hover:text-white border border-[#FF1744]/30 text-[#FF1744] text-[10px] font-black py-2 px-3 rounded-xl transition cursor-pointer select-none active:scale-95 shrink-0"
+            >
+              {Notification.permission === 'granted' ? 'إرسال إشعار تجريبي ⚡' : 'تفعيل إشعارات النظام 🔔'}
+            </button>
+          </div>
+        )}
+
+        {/* Categories Tab Swiper */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-4 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
           {[
             { id: 'all', label: 'الكل', count: getCategoryCount('all'), icon: Bell },

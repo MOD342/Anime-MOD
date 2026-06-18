@@ -38,6 +38,7 @@ const SupportPortalView = lazy(() => import('./views/SupportPortalView'));
 
 const AiChatWidget = lazy(() => import('./components/AiChatWidget'));
 import { MascotLoadingScreen, MascotOfflineScreen } from './components/MascotScreens';
+import PermissionPromptModal from './components/PermissionPromptModal';
 
 const ViewFallback = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] text-neutral-400 gap-4" dir="rtl">
@@ -50,6 +51,7 @@ export default function App() {
   const { banInfo, user, userRole, loading } = useAuth();
   const [activeTab, setActiveTab ] = useState('home');
   const [showSplash, setShowSplash] = useState(true);
+  const [askPermissions, setAskPermissions] = useState(false);
   const [viewStack, setViewStack] = useState<{name: string, props?: any}[]>([{ name: 'home' }]);
   const [activeToasts, setActiveToasts] = useState<any[]>([]);
 
@@ -58,6 +60,30 @@ export default function App() {
       if (prev.some(t => t.id === notif.id)) return prev;
       return [...prev, notif];
     });
+
+    // Send native system notification if permission has been granted
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        const title = notif.title || 'إشعار جديد ⚡';
+        const body = notif.body || '';
+        const options: NotificationOptions = {
+          body,
+          icon: '/favicon.ico',
+          dir: 'rtl',
+        };
+        if (notif.imageUrl) {
+          (options as any).image = notif.imageUrl;
+        }
+
+        const nativeNotification = new Notification(title, options);
+        nativeNotification.onclick = () => {
+          window.focus();
+          handleToastClick(notif);
+        };
+      } catch (err) {
+        console.warn('Failed to dispatch native system notification:', err);
+      }
+    }
 
     // Auto dismiss after 6 seconds
     setTimeout(() => {
@@ -281,7 +307,24 @@ export default function App() {
   }, []);
 
   if (showSplash) {
-    return <MascotLoadingScreen authLoading={loading} onComplete={() => setShowSplash(false)} />;
+    return (
+      <MascotLoadingScreen 
+        authLoading={loading} 
+        onComplete={() => {
+          setShowSplash(false);
+          if (typeof window !== 'undefined') {
+            const prompted = localStorage.getItem('mod_permissions_prompted');
+            if (prompted !== 'true') {
+              setAskPermissions(true);
+            }
+          }
+        }} 
+      />
+    );
+  }
+
+  if (askPermissions) {
+    return <PermissionPromptModal onComplete={() => setAskPermissions(false)} />;
   }
 
   if (banInfo && banInfo.isBanned) {
