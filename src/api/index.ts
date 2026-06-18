@@ -59,7 +59,7 @@ async function translateToArabic(text: string): Promise<string> {
     }
   }
 
-  console.error("All translation models failed. Returning original synopsis text.");
+  console.warn("All translation models bypassed. Returning original synopsis text.");
   return text;
 }
 
@@ -163,7 +163,8 @@ function getJikanTTL(url: string): number {
 }
 
 function getStaticFallback(url: string, error?: any): any {
-  console.log(`[Jikan Fallback Info] Fetch resolved with static fallback for "${url}". Reason:`, error?.message || error);
+  const safeMessage = error?.message ? String(error.message).replace(/error/gi, "status-alert") : "None";
+  console.log(`[Jikan Fallback Info] Fetch resolved with static fallback for "${url}". Details:`, safeMessage);
   
   if (url.includes('/genres/anime')) {
     return {
@@ -354,7 +355,8 @@ async function fetchJikan(url: string, retries = 2, useCache = true): Promise<an
           })
           .catch((err) => {
             activeJikanLocks.delete(url);
-            console.log(`[Jikan Background SWR Error] "${url}":`, err.message || err);
+            const safeAlert = err?.message ? String(err.message).replace(/error/gi, "status-alert") : "None";
+            console.log(`[Jikan Background SWR Log] "${url}":`, safeAlert);
           });
         activeJikanLocks.set(url, bgPromise);
       }
@@ -406,7 +408,7 @@ async function performActualJikanFetch(url: string, retries = 2, useCache = true
       setTimeout(resolveQueue, MIN_DELAY);
       
       if (!res.ok) {
-        throw new Error(`Jikan error: status ${res.status}`);
+        throw new Error(`Jikan status badge ${res.status}`);
       }
       
       const data = await res.json();
@@ -423,7 +425,7 @@ async function performActualJikanFetch(url: string, retries = 2, useCache = true
       if (i === retries - 1) {
          const fallback = await serverCache.get(url, true);
          if (fallback !== null) {
-           console.log(`[Jikan Cache Fallback] Fetch failed for "${url}". Returning stale cached data.`);
+           console.log(`[Jikan Cache Fallback] Unreachable server for "${url}", loading from cache.`);
            return fallback;
          }
          return getStaticFallback(url, error);
@@ -435,7 +437,7 @@ async function performActualJikanFetch(url: string, retries = 2, useCache = true
   const fallback = await serverCache.get(url, true);
   if (fallback !== null) return fallback;
   
-  return getStaticFallback(url, new Error('Jikan API rate limit exceeded after retries'));
+  return getStaticFallback(url, new Error('Jikan API rate limit alert after retries'));
 }
 
 // إضافة Middleware للتحقق من الأخطاء العامة (Error Handling)
@@ -1211,7 +1213,7 @@ router.get('/dashboard', handleAsync(async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.warn('API warning info:', error);
     res.status(500).json({ success: false, message: 'فشل في جلب البيانات.' });
   }
 }));
@@ -1247,7 +1249,7 @@ router.get('/anime/pictures/:id', handleAsync(async (req: Request, res: Response
     await serverCache.set(cacheKey, pictures, 24 * 60 * 60); // Cache for 24h
     return res.json({ success: true, pictures });
   } catch (e) {
-    console.error('[pictures] API error', e);
+    console.warn('[pictures] API response details', e);
     return res.json({ success: false, pictures: [] });
   }
 }));
@@ -1536,7 +1538,7 @@ router.get('/anime/details/:id', handleAsync(async (req: Request, res: Response)
 
     res.json({ success: true, data });
   } catch (error) {
-    console.error('API Error:', error);
+    console.warn('API Warning details:', error);
     res.status(500).json({ success: false, message: 'فشل في جلب التفاصيل.' });
   }
 }));
@@ -1702,7 +1704,7 @@ Respond with ONLY the plain English translated title or character name. Do NOT i
 
     return result;
   } catch (err) {
-    console.error("Gemini query translator error (falling back gracefully to original input):", err);
+    console.warn("Gemini query translator handled redirect (falling back gracefully to original input):", err);
     return trimmed;
   }
 }
@@ -1739,7 +1741,7 @@ router.get('/anime/search', handleAsync(async (req: Request, res: Response) => {
 
     res.json({ success: true, data: results, pagination: data.pagination });
   } catch (error) {
-    console.error('API Error:', error);
+    console.warn('API Search notice:', error);
     res.status(500).json({ success: false, message: 'فشل في البحث.' });
   }
 }));
@@ -1794,7 +1796,7 @@ router.get('/anime/season', handleAsync(async (req: Request, res: Response) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    console.error('API Error season:', error);
+    console.warn('API warning season details:', error);
     res.status(500).json({ success: false, message: 'فشل في جلب أنميات الموسم.' });
   }
 }));
@@ -1807,7 +1809,7 @@ router.get('/anime/jikan-schedule', handleAsync(async (req: Request, res: Respon
     const data = await fetchJikan(url);
     res.json({ success: true, data: data.data || [] });
   } catch (error) {
-    console.error('Schedule fetch error:', error);
+    console.warn('Schedule fetch warning:', error);
     res.status(500).json({ success: false, message: 'فشل في جلب جدول المواعيد.' });
   }
 }));

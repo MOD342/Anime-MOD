@@ -204,7 +204,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           
           unsubSnapshot = onSnapshot(userRef, (docSnap) => {
              if (docSnap.exists()) {
-               setUserData({ id: docSnap.id, ...docSnap.data() });
+               const fullData = { id: docSnap.id, ...docSnap.data() };
+               try {
+                 if (typeof localStorage !== 'undefined') {
+                   localStorage.setItem('mod_user_data_' + u.uid, JSON.stringify(fullData));
+                 }
+               } catch (e) {}
+               setUserData(fullData);
              }
           }, (error) => {
              console.warn("User data snapshot error (offline or permissions):", error);
@@ -215,7 +221,47 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
           
           setLoading(false);
         } catch (error) {
-           console.warn("Failed to setup user:", error);
+           console.warn("Failed to setup user, initiating offline fallback:", error);
+           try {
+             const localDataStr = typeof localStorage !== 'undefined' ? localStorage.getItem('mod_user_data_' + u.uid) : null;
+             let fallbackData = null;
+             if (localDataStr) {
+               try {
+                 fallbackData = JSON.parse(localDataStr);
+               } catch (e) {}
+             }
+             if (!fallbackData) {
+               const emailPrefix = u.email?.split('@')[0] || '';
+               const cleanEmailPrefix = emailPrefix.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+               const baseUsername = cleanEmailPrefix || 'otaku_' + u.uid.substring(0, 5);
+               fallbackData = {
+                 id: u.uid,
+                 username: baseUsername,
+                 displayName: u.displayName || u.email?.split('@')[0] || 'أوتاكو الرائع',
+                 email: u.email || '',
+                 photoURL: u.photoURL || '',
+                 role: 'user',
+                 createdAt: new Date().toISOString(),
+                 xp: 0,
+                 level: 1,
+                 modPoints: 0,
+                 streakDays: 0,
+                 likesReceived: 0,
+                 commentsCount: 0,
+                 recommendationsAccepted: 0,
+                 aiGamesPoints: 0,
+                 ratingsCount: 0,
+                 chatMessagesCount: 0,
+                 coins: 0,
+                 purchasedItems: [],
+                 lastActiveDate: new Date().toISOString().split('T')[0]
+               };
+             }
+             setUserData(fallbackData);
+             setUserRole(fallbackData.role || 'user');
+           } catch (fallbackErr) {
+             console.warn("Offline user fallback failed:", fallbackErr);
+           }
            setLoading(false);
         }
       } else {
