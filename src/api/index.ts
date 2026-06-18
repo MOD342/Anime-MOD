@@ -1668,9 +1668,9 @@ async function smartQueryTranslator(queryStr: string): Promise<string> {
     console.warn("[Smart Translation] Cache lookup warning:", err.message);
   }
 
-  // 3. Fallback to Gemini with stable active model (gemini-3.5-flash)
-  try {
-    const prompt = `You are an intelligent search processor for an anime streaming application.
+  // 3. Fallback to Gemini with stable active model (gemini-3.5-flash with fallback)
+  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite'];
+  const prompt = `You are an intelligent search processor for an anime streaming application.
 The user entered an Arabic anime or character search description: "${trimmed}".
 Your job is to translate and expand this search query so that it successfully matches standard worldwide databases (like MyAnimeList).
 Examples:
@@ -1686,27 +1686,34 @@ Examples:
 
 Respond with ONLY the plain English translated title or character name. Do NOT include any additional labels, quotes, explanation, or markdown.`;
 
-    const response = await aiTranslate.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.1,
-      }
-    });
-
-    const result = response.text?.trim() || trimmed;
-    console.log(`Smart Search Query translator: "${trimmed}" -> "${result}"`);
-
-    // Cache the resolved result for 7 days to preserve resources and maintain instant speed
+  for (const model of modelsToTry) {
     try {
-      await serverCache.set(cacheKey, result, 7 * 24 * 60 * 60 * 1000);
-    } catch (_) {}
+      const response = await aiTranslate.models.generateContent({
+        model: model,
+        contents: prompt,
+        config: {
+          temperature: 0.1,
+        }
+      });
 
-    return result;
-  } catch (err) {
-    console.warn("Gemini query translator handled redirect (falling back gracefully to original input):", err);
-    return trimmed;
+      if (response?.text) {
+        const result = response.text.trim();
+        console.log(`Smart Search Query translator using ${model}: "${trimmed}" -> "${result}"`);
+
+        // Cache the resolved result for 7 days to preserve resources and maintain instant speed
+        try {
+          await serverCache.set(cacheKey, result, 7 * 24 * 60 * 60 * 1000);
+        } catch (_) {}
+
+        return result;
+      }
+    } catch (err: any) {
+      console.warn(`Gemini query translator using ${model} failed (trying next fallback):`, err.message || err);
+    }
   }
+
+  console.warn("All search query translation models bypassed. Returning original input query.");
+  return trimmed;
 }
 
 // مسار للبحث المتقدم

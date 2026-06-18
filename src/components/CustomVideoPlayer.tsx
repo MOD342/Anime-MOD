@@ -551,6 +551,10 @@ export default function CustomVideoPlayer({
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
       } else if (document.pictureInPictureEnabled) {
+        if (video.readyState < 1) {
+          console.warn("Cannot request Picture-in-Picture: Metadata is not loaded yet (readyState is 0).");
+          return;
+        }
         await video.requestPictureInPicture();
       }
     } catch (e) {
