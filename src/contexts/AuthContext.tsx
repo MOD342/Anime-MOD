@@ -16,7 +16,7 @@ import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc, onSnapshot } from 'firebase/firestore';
 import { updateDailyStreak } from '../services/gamificationService';
 import { moderationService, RoleLevel } from '../services/moderationService';
-import { Mail, Lock, UserPlus, LogIn, AlertCircle, X, Sparkles, CheckCircle, RefreshCw, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, UserPlus, LogIn, AlertCircle, X, Sparkles, CheckCircle, RefreshCw, KeyRound, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface AppUser {
@@ -69,6 +69,15 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
   const [authModalLoading, setAuthModalLoading] = useState(false);
+  const [isInIframe, setIsInIframe] = useState(false);
+
+  useEffect(() => {
+    try {
+      setIsInIframe(window.self !== window.top);
+    } catch (e) {
+      setIsInIframe(true);
+    }
+  }, []);
 
   const resetAuthForm = () => {
     setAuthEmail('');
@@ -505,16 +514,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 </div>
               )}
 
-              {/* WebView/Device Advisory Warning */}
-              {isLocalFlow && authMode !== 'forgot' && (
-                <div className="mb-4 p-2.5 bg-blue-500/5 border border-blue-500/15 rounded-xl text-neutral-300 text-[10px] font-semibold leading-relaxed text-right flex gap-1.5 items-start">
-                  <span className="text-blue-400 shrink-0 select-none">💡</span>
-                  <span>
-                    يرجى ملء <strong>الحقول بالأسفل</strong> للولوج المباشر داخل الـ APK بدون التقييد بجوجل ونافذته المعرقلة.
-                  </span>
-                </div>
-              )}
-
               {/* Interactive Form */}
               <form onSubmit={authMode === 'login' ? handleLogin : authMode === 'register' ? handleRegister : handleForgotPassword} className="space-y-3.5">
                 
@@ -639,7 +638,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                 <>
                   <div className="my-4 relative flex items-center justify-center">
                     <div className="absolute inset-x-0 h-px bg-zinc-900" />
-                    <span className="relative bg-zinc-950 px-2.5 text-[9px] text-neutral-500 font-bold">أو خيار الدخول السريع</span>
+                    <span className="relative bg-zinc-950 px-2.5 text-[9px] text-neutral-500 font-bold">أو تسجيل الدخول السريع</span>
                   </div>
 
                   <button
@@ -672,28 +671,18 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                         }
                       } catch (error: any) {
                         console.warn("Google authentication trigger failed:", error);
-                        setAuthError('تنبيه: محرك تسجيل جوجل واجه صعوبة في التهيئة. يرجى استخدام خيار البريد وكلمة المرور إن تكرر الأمر لحين استكمال إعدادات الويب في جهازك!');
+                        setAuthError('تنبيه: محرك تسجيل جوجل واجه صعوبة في التهيئة. يرجى استخدام البريد الإلكتروني وكلمة المرور.');
                       } finally {
                         setAuthModalLoading(false);
                       }
                     }}
-                    className="w-full bg-zinc-900/50 hover:bg-zinc-900 hover:border-white/10 border border-zinc-800 text-white font-bold text-[10px] py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-zinc-900/50 hover:bg-zinc-900 hover:border-white/10 border border-zinc-800 text-white font-bold text-[10px] py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current">
                       <path d="M12.24 10.285V13.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.529-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l2.427-2.334C18.155 2.185 15.424 1 12.24 1c-6.075 0-11 4.925-11 11s4.925 11 11 11c6.34 0 10.55-4.46 10.55-10.74 0-.724-.077-1.277-.173-1.63L12.24 10.285z" />
                     </svg>
                     <span>تسجيل عبر حساب Google</span>
                   </button>
-
-                  <div className="bg-[#101017] border border-white/5 rounded-xl p-2.5 mt-2 text-right">
-                    <span className="text-[9px] font-black text-amber-500 flex items-center gap-1">
-                      ⚠️ زوار تطبيق الهاتف (APK):
-                    </span>
-                    <p className="text-[8px] text-zinc-400 leading-normal font-medium mt-1">
-                      تسجيل الدخول عبر Google يتطلب فتح متصفح خارجي ولن يعود تلقائياً للتطبيق في بيئات الـ WebViews البسيطة لعدم توفر ربط عميق بالـ APK.
-                      نوصي بشدة باستخدام <strong>البريد الإلكتروني وكلمة المرور</strong> (عبر خيار "إنشاء حساب أوتاكو") داخل التطبيق ليعمل معك بسلاسة وبشكل فوري!
-                    </p>
-                  </div>
                 </>
               )}
 

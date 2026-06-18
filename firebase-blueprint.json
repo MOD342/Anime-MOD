@@ -172,6 +172,34 @@
         "expireAt": { "type": "number" }
       },
       "required": ["data", "expireAt"]
+    },
+    "OtakuLeak": {
+      "title": "OtakuLeak",
+      "description": "Community anime leaks and news reports",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "source": { "type": "string" },
+        "time": { "type": "string" },
+         "tag": { "type": "string" },
+        "importance": { "type": "string" },
+        "likes": { "type": "number" },
+        "skulls": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "summary", "source", "time", "tag", "importance", "likes", "skulls", "commentsCount", "createdAt"]
+    },
+    "UserTierList": {
+      "title": "UserTierList",
+      "description": "Persistent tier list configuration for an otaku user",
+      "type": "object",
+      "properties": {
+        "placedCharacters": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["placedCharacters", "updatedAt"]
     }
   },
   "firestore": {
@@ -202,6 +230,14 @@
     "/users/{userId}/animeEntries/{animeId}": {
       "schema": "AnimeEntry",
       "description": "User's anime collection entries with status and metadata"
+    },
+    "/users/{userId}/tierList/{listId}": {
+      "schema": "UserTierList",
+      "description": "Stores persistent user anime-character tier lists"
+    },
+    "/otakuLeaks/{leakId}": {
+      "schema": "OtakuLeak",
+      "description": "Community shared anime leaks, news, and releases"
     },
     "/gameQuestions/{questionId}": {
       "schema": "GameQuestion",

@@ -101,6 +101,7 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
     {
       title: '⛩️ الساحات المفتوحة والألعاب',
       items: [
+        { id: 'suggestions_hub', label: 'باقة الإضافات والاقتراحات 💎', desc: 'أغاني أنمي أسطورية، رادار تسريبات عاجل، هرم رتب ومختبر سرعة البث', icon: Sparkles, color: 'text-rose-400', bg: 'bg-rose-500/10' },
         { id: 'games', label: 'ألعاب وفعاليات الأنمي التفاعلية', desc: 'تحدا ذكاء الأصدقاء في: القاتل الصامت، من القائل، تشاريديس والرياضيات', icon: Gamepad2, color: 'text-purple-400', bg: 'bg-purple-500/10' },
         { id: 'tournaments', label: 'تحديات البطولات الكبرى', desc: 'شارك بمسابقات الأوتوكو وتأهل للمراحل النهائية لكسب الشارات النادرة', icon: Trophy, color: 'text-red-400', bg: 'bg-red-500/10' },
         { id: 'leaderboard', label: 'قاعة مشاهير الأوتوكو والعالم', desc: 'الترتيب العام والمنافسة المفتوحة لأقوى الأعضاء في المستويات والعملات', icon: Crown, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },

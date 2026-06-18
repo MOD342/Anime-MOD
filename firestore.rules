@@ -359,6 +359,40 @@ service cloud.firestore {
           && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'customLists', 'score', 'isFavorite', 'animeId', 'updatedAt', 'title', 'posterUrl', 'releaseYear', 'completedXpClaimed', 'watchedEpisodes', 'episodesCount', 'progress', 'addedAt']);
         allow delete: if isOwner(userId) && isValidId(animeId);
       }
+
+      match /tierList/{listId} {
+        allow read: if true;
+        allow create, update: if isOwner(userId) && isValidId(listId) &&
+          incoming().keys().hasAll(['placedCharacters', 'updatedAt']) &&
+          incoming().keys().size() == 2 &&
+          incoming().placedCharacters is map &&
+          incoming().updatedAt == request.time;
+        allow delete: if isOwner(userId) && isValidId(listId);
+      }
+    }
+
+    match /otakuLeaks/{leakId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(leakId) &&
+        incoming().keys().hasAll(['title', 'summary', 'source', 'time', 'tag', 'importance', 'likes', 'skulls', 'commentsCount', 'createdAt']) &&
+        incoming().keys().size() == 10 &&
+        incoming().title is string && incoming().title.size() <= 500 &&
+        incoming().summary is string && incoming().summary.size() <= 5000 &&
+        incoming().source is string && incoming().source.size() <= 200 &&
+        incoming().time is string && incoming().time.size() <= 100 &&
+        incoming().tag is string && incoming().tag.size() <= 100 &&
+        incoming().importance is string && incoming().importance.size() <= 20 &&
+        incoming().likes is number && incoming().likes == 1 &&
+        incoming().skulls is number && incoming().skulls == 0 &&
+        incoming().commentsCount is number && incoming().commentsCount == 0 &&
+        incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(leakId) &&
+        (
+          incoming().diff(existing()).affectedKeys().hasOnly(['likes']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['skulls']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'skulls'])
+        );
+      allow delete: if isModeratorAuth();
     }
 
     match /suggestions/{suggestionId} {
