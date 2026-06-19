@@ -38,7 +38,7 @@ async function translateToArabic(text: string): Promise<string> {
   }
 
   // List of models and fallbacks to ensure translation never crashes or gets blocked under heavy load
-  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite'];
+  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
 
   for (const model of modelsToTry) {
     try {
@@ -1669,7 +1669,7 @@ async function smartQueryTranslator(queryStr: string): Promise<string> {
   }
 
   // 3. Fallback to Gemini with stable active model (gemini-3.5-flash with fallback)
-  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite'];
+  const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
   const prompt = `You are an intelligent search processor for an anime streaming application.
 The user entered an Arabic anime or character search description: "${trimmed}".
 Your job is to translate and expand this search query so that it successfully matches standard worldwide databases (like MyAnimeList).

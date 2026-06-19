@@ -6,6 +6,7 @@ import {
   signInWithRedirect,
   getRedirectResult,
   GoogleAuthProvider, 
+  signInWithCredential,
   signOut as firebaseSignOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -78,6 +79,83 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setIsInIframe(true);
     }
   }, []);
+
+  // Native/System-level Google Sign In and One Tap helper (Google Identity Services)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const initGsi = () => {
+      // Prioritize the user-configured or project-level Google Client ID
+      const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || "944497586914-7r29jmqveb3b5oeeat3as08scf03q1k2.apps.googleusercontent.com";
+      
+      if (!(window as any).google?.accounts?.id) {
+        return;
+      }
+
+      console.log("Initializing Google Identity Services with Client ID:", clientId);
+      
+      try {
+        (window as any).google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response: any) => {
+            setAuthModalLoading(true);
+            setAuthError('');
+            setAuthSuccess('');
+            try {
+              console.log("Google system account credential received.");
+              const credential = GoogleAuthProvider.credential(response.credential);
+              const userCredential = await signInWithCredential(auth, credential);
+              if (userCredential.user) {
+                setAuthSuccess(`✓ تم تسجيل دخولك بنجاح عبر حساب Google بالنظام: ${userCredential.user.displayName || 'أوتاكو'}!`);
+                setTimeout(() => {
+                  setIsAuthModalOpen(false);
+                  resetAuthForm();
+                }, 1200);
+              }
+            } catch (err: any) {
+              console.error("Firebase GSI signin failed:", err);
+              setAuthError(`فشل الاتصال بالنظام: ${err.message || 'يرجى التحقق من إعدادات حساب جوجل للمشروع'}`);
+            } finally {
+              setAuthModalLoading(false);
+            }
+          },
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          use_fedcm: false
+        });
+
+        // Trigger One Tap floating prompt if auth modal is opened
+        if (isAuthModalOpen && authMode === 'login') {
+          (window as any).google.accounts.id.prompt((notification: any) => {
+            if (notification.isNotDisplayed()) {
+              console.log("One Tap not displayed:", notification.getNotDisplayedReason());
+            } else if (notification.isSkippedMoment()) {
+              console.log("One Tap skipped:", notification.getSkippedReason());
+            } else if (notification.isDismissedMoment()) {
+              console.log("One Tap dismissed:", notification.getDismissedReason());
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Error setting up Google Identity Services:", err);
+      }
+    };
+
+    let checkAttempts = 0;
+    const interval = setInterval(() => {
+      if ((window as any).google?.accounts?.id) {
+        initGsi();
+        clearInterval(interval);
+      } else {
+        checkAttempts++;
+        if (checkAttempts > 20) {
+          clearInterval(interval);
+        }
+      }
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [isAuthModalOpen, authMode]);
 
   const resetAuthForm = () => {
     setAuthEmail('');
@@ -645,35 +723,55 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     onClick={async () => {
                       setAuthError('');
                       setAuthSuccess('');
-                      setAuthModalLoading(true);
-                      try {
-                        const provider = new GoogleAuthProvider();
-                        // Detect mobile / webview environment
-                        const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-                        const isMobile = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
-                        const isWebView = /wv|webview|xwalk|chromium|messenger|fb_iab|instagram/i.test(userAgent.toLowerCase()) || 
-                                          (isMobile && !/chrome|safari/i.test(userAgent.toLowerCase()));
-                        
-                        if (isMobile || isWebView) {
-                          console.log("Mobile/WebView environment detected - Initiating signInWithRedirect...");
-                          await signInWithRedirect(auth, provider);
-                        } else {
-                          console.log("Standard browser detected - Initiating signInWithPopup...");
-                          try {
-                            await signInWithPopup(auth, provider);
-                            setIsAuthModalOpen(false);
-                            resetAuthForm();
-                          } catch (popupErr: any) {
-                            console.warn("Popup failed or blocked, falling back to Redirect:", popupErr);
-                            // Fallback to redirect if popup fails
-                            await signInWithRedirect(auth, provider);
-                          }
+                      
+                      // 1. Try Native/System Google One Tap Prompt first (for smooth system account choice)
+                      if ((window as any).google?.accounts?.id) {
+                        try {
+                          console.log("Triggering One Tap via button click...");
+                          setAuthSuccess('جاري الاتصال بحسابات Google بالنظام...');
+                          (window as any).google.accounts.id.prompt((notification: any) => {
+                            if (notification.isNotDisplayed()) {
+                              console.info("One Tap not displayed, falling back to traditional popup/redirect:", notification.getNotDisplayedReason());
+                              runTraditionalGoogleAuth();
+                            }
+                          });
+                          return;
+                        } catch (err) {
+                          console.warn("One Tap failed, using traditional flow.", err);
                         }
-                      } catch (error: any) {
-                        console.warn("Google authentication trigger failed:", error);
-                        setAuthError('تنبيه: محرك تسجيل جوجل واجه صعوبة في التهيئة. يرجى استخدام البريد الإلكتروني وكلمة المرور.');
-                      } finally {
-                        setAuthModalLoading(false);
+                      }
+
+                      await runTraditionalGoogleAuth();
+
+                      async function runTraditionalGoogleAuth() {
+                        setAuthModalLoading(true);
+                        try {
+                          const provider = new GoogleAuthProvider();
+                          const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+                          const isMobile = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+                          const isWebView = /wv|webview|xwalk|chromium|messenger|fb_iab|instagram/i.test(userAgent.toLowerCase()) || 
+                                            (isMobile && !/chrome|safari/i.test(userAgent.toLowerCase()));
+                          
+                          if (isMobile || isWebView) {
+                            console.log("Mobile/WebView environment - Initiating signInWithRedirect...");
+                            await signInWithRedirect(auth, provider);
+                          } else {
+                            console.log("Standard browser - Initiating signInWithPopup...");
+                            try {
+                              await signInWithPopup(auth, provider);
+                              setIsAuthModalOpen(false);
+                              resetAuthForm();
+                            } catch (popupErr: any) {
+                              console.warn("Popup blocked/failed, falling back to Redirect:", popupErr);
+                              await signInWithRedirect(auth, provider);
+                            }
+                          }
+                        } catch (error: any) {
+                          console.warn("Google authentication failed:", error);
+                          setAuthError('تنبيه: محرك تسجيل جوجل واجه صعوبة. يرجى استخدام البريد الإلكتروني وكلمة المرور.');
+                        } finally {
+                          setAuthModalLoading(false);
+                        }
                       }
                     }}
                     className="w-full bg-zinc-900/50 hover:bg-zinc-900 hover:border-white/10 border border-zinc-800 text-white font-bold text-[10px] py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"

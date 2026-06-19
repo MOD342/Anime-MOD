@@ -236,19 +236,37 @@ router.post('/chat', handleAsync(async (req: Request, res: Response) => {
     }));
 
     console.log("Generating Otaku Chat response with mood:", userMood, "status:", userStatus);
+    const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    let responseText = '';
+    let success = false;
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.8
+    for (const modelName of modelsToTry) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents,
+          config: {
+            systemInstruction: systemInstruction,
+            temperature: 0.8
+          }
+        });
+        if (response?.text) {
+          responseText = response.text;
+          success = true;
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`Otaku Chat generation using ${modelName} encountered error, trying fallback:`, err.message || err);
       }
-    });
+    }
+
+    if (!success) {
+      throw new Error("All active Gemini models experienced high demand. Please try again in a moment.");
+    }
 
     res.json({
       success: true,
-      text: response.text
+      text: responseText
     });
   } catch (error: any) {
     console.error('Gemini Chat Error Details:', JSON.stringify(error, null, 2), error.message);
@@ -393,11 +411,12 @@ router.get('/games/generate', handleAsync(async (req: Request, res: Response) =>
     }
 
     let response;
-    const retries = 2;
-    for (let attempt = 1; attempt <= retries; attempt++) {
+    const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    let success = false;
+    for (const modelName of modelsToTry) {
       try {
         response = await ai.models.generateContent({
-          model: model,
+          model: modelName,
           contents: prompt,
           config: {
             temperature: 0.9,
@@ -409,12 +428,17 @@ router.get('/games/generate', handleAsync(async (req: Request, res: Response) =>
             }
           }
         });
-        break;
+        if (response?.text) {
+          success = true;
+          break;
+        }
       } catch (err: any) {
-        if (attempt === retries) throw err;
-        console.warn(`[Gemini Games] Attempt ${attempt} failed with: ${err.message || err}. Retrying in 1.5s...`);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        console.warn(`[Gemini Games] Generation failed with ${modelName}: ${err.message || err}. Trying next fallback...`);
       }
+    }
+
+    if (!success) {
+      throw new Error("All active Gemini models experienced high demand.");
     }
 
     const parsed = JSON.parse(response?.text || '{}');
@@ -434,25 +458,43 @@ router.get('/anti-cheat', handleAsync(async (req: Request, res: Response) => {
 
   try {
     const prompt = `قم بتوليد سؤال واحد فقط متوسط إلى صعب عن الأنمي "${title}" ليثبت المستخدم أنه شاهده فعلاً (تجنب الأسئلة البديهية التي يمكن الإجابة عليها من غلاف الأنمي).`;
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
-      config: {
-        temperature: 0.7,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            question: { type: Type.STRING, description: "The quiz question about the specific anime" },
-            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "4 options" },
-            correct: { type: Type.INTEGER, description: "Index of the correct option (0-3)" }
-          },
-          required: ["question", "options", "correct"]
-        }
-      }
-    });
+    const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    let response;
+    let success = false;
 
-    const parsed = JSON.parse(response.text || '{}');
+    for (const modelName of modelsToTry) {
+      try {
+        response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+          config: {
+            temperature: 0.7,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                question: { type: Type.STRING, description: "The quiz question about the specific anime" },
+                options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "4 options" },
+                correct: { type: Type.INTEGER, description: "Index of the correct option (0-3)" }
+              },
+              required: ["question", "options", "correct"]
+            }
+          }
+        });
+        if (response?.text) {
+          success = true;
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`[Gemini Anti-Cheat] Failed with ${modelName}: ${err.message || err}. Trying next fallback...`);
+      }
+    }
+
+    if (!success) {
+      throw new Error("All active Gemini models experienced high-demand.");
+    }
+
+    const parsed = JSON.parse(response?.text || '{}');
     res.json({ success: true, data: parsed });
   } catch (error: any) {
     console.warn('Gemini Anti-cheat failed (serving high-quality fallback):', error.message || error);

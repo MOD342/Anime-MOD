@@ -22,6 +22,8 @@ export interface EpisodeServer {
 
 export class ScraperService {
   private readonly defaultBaseUrls = [
+    'https://witaanime.com',
+    'https://witanime.net',
     'https://ristoanime.co',
     'https://witanime.club',
     'https://witanime.space',

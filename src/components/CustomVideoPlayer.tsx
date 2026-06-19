@@ -551,14 +551,19 @@ export default function CustomVideoPlayer({
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
       } else if (document.pictureInPictureEnabled) {
-        if (video.readyState < 1) {
-          console.warn("Cannot request Picture-in-Picture: Metadata is not loaded yet (readyState is 0).");
+        if (video.readyState < 2) {
+          console.warn("Cannot request Picture-in-Picture: video data is not yet loaded enough (readyState is " + video.readyState + "). Please play or wait for the video to load first.");
           return;
         }
         await video.requestPictureInPicture();
       }
-    } catch (e) {
-      console.error("Picture-in-picture failed:", e);
+    } catch (e: any) {
+      const errMsg = String(e?.message || e);
+      if (errMsg.includes("Metadata") || errMsg.includes("loaded")) {
+        console.warn("Picture-in-picture deferred: Video metadata not fully loaded yet.");
+      } else {
+        console.warn("Picture-in-picture deferred/failed: State was not ready or transition interrupted.");
+      }
     }
   };
 
