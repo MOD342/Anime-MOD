@@ -87,7 +87,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
     const initGsi = () => {
       // Prioritize the user-configured or project-level Google Client ID
-      const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || "944497586914-7r29jmqveb3b5oeeat3as08scf03q1k2.apps.googleusercontent.com";
+      const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+      
+      if (!clientId) {
+        console.log("GSI skipped: VITE_GOOGLE_CLIENT_ID is not configured in environment variables. Using standard Firebase Auth flow.");
+        return;
+      }
       
       if (!(window as any).google?.accounts?.id) {
         return;
@@ -721,13 +726,28 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     <span className="relative bg-zinc-950 px-2.5 text-[9px] text-neutral-500 font-bold">أو تسجيل الدخول السريع</span>
                   </div>
 
+                  {/* Sandboxed Environment Warning Box */}
+                  <div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-[10px] text-right leading-relaxed font-medium">
+                    <div className="flex gap-1.5 items-start mb-1 font-bold text-[10.5px]">
+                      <span>⚠️</span>
+                      <span>تنبيه هام ومضمون للتجربة فورا:</span>
+                    </div>
+                    <p className="text-zinc-300">
+                      بسبب خصوصية وسياسة جوجل في بيئات المحاكاة والتطبيقات المعزولة، فإن <strong className="text-amber-400">Google Sign-In</strong> سيواجه خطأ 401 للعملاء غير المدرجين مسبقاً في إعدادات OAuth.
+                    </p>
+                    <p className="text-emerald-400 font-bold mt-1">
+                      👈 البديل المضمون %100: يرجى كتابة بريد إلكتروني وكلمة مرور اختيارية في حقول الاستمارة بالأعلى، ثم اضغط على زر "التسجيل كـ أوتاكو جديد" لتبدأ فوراً!
+                    </p>
+                  </div>
+
                   <button
                     onClick={async () => {
                       setAuthError('');
                       setAuthSuccess('');
                       
-                      // 1. Try Native/System Google One Tap Prompt first (for smooth system account choice)
-                      if ((window as any).google?.accounts?.id) {
+                      // 1. Try Native/System Google One Tap Prompt first if VITE_GOOGLE_CLIENT_ID is set
+                      const hasGoogleClientId = !!(import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+                      if (hasGoogleClientId && (window as any).google?.accounts?.id) {
                         try {
                           console.log("Triggering One Tap via button click...");
                           setAuthSuccess('جاري الاتصال بحسابات Google بالنظام...');
