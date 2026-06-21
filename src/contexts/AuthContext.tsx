@@ -71,6 +71,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [authSuccess, setAuthSuccess] = useState('');
   const [authModalLoading, setAuthModalLoading] = useState(false);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [showOAuthTroubleshoot, setShowOAuthTroubleshoot] = useState(false);
 
   useEffect(() => {
     try {
@@ -165,6 +166,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     setAuthError('');
     setAuthSuccess('');
     setShowPassword(false);
+    setShowOAuthTroubleshoot(false);
   };
 
   // Listen for Google Redirect authentication and deep-linking URLs
@@ -547,7 +549,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 30 }}
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden"
+              className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] max-h-[90vh] overflow-y-auto"
             >
               {/* Background ambient decorative aura */}
               <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
@@ -781,6 +783,77 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                     </svg>
                     <span>تسجيل عبر حساب Google</span>
                   </button>
+
+                  {/* Troubleshoot Panel for Google Client ID / invalid_client 401 */}
+                  <div className="mt-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowOAuthTroubleshoot(!showOAuthTroubleshoot)}
+                      className="w-full text-center text-[9px] text-[#FF1744] hover:underline font-bold flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span>{showOAuthTroubleshoot ? '▲ إخفاء دليل حل تفعيل الدخول' : '▼ هل تواجه مشكلة "خطأ 401 / معرّف غير موجود"؟'}</span>
+                    </button>
+
+                    <AnimatePresence>
+                      {showOAuthTroubleshoot && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-2 p-3 bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden text-right leading-relaxed text-[10px]"
+                        >
+                          <p className="font-bold text-neutral-200 mb-1.5 text-[10.5px] text-red-400">
+                            🔍 سبب ظهور خطأ (invalid_client: 401):
+                          </p>
+                          <p className="text-neutral-400 mb-2">
+                            حدث هذا لأن حساب Google المطلوب للدخول (OAuth Client) غير معرّف أو غير مفعّل في منصة Firebase الخاصة بالتطبيق في حسابك. لحل هذه المشكلة كمالك، يرجى اتباع الخطوات:
+                          </p>
+                          
+                          <ol className="list-decimal list-inside space-y-2 text-neutral-300">
+                            <li>
+                              <strong className="text-white">تفعيل تسجيل Google في Firebase:</strong>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                اذهب لـ <a href="https://console.firebase.google.com/project/gen-lang-client-0027450047/authentication/providers" target="_blank" rel="noopener noreferrer" className="text-[#FF1744] hover:underline inline-flex items-center gap-0.5">Firebase Console <ExternalLink size={8} /></a> ➔ <strong className="text-zinc-300 font-normal">Authentication</strong> ➔ <strong className="text-zinc-300 font-normal">Sign-in method</strong>.
+                              </p>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                انقر على "إضافة موفر جديد" واختر <strong className="text-zinc-200">Google</strong>، ثم قم بتفعيله وحفظه.
+                              </p>
+                            </li>
+                            
+                            <li>
+                              <strong className="text-white">نسخ معرّف الويب (Web Client ID):</strong>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                ستجد في نفس صفحة تفعيل Google جزءاً باسم <strong className="text-zinc-300 font-normal">Web SDK Configuration</strong>، انسخ المعرّف الموجود هناك.
+                              </p>
+                            </li>
+
+                            <li>
+                              <strong className="text-white">إعداد معرّف العميل في AI Studio:</strong>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                اذهب إلى إعدادات التطبيق في <strong className="text-zinc-200">AI Studio</strong> ➔ <strong className="text-zinc-200">Settings</strong> ➔ <strong className="text-zinc-200">Environment Variables</strong>.
+                              </p>
+                              <p className="text-neutral-300 mr-3.5 font-mono bg-zinc-950 p-1 rounded border border-zinc-800 mt-1 select-all text-[9.5px]">
+                                VITE_GOOGLE_CLIENT_ID = [معرّف_الويب_الذي_نسخته]
+                              </p>
+                            </li>
+
+                            <li>
+                              <strong className="text-white">اعتماد نطاق التطبيق (OAuth Whitelist):</strong>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                اذهب إلى <a href="https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0027450047" target="_blank" rel="noopener noreferrer" className="text-[#FF1744] hover:underline inline-flex items-center gap-0.5">Google Cloud Credentials <ExternalLink size={8} /></a>.
+                              </p>
+                              <p className="text-neutral-400 mr-3.5 mt-0.5">
+                                اختر معرّف عميل الويب الخاص بك وتأكد من إدراج نطاقات التطبيق الحالية (URLs) بداخل خانة <strong className="text-zinc-300 font-normal">Authorized JavaScript Origins</strong> لتقبل المصادقة بنجاح.
+                              </p>
+                            </li>
+                          </ol>
+                          <p className="text-emerald-400 mt-2 font-bold text-[9.5px] border-t border-zinc-800 pt-1.5">
+                            💡 نصيحة: يمكنك أيضاً تسجيل مستخدم جديد بالبريد وكلمة السر لتجاوز ذلك فوراً وبدء التصفح!
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </>
               )}
 
