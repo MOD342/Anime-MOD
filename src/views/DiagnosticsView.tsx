@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -57,7 +58,7 @@ export default function DiagnosticsView({ onBack }: DiagnosticsViewProps) {
     { name: 'اتصال البنية السحابية لقاعدة البيانات (Firebase)', category: 'firebase', status: 'idle', desc: 'معاينة جاهزية الاتصال ومزامنة البيانات في Firestore لـ ' + (db?.app?.options?.projectId || '') },
   ]);
 
-  const defaultApiHost = (import.meta as any).env?.VITE_API_URL || 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
+  const defaultApiHost = import.meta.env.VITE_API_URL || 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
 
   useEffect(() => {
     // Load saved custom host if any

@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
@@ -17,7 +18,7 @@ function resolveAbsoluteUrl(input: any): any {
     
     if (!isDirectRun) {
       // استخدام متغير البيئة VITE_API_URL إن وُجد، وإلا استخدام خادم الإنتاج السحابي الافتراضي
-      const defaultHost = (import.meta as any).env?.VITE_API_URL || 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
+      const defaultHost = import.meta.env.VITE_API_URL || 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
       let absoluteHost = defaultHost;
       try {
         const storedHost = localStorage.getItem('custom_api_host');
