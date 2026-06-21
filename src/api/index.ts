@@ -9,19 +9,35 @@ import { serverCache } from '../services/cacheService';
 const router = Router();
 const scraper = new ScraperService();
 
-const aiTranslate = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let aiTranslateInstance: GoogleGenAI | null = null;
+function getAiTranslate(): GoogleGenAI | null {
+  if (!process.env.GEMINI_API_KEY) {
+    return null;
+  }
+  if (!aiTranslateInstance) {
+    try {
+      aiTranslateInstance = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
+    } catch (e: any) {
+      console.error("Failed to initialize GoogleGenAI client:", e.message);
+      return null;
     }
   }
-});
+  return aiTranslateInstance;
+}
 
 async function translateToArabic(text: string): Promise<string> {
   if (!text || !text.trim()) return text;
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn("GEMINI_API_KEY is not configured.");
+  
+  const client = getAiTranslate();
+  if (!client) {
+    console.warn("GEMINI_API_KEY is not configured or failed to initialize client.");
     return text;
   }
 
@@ -42,7 +58,7 @@ async function translateToArabic(text: string): Promise<string> {
 
   for (const model of modelsToTry) {
     try {
-      const response = await aiTranslate.models.generateContent({
+      const response = await client.models.generateContent({
         model: model,
         contents: `ترجم القصة التالية للأنمي إلى لغة عربية فصيحة ومثيرة ومشوقة لمحبين الأنمي، دون إضافة مقدمات أو كتابة "هذه هي الترجمة" أو أي كلام جانبي، فقط الترجمة المباشرة للقصة وبأسلوب عربي رائع ومفهوم:\n\n${text}`,
       });
@@ -1669,6 +1685,12 @@ async function smartQueryTranslator(queryStr: string): Promise<string> {
   }
 
   // 3. Fallback to Gemini with stable active model (gemini-3.5-flash with fallback)
+  const client = getAiTranslate();
+  if (!client) {
+    console.warn("GEMINI_API_KEY is not configured for search query translator, returning original query.");
+    return trimmed;
+  }
+
   const modelsToTry = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
   const prompt = `You are an intelligent search processor for an anime streaming application.
 The user entered an Arabic anime or character search description: "${trimmed}".
@@ -1688,7 +1710,7 @@ Respond with ONLY the plain English translated title or character name. Do NOT i
 
   for (const model of modelsToTry) {
     try {
-      const response = await aiTranslate.models.generateContent({
+      const response = await client.models.generateContent({
         model: model,
         contents: prompt,
         config: {

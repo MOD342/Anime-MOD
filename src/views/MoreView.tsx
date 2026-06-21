@@ -25,7 +25,9 @@ import {
   MessageSquare,
   CreditCard,
   Users,
-  Newspaper
+  Newspaper,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,6 +42,59 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
   const { user, signIn, logout, userData } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const userLevel = userData?.level || 1;
+
+  // الحالات والتعريفات الخاصة بتطبيق الويب التقدمي وحفظ التثبيت (PWA)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [isAlreadyInstalled, setIsAlreadyInstalled] = useState(false);
+
+  useEffect(() => {
+    // التحقق مما إذا كان الموقع قد جرى فتحه بالفعل كتطبيق منفصل مثبت مسبقاً
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsAlreadyInstalled(true);
+    }
+
+    // التحقق مما إذا كان الحدث موجوداً مسبقاً في كائن النافذة الكلي
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+      setIsInstallable(true);
+    }
+
+    const handlePwaInstallable = (e: any) => {
+      setDeferredPrompt((window as any).deferredPrompt || e.detail);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('pwa-installable', handlePwaInstallable);
+    
+    return () => {
+      window.removeEventListener('pwa-installable', handlePwaInstallable);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    const promptEvent = (window as any).deferredPrompt || deferredPrompt;
+    if (promptEvent) {
+      promptEvent.prompt();
+      const { outcome } = await promptEvent.userChoice;
+      console.log(`PWA Installation outcome: ${outcome}`);
+      if (outcome === 'accepted') {
+        (window as any).deferredPrompt = null;
+        setDeferredPrompt(null);
+        setIsInstallable(false);
+        setIsAlreadyInstalled(true);
+        setShowInstallModal(false);
+      }
+    } else {
+      setShowInstallModal(true);
+    }
+  };
+
+  const isIOS = useMemo(() => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }, []);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -96,6 +151,7 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
         { id: 'rewards', label: 'صندوق المهام والمكافآت', desc: 'العجلة الدوارة الحظية، والمهام اليومية السريعة لكسب الكوينز والذهب', icon: Gift, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
         { id: 'level_perks', label: 'امتيازات المستويات والرتب', desc: 'جدول المزايا الحصرية والصلاحيات المحصودة لمستواك الحالي', icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10' },
         { id: 'notifications', label: 'الإشعارات والتنبيهات العامة', desc: 'قائمة التنبيهات المباشرة والحصرية المرسلة من الإدارة والأصدقاء', icon: Bell, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+        { id: 'pwa_install', label: 'تثبيت التطبيق على الهاتف', desc: 'تثبيت منصة أنمي MOD كـ تطبيق فوري فائق الخفة بضغطة زر وبدون تكلفة', icon: Smartphone, color: 'text-violet-400', bg: 'bg-violet-500/10' },
       ]
     },
     {
@@ -282,6 +338,40 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
         )}
       </AnimatePresence>
 
+      {/* بنر ترويجي لتثبيت التطبيق PWA */}
+      {!isAlreadyInstalled && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative overflow-hidden bg-gradient-to-r from-red-950/25 via-neutral-950 to-[#0e0c15] border border-neutral-900 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"
+          id="pwa_install_banner"
+        >
+          {/* خلفيات مضيئة جمالية */}
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-transparent blur-2xl pointer-events-none rounded-full" />
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-gradient-to-tr from-[#FF1744]/10 to-transparent blur-2xl pointer-events-none rounded-full" />
+
+          <div className="flex items-center gap-4 text-center sm:text-right flex-col sm:flex-row relative z-10">
+            <div className="w-12 h-12 bg-[#FF1744]/15 border border-[#FF1744]/25 text-[#FF1744] rounded-2xl flex items-center justify-center shrink-0">
+              <Smartphone size={22} className="animate-pulse text-[#FF1744]" />
+            </div>
+            <div className="space-y-0.5">
+              <h4 className="text-white font-black text-sm md:text-base">تثبيت منصة أنمي MOD كتطبيق هاتف مجاني!</h4>
+              <p className="text-[11px] text-neutral-400 font-sans max-w-md leading-relaxed">
+                استمتع بفتح المنصة بضغطة زر سريعة على شاشتك الرئيسية كاختصار مرن، وتخلص من شريط المتصفح دون أي استهلاك لمساحة التخزين!
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowInstallModal(true)}
+            className="shrink-0 bg-gradient-to-r from-[#FF1744] to-red-600 text-white font-black px-6 py-3 rounded-2xl text-xs transition duration-300 w-full sm:w-auto shadow-md cursor-pointer hover:brightness-110 active:scale-98 relative z-10"
+            id="btn_trigger_pwa_banner"
+          >
+            تثبيت التطبيق الآن 📲
+          </button>
+        </motion.div>
+      )}
+
       {/* Structured Category Clusters - Bento list style */}
       <div className="space-y-8">
         {categories.map((cat, catIdx) => (
@@ -305,7 +395,13 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: itemIdx * 0.04 + catIdx * 0.1 }}
                     key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => {
+                      if (item.id === 'pwa_install') {
+                        setShowInstallModal(true);
+                      } else {
+                        onNavigate(item.id);
+                      }
+                    }}
                     className="group relative overflow-hidden bg-gradient-to-b from-[#09090c] to-[#050507] border border-neutral-900 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-3 transition-all hover:bg-neutral-900 hover:border-neutral-800 hover:-translate-y-0.5 active:translate-y-0 shadow-lg active:shadow-sm min-h-[120px]"
                     id={`btn_more_menu_${item.id}`}
                   >
@@ -347,6 +443,141 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
          <span>منصة عالم الأوتوكو العربي الحصرية والذكية • إصدار 2026.6.6</span>
          <span className="font-mono text-[9px] text-[#FF1744]/70 font-black tracking-widest uppercase">بواسطة المطور الإشرافي: MOD-342 🛡️</span>
       </div>
+
+      {/* PWA Installation Modal */}
+      <AnimatePresence>
+        {showInstallModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans" id="pwa_install_modal_wrapper">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInstallModal(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+              id="pwa_install_modal_backdrop"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#0a0a0c] border border-neutral-800 rounded-3xl p-6 shadow-2xl overflow-hidden text-right z-10"
+              id="pwa_install_modal_box"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Close Button */}
+              <button
+                onClick={() => setShowInstallModal(false)}
+                className="absolute top-4 left-4 w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition cursor-pointer font-bold text-xs"
+              >
+                ✕
+              </button>
+
+              <div className="flex flex-col items-center text-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#FF1744]/15 to-red-600/5 border border-[#FF1744]/20 flex items-center justify-center p-0.5 shadow-lg">
+                  <img src="/app_icon.png" className="w-14 h-14 rounded-xl object-cover" alt="أنمي MOD" referrerPolicy="no-referrer" />
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-lg">تثبيت منصة أنمي MOD</h3>
+                  <p className="text-xs text-neutral-400 font-sans mt-0.5">تطبيق فوري فائق الخفة - بدون تكلفة وبدون متجر تطبيقات</p>
+                </div>
+              </div>
+
+              {isInstallable ? (
+                /* Native PWA Prompt available (Android Chrome, PC Edge/Chrome, etc.) */
+                <div className="space-y-4" id="native_prompt_layout">
+                  <p className="text-xs text-neutral-300 leading-relaxed text-right font-sans">
+                    متصفحك الحالي يدعم التثبيت الفوري بنقرة واحدة كاختصار مستقل على شاشتك بمظهر التطبيق الرسمي وبدون استهلاك للإنترنت بعد التنزيل.
+                  </p>
+                  
+                  <button
+                    onClick={handleInstallClick}
+                    className="w-full bg-gradient-to-r from-[#FF1744] to-red-600 hover:scale-[1.02] active:scale-98 text-white font-black py-3 rounded-2xl text-xs transition shadow-[0_4px_25px_rgba(255,23,68,0.35)] flex items-center justify-center gap-2 cursor-pointer mt-2"
+                  >
+                    <Download size={16} />
+                    <span>ابدأ التثبيت التلقائي المباشر 🚀</span>
+                  </button>
+                </div>
+              ) : isIOS ? (
+                /* iOS Safari instructions */
+                <div className="space-y-5" id="ios_safari_instructions">
+                  <p className="text-xs text-[#FF1744] font-black border border-[#FF1744]/20 bg-[#FF1744]/5 p-3 rounded-xl leading-relaxed text-right font-sans">
+                    لأنك تستخدم متصفح Safari على نظام iOS، اتبع الإرشادات السريعة التالية لتثبيت منصة أنمي MOD:
+                  </p>
+
+                  <div className="space-y-3.5 pr-2.5 border-r border-neutral-900">
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">١</span>
+                      <p className="text-xs text-neutral-300 font-sans leading-relaxed flex-1">
+                        اضغط على زر المشاركة <span className="inline-flex bg-neutral-900 px-1.5 py-0.5 rounded-md text-white border border-neutral-800 mx-0.5 text-[10px]">📤 مشاركة / Share</span> الموجود في متصفح Safari بالأسفل.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">٢</span>
+                      <p className="text-xs text-neutral-400 font-sans leading-relaxed flex-1">
+                        قم بالتمرير للأسفل في القائمة ثم اضغط على خيار <span className="text-white font-black">"إضافة إلى الشاشة الرئيسية"</span> أو <span className="font-mono text-white text-[10px] bg-neutral-950 px-1 py-0.5 rounded border border-neutral-850">Add to Home Screen ➕</span>.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">٣</span>
+                      <p className="text-xs text-neutral-400 font-sans leading-relaxed flex-1">
+                        اكتب الاسم "أنمي MOD" ثم اضغط على زر <span className="text-[#FF1744] font-black">"إضافة"</span> أو <span className="text-[#FF1744] font-black">Add</span> بالزاوية العلوية اليسرى.
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-neutral-500 text-center font-sans mt-3">
+                    بمجرد الإضافة، ستظهر أيقونة التطبيق على شاشتك الرئيسية بجانب تطبيقاتك وسيتصرف كتطبيق فوري بالكامل!
+                  </p>
+                </div>
+              ) : (
+                /* General manual guidance */
+                <div className="space-y-5" id="generic_manual_guidance">
+                  <p className="text-xs text-neutral-300 leading-relaxed text-right font-sans">
+                    لتثبيت منصة الأنمي كاختصار مستقل على جهازك بدون متجر للتطبيقات، يرجى القيام بالتالي:
+                  </p>
+
+                  <div className="space-y-3.5 pr-2.5 border-r border-neutral-900">
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">١</span>
+                      <p className="text-xs text-neutral-300 font-sans leading-relaxed flex-1">
+                        اضغط على قائمة خيارات المتصفح ثلاثية النقاط <span className="font-black text-white">⋮</span> أو <span className="font-black text-white">☰</span> بالزاوية.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">٢</span>
+                      <p className="text-xs text-neutral-400 font-sans leading-relaxed flex-1">
+                        ابحث واضغط على خيار <span className="text-white font-black">"تثبيت التطبيق"</span> أو <span className="text-white font-black">"إضافة للشاشة الرئيسية"</span>.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 text-right">
+                      <span className="w-5 h-5 rounded-full bg-neutral-900 border border-neutral-800 text-[#FF1744] text-[10px] font-black flex items-center justify-center shrink-0">٣</span>
+                      <p className="text-xs text-neutral-400 font-sans leading-relaxed flex-1">
+                        أكّد الرغبة بالضغط على <span className="text-emerald-400 font-black">تثبيت / إضافة</span> وسيتم إضافته فوراً!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowInstallModal(false)}
+                className="w-full mt-6 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-400 hover:text-white font-black py-2.5 rounded-xl text-xs transition cursor-pointer text-center"
+              >
+                تحديث / إغلاق
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

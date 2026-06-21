@@ -5,7 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>أنمي MOD - Otaku Hub</title>
     <link rel="icon" type="image/png" href="/src/assets/images/app_icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- تهيئة توافقية PWA للهواتف الذكية وتحديداً هواتف الآيفون (iOS Safari) والآيباد -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="أنمي MOD" />
+    <link rel="apple-touch-icon" href="/app_icon.png" />
+    <meta name="theme-color" content="#FF1744" />
+    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script>
+      // تسجيل الـ Service Worker في الخلفية لإتاحة التصفح غير المباشر والتثبيت
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered successfully!', reg.scope))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        });
+      }
+
+      // اعتراض حدث التثبيت التلقائي لحفظه وطلب التثبيت يدوياً عند ضغط الزر في واجهة المستخدم
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-installable', { detail: e }));
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

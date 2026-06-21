@@ -2,7 +2,22 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { GoogleGenAI, Type } from '@google/genai';
 
 const router = Router();
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+function getAi(): GoogleGenAI | null {
+  if (!process.env.GEMINI_API_KEY) {
+    return null;
+  }
+  if (!aiInstance) {
+    try {
+      aiInstance = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    } catch (e: any) {
+      console.error("Failed to initialize GoogleGenAI:", e.message);
+      return null;
+    }
+  }
+  return aiInstance;
+}
+
 const model = 'gemini-3.5-flash';
 
 const FALLBACK_GAMES: Record<string, any[]> = {
@@ -217,6 +232,11 @@ router.post('/chat', handleAsync(async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: 'Invalid messages array.' });
   }
 
+  const ai = getAi();
+  if (!ai) {
+    return res.status(500).json({ success: false, message: 'Gemini API key is not configured or failed to initialize client.' });
+  }
+
   try {
     const userMood = mood || 'طبيعي';
     const userStatus = status || 'أتابع أنمي';
@@ -277,6 +297,13 @@ router.post('/chat', handleAsync(async (req: Request, res: Response) => {
 router.get('/games/generate', handleAsync(async (req: Request, res: Response) => {
   const { type } = req.query; // 'quotes', 'lyrics', 'imposter', 'emoji', etc.
   if (!type) return res.status(400).json({ success: false, message: 'Missing type.' });
+
+  const ai = getAi();
+  if (!ai) {
+    console.warn("[Gemini Games API] Gemini client not ready. Serving high-quality offline fallbacks directly.");
+    const fallbackQuestions = FALLBACK_GAMES[type as string] || FALLBACK_GAMES.quotes;
+    return res.json({ success: true, data: fallbackQuestions });
+  }
 
   try {
     let schemaName = "Questions";
@@ -455,6 +482,11 @@ router.get('/games/generate', handleAsync(async (req: Request, res: Response) =>
 router.get('/anti-cheat', handleAsync(async (req: Request, res: Response) => {
   const { title } = req.query;
   if (!title) return res.status(400).json({ success: false, message: 'Missing anime title.' });
+
+  const ai = getAi();
+  if (!ai) {
+    throw new Error("Gemini AI client not initialized (API key missing).");
+  }
 
   try {
     const prompt = `قم بتوليد سؤال واحد فقط متوسط إلى صعب عن الأنمي "${title}" ليثبت المستخدم أنه شاهده فعلاً (تجنب الأسئلة البديهية التي يمكن الإجابة عليها من غلاف الأنمي).`;

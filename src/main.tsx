@@ -4,25 +4,33 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
 
-// مُترضّ لطلبات الـ fetch لضمان عمل التطبيق على تطبيقات أندرويد 15 والويب فيوز (WebView) بكل سلاسة
-// حيث يقوم بتحويل المسارات النسبية المتصلة بالسيرفر (/api/...) إلى روابط كاملة تدعم بروتوكول HTTPS الآمن
+// مُعترض لطلبات الـ fetch لضمان عمل التطبيق على Vercel وتطبيقات أندرويد والويب فيوز (WebView) بكل سلاسة
+// يقوم بتحويل المسارات النسبية للـ API (/api/...) إلى روابط كاملة تشير إلى السيرفر السحابي المباشر عند تشغيل التطبيق خارج بيئة التطوير الأصلية.
 const originalFetch = window.fetch;
+
+function resolveAbsoluteUrl(input: any): any {
+  if (typeof input === 'string' && input.startsWith('/api')) {
+    const host = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // الحالات التي لا نحتاج فيها إلى تحويل الرابط (التطوير المحلي داخل حاوية AI Studio)
+    const isDirectRun = host.includes('europe-west2.run.app') || (host === 'localhost' && window.location.port === '3000');
+    
+    if (!isDirectRun) {
+      // إشارة إلى السيرفر السحابي المرفوع والجاهز للإنتاج
+      const absoluteHost = 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
+      const cleanInput = input.startsWith('/') ? input : `/${input}`;
+      return `${absoluteHost}${cleanInput}`;
+    }
+  }
+  return input;
+}
+
 try {
   Object.defineProperty(window, 'fetch', {
     value: function (input: any, init?: any) {
-      if (typeof input === 'string' && input.startsWith('/api')) {
-        const protocol = window.location.protocol;
-        // التحقق مما إذا كان التطبيق يعمل محلياً كحزمة APK في الهواتف الذكية (مثل Capacitor أو Cordova) أو عبر بروتوكولات محلية
-        const isLocal = protocol === 'file:' || protocol.includes('capacitor') || protocol.includes('ionic') || protocol.includes('app') || !window.location.host;
-        
-        if (isLocal) {
-          // استخدام رابط النشر السحابي الآمن كخادم أساسي لتمرير البيانات والطلبات
-          const absoluteHost = 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
-          input = `${absoluteHost}${input}`;
-          console.info(`[Android 15 Sync Patch] Refactored relative API call to absolute: ${input}`);
-        }
-      }
-      return originalFetch(input, init);
+      const resolvedInput = resolveAbsoluteUrl(input);
+      return originalFetch(resolvedInput, init);
     },
     writable: true,
     configurable: true,
@@ -32,15 +40,8 @@ try {
   console.warn("Failed to override window.fetch via Object.defineProperty, falling back to direct assignment:", e);
   try {
     (window as any).fetch = function (input: any, init?: any) {
-      if (typeof input === 'string' && input.startsWith('/api')) {
-        const protocol = window.location.protocol;
-        const isLocal = protocol === 'file:' || protocol.includes('capacitor') || protocol.includes('ionic') || protocol.includes('app') || !window.location.host;
-        if (isLocal) {
-          const absoluteHost = 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
-          input = `${absoluteHost}${input}`;
-        }
-      }
-      return originalFetch(input, init);
+      const resolvedInput = resolveAbsoluteUrl(input);
+      return originalFetch(resolvedInput, init);
     };
   } catch (err) {
     console.error("Could not override fetch at all:", err);
