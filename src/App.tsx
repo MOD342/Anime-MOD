@@ -51,7 +51,7 @@ const ViewFallback = () => (
 export default function App() {
   const { banInfo, user, userRole, loading } = useAuth();
   const [activeTab, setActiveTab ] = useState('home');
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [askPermissions, setAskPermissions] = useState(false);
   const [viewStack, setViewStack] = useState<{name: string, props?: any}[]>([{ name: 'home' }]);
   const [activeToasts, setActiveToasts] = useState<any[]>([]);
@@ -304,6 +304,21 @@ export default function App() {
       setViewStack(prev => [...prev, { name: 'ai_chat' }]);
     };
     window.addEventListener('open-ai-chat', handleOpenChat);
+
+    // Prompt for permissions on mount (since splash loading is removed)
+    if (typeof window !== 'undefined') {
+      const prompted = localStorage.getItem('mod_permissions_prompted');
+      if (prompted !== 'true') {
+        const timer = setTimeout(() => {
+          setAskPermissions(true);
+        }, 800);
+        return () => {
+          window.removeEventListener('open-ai-chat', handleOpenChat);
+          clearTimeout(timer);
+        };
+      }
+    }
+
     return () => window.removeEventListener('open-ai-chat', handleOpenChat);
   }, []);
 
