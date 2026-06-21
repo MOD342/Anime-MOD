@@ -36,6 +36,7 @@ const AiChatView = lazy(() => import('./views/AiChatView'));
 const AdSupportView = lazy(() => import('./views/AdSupportView'));
 const SupportPortalView = lazy(() => import('./views/SupportPortalView'));
 const SuggestionsHubView = lazy(() => import('./views/SuggestionsHubView'));
+const DiagnosticsView = lazy(() => import('./views/DiagnosticsView'));
 
 const AiChatWidget = lazy(() => import('./components/AiChatWidget'));
 import { MascotLoadingScreen, MascotOfflineScreen } from './components/MascotScreens';
@@ -460,6 +461,8 @@ export default function App() {
         return <NotificationsView onBack={goBack} onNavigate={navigateTo} />;
       case 'suggestions_hub':
         return <SuggestionsHubView onBack={goBack} />;
+      case 'diagnostics':
+        return <DiagnosticsView onBack={goBack} />;
       case 'ai_chat':
         return <AiChatView onBack={goBack} />;
       case 'ad_support':
@@ -480,7 +483,7 @@ export default function App() {
   };
 
   // Do not show AppLayout (top/bottom navs) if we are in fullscreen views like details or watch
-  const isFullScreenView = currentView.name === 'suggestions_hub' || currentView.name === 'ai_chat' || currentView.name === 'level_perks' || currentView.name === 'anime_details' || currentView.name === 'anime_comments' || currentView.name === 'watch_episode' || currentView.name === 'admin' || currentView.name === 'games' || currentView.name === 'leaderboard' || currentView.name === 'store' || currentView.name === 'schedule' || currentView.name === 'tournaments' || currentView.name === 'recent_episodes' || currentView.name === 'current_season' || currentView.name === 'rewards' || currentView.name === 'other_profile' || currentView.name === 'favorites' || currentView.name === 'notifications' || currentView.name === 'ad_support' || currentView.name === 'support_help' || currentView.name === 'support_suggestions' || currentView.name === 'support_donate' || currentView.name === 'support_chat' || currentView.name === 'support_news';
+  const isFullScreenView = currentView.name === 'diagnostics' || currentView.name === 'suggestions_hub' || currentView.name === 'ai_chat' || currentView.name === 'level_perks' || currentView.name === 'anime_details' || currentView.name === 'anime_comments' || currentView.name === 'watch_episode' || currentView.name === 'admin' || currentView.name === 'games' || currentView.name === 'leaderboard' || currentView.name === 'store' || currentView.name === 'schedule' || currentView.name === 'tournaments' || currentView.name === 'recent_episodes' || currentView.name === 'current_season' || currentView.name === 'rewards' || currentView.name === 'other_profile' || currentView.name === 'favorites' || currentView.name === 'notifications' || currentView.name === 'ad_support' || currentView.name === 'support_help' || currentView.name === 'support_suggestions' || currentView.name === 'support_donate' || currentView.name === 'support_chat' || currentView.name === 'support_news';
 
   return (
     <>

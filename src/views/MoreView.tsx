@@ -171,9 +171,10 @@ export default function MoreView({ onNavigate }: MoreViewProps) {
       ]
     },
     {
-      title: '💰 الدعم والتواصل',
+      title: '💰 الدعم والتواصل والتشخيص',
       items: [
         { id: 'support_help', label: 'الدعم والتواصل', desc: 'بوابة الدعم المالي والإعلاني، وتواصل مباشر مع الإدارة والقروب والشكاوى مجمعة في مكان واحد', icon: HelpCircle, color: 'text-red-400', bg: 'bg-[#FF1744]/15' },
+        { id: 'diagnostics', label: 'أدوات فحص الاتصال والشبكة', desc: 'اختبار الاتصال بالخادم السحابي وفحص قواعد البيانات وتجاوز مشكلات عدم تحميل البيانات بالخارج أو بالـ APK', icon: LayoutGrid, color: 'text-amber-400', bg: 'bg-amber-500/10' },
       ]
     }
   ];

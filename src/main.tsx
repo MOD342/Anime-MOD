@@ -11,16 +11,26 @@ const originalFetch = window.fetch;
 function resolveAbsoluteUrl(input: any): any {
   if (typeof input === 'string' && input.startsWith('/api')) {
     const host = window.location.hostname;
-    const protocol = window.location.protocol;
     
     // الحالات التي لا نحتاج فيها إلى تحويل الرابط (التطوير المحلي داخل حاوية AI Studio)
     const isDirectRun = host.includes('europe-west2.run.app') || (host === 'localhost' && window.location.port === '3000');
     
     if (!isDirectRun) {
-      // إشارة إلى السيرفر السحابي المرفوع والجاهز للإنتاج
-      const absoluteHost = 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
+      // استخدام متغير البيئة VITE_API_URL إن وُجد، وإلا استخدام خادم الإنتاج السحابي الافتراضي
+      const defaultHost = (import.meta as any).env?.VITE_API_URL || 'https://ais-pre-n66z4zqpsskq4rqmdhuz4r-358090555339.europe-west2.run.app';
+      let absoluteHost = defaultHost;
+      try {
+        const storedHost = localStorage.getItem('custom_api_host');
+        if (storedHost && storedHost.trim()) {
+          absoluteHost = storedHost.trim();
+        }
+      } catch (err) {
+        console.warn('Could not read custom_api_host from localStorage:', err);
+      }
+      
+      const cleanHost = absoluteHost.endsWith('/') ? absoluteHost.slice(0, -1) : absoluteHost;
       const cleanInput = input.startsWith('/') ? input : `/${input}`;
-      return `${absoluteHost}${cleanInput}`;
+      return `${cleanHost}${cleanInput}`;
     }
   }
   return input;
