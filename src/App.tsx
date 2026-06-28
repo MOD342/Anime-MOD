@@ -392,7 +392,7 @@ export default function App() {
   const renderView = () => {
     switch (currentView.name) {
       case 'home':
-        return <HomeView onAnimeClick={(id) => navigateTo('anime_details', { id })} onNavigateToGames={() => navigateTo('games')} onSearchCategory={(cat) => { setActiveTab('watch'); navigateTo('watch', { initialQuery: cat }); }} onNavigateToSchedule={(day) => navigateTo('schedule', { initialDay: day })} onNavigateToRecent={() => navigateTo('recent_episodes')} onNavigateToSeason={() => navigateTo('current_season')} />;
+        return <HomeView onAnimeClick={(id, epNum) => navigateTo('anime_details', { id, autoplayEpisode: epNum })} onNavigateToGames={() => navigateTo('games')} onSearchCategory={(cat) => { setActiveTab('watch'); navigateTo('watch', { initialQuery: cat }); }} onNavigateToSchedule={(day) => navigateTo('schedule', { initialDay: day })} onNavigateToRecent={() => navigateTo('recent_episodes')} onNavigateToSeason={() => navigateTo('current_season')} />;
       case 'watch': 
         return <ExploreView onAnimeClick={(id) => navigateTo('anime_details', { id })} initialQuery={currentView.props?.initialQuery} />;
       case 'community':
@@ -408,7 +408,7 @@ export default function App() {
       case 'other_profile':
         return <ProfileView userId={currentView.props?.userId} onBack={goBack} />;
       case 'anime_details':
-        return <AnimeDetailsView key={currentView.props?.t || currentView.props?.id} id={currentView.props?.id} showComments={currentView.props?.showComments} focusCommentId={currentView.props?.focusCommentId} onBack={goBack} onWatch={(ep, anime) => navigateTo('watch_episode', { episode: ep, anime })} onAnimeClick={(id) => navigateTo('anime_details', id === 'random' ? { id: 'random', t: Date.now() } : { id })} onNavigate={navigateTo} />;
+        return <AnimeDetailsView key={currentView.props?.t || currentView.props?.id} id={currentView.props?.id} showComments={currentView.props?.showComments} focusCommentId={currentView.props?.focusCommentId} autoplayEpisode={currentView.props?.autoplayEpisode} onBack={goBack} onWatch={(ep, anime) => navigateTo('watch_episode', { episode: ep, anime })} onAnimeClick={(id, epNum) => navigateTo('anime_details', id === 'random' ? { id: 'random', t: Date.now() } : { id, autoplayEpisode: epNum })} onNavigate={navigateTo} />;
       case 'anime_comments':
         return <AnimeCommentsView animeId={currentView.props?.animeId} focusCommentId={currentView.props?.focusCommentId} onBack={goBack} onAnimeClick={(id) => navigateTo('anime_details', { id })} onUserClick={(userId) => navigateTo('other_profile', { userId })} />;
       case 'watch_episode':
@@ -448,7 +448,7 @@ export default function App() {
       case 'store':
         return <StoreView onBack={goBack} />;
       case 'recent_episodes':
-        return <RecentEpisodesView onBack={goBack} onAnimeClick={(id) => navigateTo('anime_details', { id })} />;
+        return <RecentEpisodesView onBack={goBack} onAnimeClick={(id, epNum) => navigateTo('anime_details', { id, autoplayEpisode: epNum })} />;
       case 'current_season':
         return <CurrentSeasonView onBack={goBack} onAnimeClick={(id) => navigateTo('anime_details', { id })} />;
       case 'level_perks':

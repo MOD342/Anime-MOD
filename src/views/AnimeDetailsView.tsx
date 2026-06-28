@@ -88,9 +88,10 @@ interface AnimeDetailsProps {
   id?: string;
   showComments?: boolean;
   focusCommentId?: string;
+  autoplayEpisode?: string;
   onBack: () => void;
   onWatch: (episode: any, anime: any) => void;
-  onAnimeClick?: (id: string) => void;
+  onAnimeClick?: (id: string, autoplayEpisode?: string) => void;
   onNavigate?: (view: string, props?: any) => void;
 }
 
@@ -117,7 +118,7 @@ const RELATION_TYPES_AR: Record<string, string> = {
   'Other': 'أخرى'
 };
 
-export default function AnimeDetailsView({ id, showComments = false, focusCommentId, onBack, onWatch, onAnimeClick, onNavigate }: AnimeDetailsProps) {
+export default function AnimeDetailsView({ id, showComments = false, focusCommentId, autoplayEpisode, onBack, onWatch, onAnimeClick, onNavigate }: AnimeDetailsProps) {
   const { user, signIn, userRole, userData } = useAuth();
   const [anime, setAnime] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -142,6 +143,17 @@ export default function AnimeDetailsView({ id, showComments = false, focusCommen
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollYDetails]);
+
+  // Autoplay episode if specified
+  useEffect(() => {
+    if (anime && autoplayEpisode) {
+      const targetEp = anime.episodes?.find((e: any) => e.num === autoplayEpisode || e.title?.includes(autoplayEpisode) || e.num === parseInt(autoplayEpisode).toString());
+      if (targetEp) {
+        console.log(`[Autoplay] Launching watch player for episode ${autoplayEpisode}`);
+        onWatch(targetEp, anime);
+      }
+    }
+  }, [anime, autoplayEpisode, onWatch]);
   
   const [userEntry, setUserEntry] = useState<AnimeEntry | null>(null);
   const [customLists, setCustomLists] = useState<CustomList[]>([]);

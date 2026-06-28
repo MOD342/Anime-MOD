@@ -22,6 +22,7 @@ export interface EpisodeServer {
 
 export class ScraperService {
   private readonly defaultBaseUrls = [
+    'https://ristoanime.me',
     'https://witaanime.com',
     'https://witanime.net',
     'https://ristoanime.co',
@@ -282,6 +283,18 @@ export class ScraperService {
           const link = $(el).attr('href') || '';
           if (!link) return;
 
+          if (link.includes('/series/') || link.includes('/anime-type/') || link.includes('/genre/')) {
+            return;
+          }
+
+          const isEpisodeLink = link.includes('/episode/') || link.includes('/episode') || link.includes('/حلقة-') || link.includes('%d8%a7%d9%84%d8%ad%d9%84%d9%82%d8%a9') || link.includes('%d8%ad%d9%84%d9%82%d8%a9-');
+          let rawTitle = $(el).find('.title h4').text().trim() || $(el).find('.title').text().trim() || $(el).text().trim();
+          rawTitle = rawTitle.replace(/\s+/g, ' ');
+
+          if (!isEpisodeLink && !rawTitle.includes('حلقة') && !rawTitle.includes('الحلقة')) {
+            return;
+          }
+
           // Extract image
           let imageUrl = '';
           const posterDiv = $(el).find('.poster');
@@ -292,10 +305,6 @@ export class ScraperService {
           } else {
             imageUrl = posterDiv.find('img').attr('src') || $(el).find('img').attr('src') || '';
           }
-
-          // Extract title of episode
-          let rawTitle = $(el).find('.title h4').text().trim() || $(el).find('.title').text().trim() || $(el).text().trim();
-          rawTitle = rawTitle.replace(/\s+/g, ' ');
 
           const { episode, title: parsedTitle } = this.parseEpisodeAndTitle(rawTitle);
           const cleanTitle = parsedTitle.replace(/^انمي\s+/i, '').trim();
@@ -316,8 +325,18 @@ export class ScraperService {
         // Witaanime uses .CARTA or .bita9a-link inside episodes view
         $('a.CARTA, a.bita9a-link').each((_, el) => {
           const link = $(el).attr('href') || '';
-          const rawText = $(el).text().trim().replace(/\s+/g, ' ');
           if (!link) return;
+
+          if (link.includes('/series/') || link.includes('/anime-type/') || link.includes('/genre/')) {
+            return;
+          }
+
+          const isEpisodeLink = link.includes('/episode/') || link.includes('/episode') || link.includes('/حلقة-') || link.includes('%d8%a7%d9%84%d8%ad%d9%84%d9%82%d8%a9') || link.includes('%d8%ad%d9%84%d9%82%d8%a9-');
+          const rawText = $(el).text().trim().replace(/\s+/g, ' ');
+
+          if (!isEpisodeLink && !rawText.includes('حلقة') && !rawText.includes('الحلقة')) {
+            return;
+          }
 
           // Extract image
           let imageUrl = $(el).find('img').attr('src') || '';
@@ -343,31 +362,152 @@ export class ScraperService {
         });
       }
 
+      // Universal Fallback Selector Scan if specific layouts did not return any items
+      if (items.length === 0) {
+        $('a').each((_, el) => {
+          const link = $(el).attr('href') || '';
+          if (!link) return;
+
+          if (link.includes('/series/') || link.includes('/anime-type/') || link.includes('/genre/')) {
+            return;
+          }
+
+          const isEpisodeLink = link.includes('/episode/') || link.includes('/episode') || link.includes('/حلقة-') || link.includes('%d8%a7%d9%84%d8%ad%d9%84%d9%82%d8%a9') || link.includes('%d8%ad%d9%84%d9%82%d8%a9-');
+          if (!isEpisodeLink) return;
+
+          let rawText = $(el).find('.title h4').text().trim() || 
+                        $(el).find('.title').text().trim() || 
+                        $(el).find('h4').text().trim() || 
+                        $(el).find('h3').text().trim() || 
+                        $(el).text().trim();
+          rawText = rawText.replace(/\s+/g, ' ');
+
+          // Extract image
+          let imageUrl = '';
+          const styleAttr = $(el).attr('style') || $(el).attr('data-style') || $(el).find('.poster, .bita9a').attr('style') || '';
+          const match = styleAttr.match(/url\(['"]?(.*?)['"]?\)/);
+          if (match) {
+            imageUrl = match[1];
+          } else {
+            imageUrl = $(el).find('img').attr('src') || $(el).find('img').attr('data-src') || '';
+          }
+
+          const { episode, title } = this.parseEpisodeAndTitle(rawText);
+          const cleanTitle = title.replace(/^انمي\s+/i, '').trim();
+          const id = link.split('/').filter(Boolean).pop() || 'unknown';
+
+          if (cleanTitle && link && !items.some(it => it.link === link)) {
+            items.push({
+              id,
+              title: cleanTitle,
+              episode,
+              link,
+              imageUrl: imageUrl || 'https://via.placeholder.com/300x400?text=No+Image'
+            });
+          }
+        });
+      }
+
       if (items.length > 0) {
         await this.setCache(cacheKey, items, 5 * 60 * 1000); // 5 minutes cache
         return items;
       }
       throw new Error('No items found from RistoAnime scraper');
     } catch (error: any) {
-      // Quietly fall back to Jikan API if the scraper fails (e.g. cloudflare down or offline)
+      console.warn(`[Scraper] getRecentEpisodes failed: ${error.message || error}. Attempting stale cache fallback...`);
+      
+      // 1. First, try to get stale cache (expired but contains real scraped episodes)
       try {
-        const json = await this.safeFetchJikan('https://api.jikan.moe/v4/watch/episodes', 3, 15 * 60 * 1000);
-        if (json && Array.isArray(json.data)) {
-          const items: AnimeItem[] = [];
-          json.data.forEach((item: any) => {
-            const title = item.entry.title;
-            const link = `/anime/${item.entry.mal_id}/`;
-            const imageUrl = item.entry.images?.jpg?.large_image_url || item.entry.images?.jpg?.image_url || '';
-            const episode = item.episodes?.[0]?.title ? item.episodes[0].title.replace(/^\D+/g, '') : (item.episodes?.[0]?.mal_id?.toString() || '1');
-            const id = item.entry.mal_id.toString();
-            if (title && id) {
-              items.push({ id, title, episode, link, imageUrl });
-            }
-          });
-          if (items.length > 0) {
-            await this.setCache(cacheKey, items, 15 * 60 * 1000); // 15 mins cache
-            return items;
+        const staleCached = await serverCache.get<AnimeItem[]>(cacheKey, true);
+        if (staleCached && Array.isArray(staleCached) && staleCached.length > 0) {
+          console.log(`[Scraper] Successfully loaded stale cache with ${staleCached.length} real episodes as error fallback.`);
+          return staleCached;
+        }
+      } catch (staleErr: any) {
+        console.warn('[Scraper] Failed to fetch stale cache fallback:', staleErr.message);
+      }
+
+      // 2. Fall back to current season ongoing anime if the scraper fails and no stale cache is available
+      try {
+        const items: AnimeItem[] = [];
+        try {
+          console.log('[Scraper Fallback] Fetching current season ongoing anime...');
+          const seasonJson = await this.safeFetchJikan('https://api.jikan.moe/v4/seasons/now?limit=25', 3, 2 * 60 * 60 * 1000);
+          if (seasonJson && Array.isArray(seasonJson.data)) {
+            seasonJson.data.forEach((anime: any, index: number) => {
+              const animeId = String(anime.mal_id);
+              const title = anime.title_english || anime.title;
+              let episode = '12';
+              if (anime.aired?.from) {
+                const airDate = new Date(anime.aired.from);
+                const diffWeeks = Math.floor((Date.now() - airDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+                if (diffWeeks >= 0) {
+                  episode = String(diffWeeks + 1);
+                } else {
+                  episode = String(12 - (index % 5));
+                }
+              } else {
+                episode = String(12 - (index % 5));
+              }
+
+              if (anime.episodes && Number(episode) > anime.episodes) {
+                episode = String(anime.episodes);
+              }
+
+              const imageUrl = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
+              
+              if (title) {
+                items.push({
+                  id: animeId,
+                  title,
+                  episode,
+                  link: `/anime/${animeId}/`,
+                  imageUrl
+                });
+              }
+            });
           }
+        } catch (seasonErr: any) {
+          console.warn('[Scraper Fallback] Failed to fetch current season:', seasonErr.message);
+        }
+
+        // 3. Supplement with curated high-quality popular modern anime to reach at least 24 items
+        const staticPopularFallbacks = [
+          { id: "57334", title: "Dandadan", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1206/143532l.jpg" },
+          { id: "41467", title: "Bleach: Thousand-Year Blood War", episode: "13", imageUrl: "https://cdn.myanimelist.net/images/anime/1764/126627l.jpg" },
+          { id: "56163", title: "Solo Leveling", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1097/140263l.jpg" },
+          { id: "52991", title: "Frieren: Beyond Journey's End", episode: "28", imageUrl: "https://cdn.myanimelist.net/images/anime/1015/138075l.jpg" },
+          { id: "21", title: "One Piece", episode: "1115", imageUrl: "https://cdn.myanimelist.net/images/anime/1244/138851l.jpg" },
+          { id: "38000", title: "Demon Slayer: Kimetsu no Yaiba", episode: "26", imageUrl: "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg" },
+          { id: "40748", title: "Jujutsu Kaisen", episode: "24", imageUrl: "https://cdn.myanimelist.net/images/anime/1120/120495l.jpg" },
+          { id: "50602", title: "Chainsaw Man", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1806/126216l.jpg" },
+          { id: "54865", title: "Kaiju No. 8", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1039/141887l.jpg" },
+          { id: "52347", title: "Shangri-La Frontier", episode: "25", imageUrl: "https://cdn.myanimelist.net/images/anime/1004/137684l.jpg" },
+          { id: "49596", title: "Blue Lock", episode: "24", imageUrl: "https://cdn.myanimelist.net/images/anime/1210/125345l.jpg" },
+          { id: "51535", title: "Attack on Titan: The Final Season", episode: "29", imageUrl: "https://cdn.myanimelist.net/images/anime/1917/124803l.jpg" },
+          { id: "52211", title: "Mashle: Magic and Muscles", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1653/135999l.jpg" },
+          { id: "49387", title: "Hell's Paradise", episode: "13", imageUrl: "https://cdn.myanimelist.net/images/anime/1832/134442l.jpg" },
+          { id: "52089", title: "Oshi no Ko", episode: "11", imageUrl: "https://cdn.myanimelist.net/images/anime/1814/128455l.jpg" },
+          { id: "50739", title: "Vinland Saga Season 2", episode: "24", imageUrl: "https://cdn.myanimelist.net/images/anime/1317/128522l.jpg" },
+          { id: "50172", title: "Mob Psycho 100 III", episode: "12", imageUrl: "https://cdn.myanimelist.net/images/anime/1222/126916l.jpg" }
+        ];
+
+        staticPopularFallbacks.forEach((anime) => {
+          if (items.length < 24 && !items.some(it => it.title.toLowerCase() === anime.title.toLowerCase())) {
+            items.push({
+              id: anime.id,
+              title: anime.title,
+              episode: anime.episode,
+              link: `/anime/${anime.id}/`,
+              imageUrl: anime.imageUrl
+            });
+          }
+        });
+
+        if (items.length > 0) {
+          // Transient fallback cache of 30 seconds so we retry scraping the real sites quickly
+          await this.setCache(cacheKey, items, 30 * 1000); 
+          return items;
         }
       } catch (e: any) {
         // Quiet fallback failure
@@ -563,6 +703,9 @@ export class ScraperService {
         'movie', 'special', 'ova', 'ona', 'rewrite', 'recap', 'spin-off', 'filler',
         'فيلم', 'فلم', 'خاصة', 'الأفلام', 'أوفا', 'اونا', 'خصوم', 'تعديل', 'إعادة'
       ];
+      const listKeywords = [
+        'جميع حلقات', 'جميع مواسم', 'جميع الحلقات', 'أرشيف', 'قائمة', 'تصنيف', 'أرشيفات'
+      ];
       const queryHasSpecialWord = specialKeywords.some(kw => cleanQuery.includes(kw));
 
       let bestSlug = results[0].slug;
@@ -604,6 +747,12 @@ export class ScraperService {
         const titleHasSpecialWord = specialKeywords.some(kw => cleanTitle.includes(kw) || cleanSlug.includes(kw));
         if (titleHasSpecialWord && !queryHasSpecialWord) {
           score -= 1000; // Strong penalty to push specials/rewrites/movies to the bottom
+        }
+
+        // 6. Generic list pages heavy penalty to prioritize real profiles
+        const titleHasListWord = listKeywords.some(kw => cleanTitle.includes(kw) || cleanSlug.includes(kw));
+        if (titleHasListWord) {
+          score -= 2000; // Major penalty to avoid listing/archive/tag/category pages
         }
 
         score -= titleWords.length * 2;
@@ -667,17 +816,33 @@ export class ScraperService {
       const episodesMap = new Map<string, any>();
       // Witaanime uses div.EpisodesList a or similar
       $('div.EpisodesList a, .EpisodesList a').each((_, el) => {
+        const epLink = $(el).attr('href') || '';
+        if (!epLink) return;
+
+        // Strictly exclude related parent seasons, series profiles or generic tags/categories
+        if (epLink.includes('/series/') || epLink.includes('/anime-type/') || epLink.includes('/genre/')) {
+          return;
+        }
+
+        // Must be a valid episode link or contain episode indicators in Arabic/English
+        const isEpisodeLink = epLink.includes('/episode/') || epLink.includes('/episode') || epLink.includes('/حلقة-') || epLink.includes('-حلقة-') || epLink.includes('%d8%a7%d9%84%d8%ad%d9%84%d9%82%d8%a9') || epLink.includes('%d8%ad%d9%84%d9%82%d8%a9-');
         let epTitle = $(el).text().trim();
+        if (!isEpisodeLink && !epTitle.includes('حلقة') && !epTitle.includes('الحلقة') && !epTitle.includes('خاصة') && !epTitle.includes('أوفا') && !epTitle.includes('اونا')) {
+          return;
+        }
+
         if (!epTitle) return;
         epTitle = epTitle.split('\n')[0].trim() || 'حلقة';
         
-        const epLink = $(el).attr('href') || '';
         const epId = epLink.split('/').filter(Boolean).pop() || '';
-        
         if (epId && !episodesMap.has(epId)) {
+          // Parse secure episode number
+          const numMatch = epTitle.match(/\d+/);
+          const num = numMatch ? numMatch[0] : '1';
+          
           episodesMap.set(epId, {
             id: epId,
-            num: epTitle.match(/\d+/)?.[0] || '1',
+            num,
             title: epTitle,
             link: epLink
           });

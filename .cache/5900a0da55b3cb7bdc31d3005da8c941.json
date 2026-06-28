@@ -1,0 +1,1494 @@
+{
+  "data": {
+    "pagination": {
+      "last_visible_page": 1,
+      "has_next_page": false,
+      "current_page": 1,
+      "items": {
+        "count": 11,
+        "total": 11,
+        "per_page": 20
+      }
+    },
+    "data": [
+      {
+        "mal_id": 63383,
+        "url": "https://myanimelist.net/anime/63383/Kumarba_Season_3",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1148/155162.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1148/155162t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1148/155162l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1148/155162.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1148/155162t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1148/155162l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/ZMbzOD0r_Us?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Kumarba Season 3"
+          },
+          {
+            "type": "Japanese",
+            "title": "クマーバ シーズン3"
+          }
+        ],
+        "title": "Kumarba Season 3",
+        "title_english": null,
+        "title_japanese": "クマーバ シーズン3",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Other",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2026-04-12T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 12,
+              "month": 4,
+              "year": 2026
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Apr 12, 2026 to ?"
+        },
+        "duration": "1 min",
+        "rating": "PG - Children",
+        "score": null,
+        "scored_by": null,
+        "rank": 18244,
+        "popularity": 24567,
+        "members": 169,
+        "favorites": 0,
+        "synopsis": "Third season of Kumarba.",
+        "background": "",
+        "season": "spring",
+        "year": 2026,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "07:00",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 07:00 (JST)"
+        },
+        "producers": [],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 3281,
+            "type": "anime",
+            "name": "Akatsuki Media Studio",
+            "url": "https://myanimelist.net/anime/producer/3281/Akatsuki_Media_Studio"
+          }
+        ],
+        "genres": [],
+        "explicit_genres": [],
+        "themes": [],
+        "demographics": [
+          {
+            "mal_id": 15,
+            "type": "anime",
+            "name": "Kids",
+            "url": "https://myanimelist.net/anime/genre/15/Kids"
+          }
+        ]
+      },
+      {
+        "mal_id": 62933,
+        "url": "https://myanimelist.net/anime/62933/Shou_3_Ashibe_QQ_Goma-chan",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1899/155697.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1899/155697t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1899/155697l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1899/155697.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1899/155697t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1899/155697l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": null,
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Shou 3 Ashibe QQ Goma-chan"
+          },
+          {
+            "type": "Japanese",
+            "title": "小３アシベ QQゴマちゃん"
+          }
+        ],
+        "title": "Shou 3 Ashibe QQ Goma-chan",
+        "title_english": null,
+        "title_japanese": "小３アシベ QQゴマちゃん",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2026-04-12T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 12,
+              "month": 4,
+              "year": 2026
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Apr 12, 2026 to ?"
+        },
+        "duration": "2 min",
+        "rating": "G - All Ages",
+        "score": null,
+        "scored_by": null,
+        "rank": 20510,
+        "popularity": 21560,
+        "members": 304,
+        "favorites": 2,
+        "synopsis": null,
+        "background": "",
+        "season": "spring",
+        "year": 2026,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "07:00",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 07:00 (JST)"
+        },
+        "producers": [],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 276,
+            "type": "anime",
+            "name": "DLE",
+            "url": "https://myanimelist.net/anime/producer/276/DLE"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 4,
+            "type": "anime",
+            "name": "Comedy",
+            "url": "https://myanimelist.net/anime/genre/4/Comedy"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 71,
+            "type": "anime",
+            "name": "Pets",
+            "url": "https://myanimelist.net/anime/genre/71/Pets"
+          }
+        ],
+        "demographics": [
+          {
+            "mal_id": 42,
+            "type": "anime",
+            "name": "Seinen",
+            "url": "https://myanimelist.net/anime/genre/42/Seinen"
+          }
+        ]
+      },
+      {
+        "mal_id": 38776,
+        "url": "https://myanimelist.net/anime/38776/Manul_no_Yuube",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1980/96936.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1980/96936t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1980/96936l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1980/96936.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1980/96936t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1980/96936l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": null,
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Manul no Yuube"
+          },
+          {
+            "type": "Japanese",
+            "title": "マヌ～ルのゆうべ"
+          }
+        ],
+        "title": "Manul no Yuube",
+        "title_english": null,
+        "title_japanese": "マヌ～ルのゆうべ",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Web manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2018-11-11T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 11,
+              "month": 11,
+              "year": 2018
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Nov 11, 2018 to ?"
+        },
+        "duration": "1 min",
+        "rating": "PG-13 - Teens 13 or older",
+        "score": null,
+        "scored_by": null,
+        "rank": 18595,
+        "popularity": 14892,
+        "members": 1126,
+        "favorites": 1,
+        "synopsis": "Within the nature \"Darwin Kita! Kikimono Shin Densetsu\" program on NHK1.5 airs the short Manul no Yuube, based on a web manga/comic of the same name. It following animal characters who visit the bar Manul no Yuube. The bar is run by the Mama who is a Pallas's cat (Otocolobus manul) and serviced by the hostess Tsunomin who is a Brazilian treehopper (Bocydium globulare).",
+        "background": "",
+        "season": "fall",
+        "year": 2018,
+        "broadcast": {
+          "day": null,
+          "time": null,
+          "timezone": null,
+          "string": "Sundays at Unknown"
+        },
+        "producers": [
+          {
+            "mal_id": 111,
+            "type": "anime",
+            "name": "NHK",
+            "url": "https://myanimelist.net/anime/producer/111/NHK"
+          }
+        ],
+        "licensors": [],
+        "studios": [],
+        "genres": [
+          {
+            "mal_id": 36,
+            "type": "anime",
+            "name": "Slice of Life",
+            "url": "https://myanimelist.net/anime/genre/36/Slice_of_Life"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [],
+        "demographics": []
+      },
+      {
+        "mal_id": 63352,
+        "url": "https://myanimelist.net/anime/63352/Onegai_AiPri",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1705/155680.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1705/155680t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1705/155680l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1705/155680.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1705/155680t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1705/155680l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/j5MgjyhhUBc?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Onegai AiPri"
+          },
+          {
+            "type": "Synonym",
+            "title": "+Himitsu no AiPri 3rd Season"
+          },
+          {
+            "type": "Japanese",
+            "title": "おねがいアイプリ"
+          }
+        ],
+        "title": "Onegai AiPri",
+        "title_english": null,
+        "title_japanese": "おねがいアイプリ",
+        "title_synonyms": [
+          "+Himitsu no AiPri 3rd Season"
+        ],
+        "type": "TV",
+        "source": "Game",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2026-04-05T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 5,
+              "month": 4,
+              "year": 2026
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Apr 5, 2026 to ?"
+        },
+        "duration": "24 min",
+        "rating": "PG - Children",
+        "score": 5.93,
+        "scored_by": 120,
+        "rank": 11206,
+        "popularity": 14464,
+        "members": 1242,
+        "favorites": 4,
+        "synopsis": "The new anime's story centers on Konomi Inori, a first year middle school student who just moved to the town of Onegai. At the town's plaza, Konomi prayed to the goddess statue to give her a chance to be an AiPri. After she prayed, she accidentally meets the famous AiPri Aoi Yumemiya and a mysterious talking stuffed toy with her named Fortu. It turns out that Fortu is looking for an AiPri who can make their wish come true, and when Konomi opened the special mirror pact that Aoi handed her, she gets the AiPri debut that she prayed for. \n\n(Source: ANN)",
+        "background": "",
+        "season": "spring",
+        "year": 2026,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "09:30",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 09:30 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 16,
+            "type": "anime",
+            "name": "TV Tokyo",
+            "url": "https://myanimelist.net/anime/producer/16/TV_Tokyo"
+          },
+          {
+            "mal_id": 1284,
+            "type": "anime",
+            "name": "Avex Pictures",
+            "url": "https://myanimelist.net/anime/producer/1284/Avex_Pictures"
+          },
+          {
+            "mal_id": 1430,
+            "type": "anime",
+            "name": "Shogakukan",
+            "url": "https://myanimelist.net/anime/producer/1430/Shogakukan"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 28,
+            "type": "anime",
+            "name": "OLM",
+            "url": "https://myanimelist.net/anime/producer/28/OLM"
+          },
+          {
+            "mal_id": 1025,
+            "type": "anime",
+            "name": "Dongwoo A&E",
+            "url": "https://myanimelist.net/anime/producer/1025/Dongwoo_A_E"
+          }
+        ],
+        "genres": [],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 60,
+            "type": "anime",
+            "name": "Idols (Female)",
+            "url": "https://myanimelist.net/anime/genre/60/Idols_Female"
+          },
+          {
+            "mal_id": 19,
+            "type": "anime",
+            "name": "Music",
+            "url": "https://myanimelist.net/anime/genre/19/Music"
+          }
+        ],
+        "demographics": []
+      },
+      {
+        "mal_id": 60534,
+        "url": "https://myanimelist.net/anime/60534/Koupen-chan",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1533/146981.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1533/146981t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1533/146981l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1533/146981.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1533/146981t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1533/146981l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/jPKV0TiwBsw?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Koupen-chan"
+          },
+          {
+            "type": "Japanese",
+            "title": "コウペンちゃん"
+          }
+        ],
+        "title": "Koupen-chan",
+        "title_english": null,
+        "title_japanese": "コウペンちゃん",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Original",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2025-04-06T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 6,
+              "month": 4,
+              "year": 2025
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Apr 6, 2025 to ?"
+        },
+        "duration": "1 min",
+        "rating": "G - All Ages",
+        "score": 7.55,
+        "scored_by": 955,
+        "rank": 1948,
+        "popularity": 8460,
+        "members": 6917,
+        "favorites": 80,
+        "synopsis": "A baby emperor penguin, Koupen-chan, always makes sure everyone feels included. As it meets its newest friend, Koupen-chan wishes to spend as much time as possible with them and brighten up their day.\n\n[Written by MAL Rewrite]",
+        "background": "",
+        "season": "spring",
+        "year": 2025,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "08:00",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 08:00 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 2402,
+            "type": "anime",
+            "name": "Stay Luck",
+            "url": "https://myanimelist.net/anime/producer/2402/Stay_Luck"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 1829,
+            "type": "anime",
+            "name": "Lesprit",
+            "url": "https://myanimelist.net/anime/producer/1829/Lesprit"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 36,
+            "type": "anime",
+            "name": "Slice of Life",
+            "url": "https://myanimelist.net/anime/genre/36/Slice_of_Life"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 51,
+            "type": "anime",
+            "name": "Anthropomorphic",
+            "url": "https://myanimelist.net/anime/genre/51/Anthropomorphic"
+          },
+          {
+            "mal_id": 63,
+            "type": "anime",
+            "name": "Iyashikei",
+            "url": "https://myanimelist.net/anime/genre/63/Iyashikei"
+          }
+        ],
+        "demographics": []
+      },
+      {
+        "mal_id": 63042,
+        "url": "https://myanimelist.net/anime/63042/Meitantei_Precure",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1706/154944.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1706/154944t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1706/154944l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1706/154944.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1706/154944t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1706/154944l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/qjozo1fh7OI?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Meitantei Precure!"
+          },
+          {
+            "type": "Synonym",
+            "title": "TanPuri"
+          },
+          {
+            "type": "Japanese",
+            "title": "名探偵プリキュア！"
+          },
+          {
+            "type": "English",
+            "title": "Star Detective Precure!"
+          }
+        ],
+        "title": "Meitantei Precure!",
+        "title_english": "Star Detective Precure!",
+        "title_japanese": "名探偵プリキュア！",
+        "title_synonyms": [
+          "TanPuri"
+        ],
+        "type": "TV",
+        "source": "Original",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2026-02-01T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 1,
+              "month": 2,
+              "year": 2026
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Feb 1, 2026 to ?"
+        },
+        "duration": "24 min",
+        "rating": "G - All Ages",
+        "score": 7.59,
+        "scored_by": 1161,
+        "rank": 1793,
+        "popularity": 8414,
+        "members": 7023,
+        "favorites": 54,
+        "synopsis": "Anna Akechi is a second-year junior high student living in Makoto Mirai Town. On her 14th birthday, she has a chance encounter with a fairy named Pochitan, and a magical pendant caused her to travel back in time from 2027 to 1999! In the Makoto Mirai Town 28 years in the past, Anna meets Mikuru Kobayashi, a girl her age who wants to become a great detective.\n\nMeanwhile, people in town are in trouble as their prized possessions are being stolen from under their noses - the cause being a group of Phantom Thieves. To stop them, Anna and Mikuru turn into Precures! Maybe if they solve these mysteries, Anna can find her way back to her own time?\n\n(Source: Official site, translated)",
+        "background": "",
+        "season": "winter",
+        "year": 2026,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "08:30",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 08:30 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 55,
+            "type": "anime",
+            "name": "TV Asahi",
+            "url": "https://myanimelist.net/anime/producer/55/TV_Asahi"
+          },
+          {
+            "mal_id": 1500,
+            "type": "anime",
+            "name": "ABC Animation",
+            "url": "https://myanimelist.net/anime/producer/1500/ABC_Animation"
+          },
+          {
+            "mal_id": 2118,
+            "type": "anime",
+            "name": "ADK Emotions",
+            "url": "https://myanimelist.net/anime/producer/2118/ADK_Emotions"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 18,
+            "type": "anime",
+            "name": "Toei Animation",
+            "url": "https://myanimelist.net/anime/producer/18/Toei_Animation"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 1,
+            "type": "anime",
+            "name": "Action",
+            "url": "https://myanimelist.net/anime/genre/1/Action"
+          },
+          {
+            "mal_id": 7,
+            "type": "anime",
+            "name": "Mystery",
+            "url": "https://myanimelist.net/anime/genre/7/Mystery"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 39,
+            "type": "anime",
+            "name": "Detective",
+            "url": "https://myanimelist.net/anime/genre/39/Detective"
+          },
+          {
+            "mal_id": 66,
+            "type": "anime",
+            "name": "Mahou Shoujo",
+            "url": "https://myanimelist.net/anime/genre/66/Mahou_Shoujo"
+          },
+          {
+            "mal_id": 78,
+            "type": "anime",
+            "name": "Time Travel",
+            "url": "https://myanimelist.net/anime/genre/78/Time_Travel"
+          }
+        ],
+        "demographics": []
+      },
+      {
+        "mal_id": 6149,
+        "url": "https://myanimelist.net/anime/6149/Chibi_Maruko-chan_1995",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1678/153148.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1678/153148t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1678/153148l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1678/153148.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1678/153148t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1678/153148l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": null,
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Chibi Maruko-chan (1995)"
+          },
+          {
+            "type": "Synonym",
+            "title": "Maruko-chan"
+          },
+          {
+            "type": "Japanese",
+            "title": "ちびまる子ちゃん"
+          },
+          {
+            "type": "English",
+            "title": "Little Miss Maruko"
+          },
+          {
+            "type": "Spanish",
+            "title": "Chibi Maruko-chan"
+          }
+        ],
+        "title": "Chibi Maruko-chan (1995)",
+        "title_english": "Little Miss Maruko",
+        "title_japanese": "ちびまる子ちゃん",
+        "title_synonyms": [
+          "Maruko-chan"
+        ],
+        "type": "TV",
+        "source": "Manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "1995-01-08T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 8,
+              "month": 1,
+              "year": 1995
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Jan 8, 1995 to ?"
+        },
+        "duration": "23 min",
+        "rating": "G - All Ages",
+        "score": 7.44,
+        "scored_by": 2404,
+        "rank": 2396,
+        "popularity": 7691,
+        "members": 8826,
+        "favorites": 75,
+        "synopsis": "Momoko Sakura is an elementary school student who likes popular idol Momoe Yamaguchi and mangas. She is often called \"Chibi Maruko-chan\" due to her young age and small size. She lives together with her parents, her grandparents and her elder sister in a little town. In school, she has many friends with whom she studies and plays together everyday, including her close pal, Tama-chan; the student committee members, Maruo-kun and Migiwa-san; and the B-class trio: 'little master' Hanawa-kun, Hamaji-Bu Taro and Sekiguchi-kun. This is a fun-loving and enjoyable anime that portrays the simple things in life.\n\n(Source: ANN)",
+        "background": "",
+        "season": "winter",
+        "year": 1995,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "18:00",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 18:00 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 30,
+            "type": "anime",
+            "name": "Ajia-do",
+            "url": "https://myanimelist.net/anime/producer/30/Ajia-do"
+          },
+          {
+            "mal_id": 169,
+            "type": "anime",
+            "name": "Fuji TV",
+            "url": "https://myanimelist.net/anime/producer/169/Fuji_TV"
+          },
+          {
+            "mal_id": 611,
+            "type": "anime",
+            "name": "Sakura Production",
+            "url": "https://myanimelist.net/anime/producer/611/Sakura_Production"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 22,
+            "type": "anime",
+            "name": "Nippon Animation",
+            "url": "https://myanimelist.net/anime/producer/22/Nippon_Animation"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 4,
+            "type": "anime",
+            "name": "Comedy",
+            "url": "https://myanimelist.net/anime/genre/4/Comedy"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 23,
+            "type": "anime",
+            "name": "School",
+            "url": "https://myanimelist.net/anime/genre/23/School"
+          }
+        ],
+        "demographics": [
+          {
+            "mal_id": 25,
+            "type": "anime",
+            "name": "Shoujo",
+            "url": "https://myanimelist.net/anime/genre/25/Shoujo"
+          }
+        ]
+      },
+      {
+        "mal_id": 2406,
+        "url": "https://myanimelist.net/anime/2406/Sazae-san",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1008/98996.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1008/98996t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1008/98996l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1008/98996.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1008/98996t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1008/98996l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": null,
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Sazae-san"
+          },
+          {
+            "type": "Japanese",
+            "title": "サザエさん"
+          },
+          {
+            "type": "English",
+            "title": "Mrs. Sazae"
+          }
+        ],
+        "title": "Sazae-san",
+        "title_english": "Mrs. Sazae",
+        "title_japanese": "サザエさん",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "4-koma manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "1969-10-05T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 5,
+              "month": 10,
+              "year": 1969
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Oct 5, 1969 to ?"
+        },
+        "duration": "24 min",
+        "rating": "G - All Ages",
+        "score": 6.15,
+        "scored_by": 2038,
+        "rank": 9993,
+        "popularity": 7182,
+        "members": 10472,
+        "favorites": 43,
+        "synopsis": "The main character is a mother named Sazae-san. She lives in a house with her husband, her kids and her parents. The show is the ultimate family program and tends to follow traditional themes. Think of this show as the Japanese equivalent to \"The Partridge Family\" and you'll get a good feel for this show's atmosphere. Don't expect to see things like violence, swearing, kung-fu action or magical girls. The plots are more like \"Today, Sazae-san goes to the new mall and gets lost\". Such \"boring\" plotlines and the simplistic art are often a turn-off to non-Japanese audiences, but most Japanese find the show incredibly good. As a result, it continues to be one of the top ratings grabbers on TV and is one of the few anime that is considered \"acceptable\" by adults. \n\n(Source: AniDB)",
+        "background": "Sazae-san currently holds the Guinness World Record for the longest running animated television series.",
+        "season": "fall",
+        "year": 1969,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "18:30",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 18:30 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 169,
+            "type": "anime",
+            "name": "Fuji TV",
+            "url": "https://myanimelist.net/anime/producer/169/Fuji_TV"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 191,
+            "type": "anime",
+            "name": "Eiken",
+            "url": "https://myanimelist.net/anime/producer/191/Eiken"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 4,
+            "type": "anime",
+            "name": "Comedy",
+            "url": "https://myanimelist.net/anime/genre/4/Comedy"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [],
+        "demographics": []
+      },
+      {
+        "mal_id": 61269,
+        "url": "https://myanimelist.net/anime/61269/Digimon_Beatbreak",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1776/151242.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1776/151242t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1776/151242l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1776/151242.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1776/151242t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1776/151242l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/WgCglA2Twnw?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Digimon Beatbreak"
+          },
+          {
+            "type": "Japanese",
+            "title": "DIGIMON BEATBREAK（デジモンビートブレイク）"
+          },
+          {
+            "type": "English",
+            "title": "Digimon Beatbreak"
+          }
+        ],
+        "title": "Digimon Beatbreak",
+        "title_english": "Digimon Beatbreak",
+        "title_japanese": "DIGIMON BEATBREAK（デジモンビートブレイク）",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Other",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2025-10-05T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 5,
+              "month": 10,
+              "year": 2025
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Oct 5, 2025 to ?"
+        },
+        "duration": "23 min",
+        "rating": "PG-13 - Teens 13 or older",
+        "score": 7.13,
+        "scored_by": 4543,
+        "rank": 4091,
+        "popularity": 4887,
+        "members": 27250,
+        "favorites": 144,
+        "synopsis": "Tomorou Tenma possesses a uniquely strong e-Pulse—the energy created by human thoughts and emotions that powers egg-shaped AI devices named Sapotama. The world's everyday life relies on the assistance of Sapotamas, but the force of Tomorou's e-Pulse often causes glitches in them. One night, a strange creature calling itself Gekkoumon emerges from his device and insists on eating Tomorou's e-Pulse.\n\nGekkoumon is a Digimon, a creature feeding on e-Pulse that was born from an error in Sapotamas. Some Digimon completely drain humans of their energy, leaving them in a comatose state known as Cold Heart. When Tomorou's older brother, Asuka, becomes a victim of this phenomenon, Tomorou vows to avenge him.\n\nTomorou meets a group of Digimon-wielders called Glowing Dawn, who hunt down rogue Digimon for bounties. Their leader, Kyou Sawashiro, explains that there might still be hope for Asuka's recovery. Although Tomorou struggles to trust these strangers, he decides to join them, as he realizes that saving his brother may not be achievable on his own.\n\n[Written by MAL Rewrite]",
+        "background": "",
+        "season": "fall",
+        "year": 2025,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "09:00",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 09:00 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 127,
+            "type": "anime",
+            "name": "Yomiko Advertising",
+            "url": "https://myanimelist.net/anime/producer/127/Yomiko_Advertising"
+          },
+          {
+            "mal_id": 169,
+            "type": "anime",
+            "name": "Fuji TV",
+            "url": "https://myanimelist.net/anime/producer/169/Fuji_TV"
+          },
+          {
+            "mal_id": 1761,
+            "type": "anime",
+            "name": "Tavac",
+            "url": "https://myanimelist.net/anime/producer/1761/Tavac"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 18,
+            "type": "anime",
+            "name": "Toei Animation",
+            "url": "https://myanimelist.net/anime/producer/18/Toei_Animation"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 1,
+            "type": "anime",
+            "name": "Action",
+            "url": "https://myanimelist.net/anime/genre/1/Action"
+          },
+          {
+            "mal_id": 10,
+            "type": "anime",
+            "name": "Fantasy",
+            "url": "https://myanimelist.net/anime/genre/10/Fantasy"
+          },
+          {
+            "mal_id": 24,
+            "type": "anime",
+            "name": "Sci-Fi",
+            "url": "https://myanimelist.net/anime/genre/24/Sci-Fi"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [],
+        "demographics": []
+      },
+      {
+        "mal_id": 62171,
+        "url": "https://myanimelist.net/anime/62171/Kuroneko_to_Majo_no_Kyoushitsu",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1716/153989.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1716/153989t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1716/153989l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1716/153989.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1716/153989t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1716/153989l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/97lYICAGNmE?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "Kuroneko to Majo no Kyoushitsu"
+          },
+          {
+            "type": "Japanese",
+            "title": "黒猫と魔女の教室"
+          },
+          {
+            "type": "English",
+            "title": "The Classroom of a Black Cat and a Witch"
+          }
+        ],
+        "title": "Kuroneko to Majo no Kyoushitsu",
+        "title_english": "The Classroom of a Black Cat and a Witch",
+        "title_japanese": "黒猫と魔女の教室",
+        "title_synonyms": [],
+        "type": "TV",
+        "source": "Web manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "2026-04-12T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 12,
+              "month": 4,
+              "year": 2026
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Apr 12, 2026 to ?"
+        },
+        "duration": "23 min",
+        "rating": "PG-13 - Teens 13 or older",
+        "score": 6.52,
+        "scored_by": 4579,
+        "rank": 7716,
+        "popularity": 4456,
+        "members": 33403,
+        "favorites": 46,
+        "synopsis": "The Royal Diana Academy is a prestigious school that accepts individuals with adept magical abilities. Upon graduation, these students find themselves at the top of their field or employed by the royal family. Spica Virgo dreams of studying at the academy, aiming to be a top-rate sorceress like her idol Claude Sirius. Claude is a world-renowned sorcerer who became the institution's youngest instructor, but mysteriously disappeared soon after.\n\nLacking the experience and connections required for admission, Spica finds herself unable to make meaningful progress with her training. One day, however, she meets a talking black cat with magical abilities. Hoping to change the situation for the better, she begs the animal to take her as his apprentice and teach her the magic she needs to attend the academy. The cat accepts the deal on one condition—she must find a way to reverse his feline curse. Despite the arduous challenges ahead of her, Spica is determined to prove herself as a student worthy of the cat's mentorship.\n\n[Written by MAL Rewrite]",
+        "background": "Kuroneko to Majo no Kyoushitsu aired on CBC and TBS' Agaru Anime block.",
+        "season": "spring",
+        "year": 2026,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "23:30",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 23:30 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 53,
+            "type": "anime",
+            "name": "Dentsu",
+            "url": "https://myanimelist.net/anime/producer/53/Dentsu"
+          },
+          {
+            "mal_id": 146,
+            "type": "anime",
+            "name": "CBC Television",
+            "url": "https://myanimelist.net/anime/producer/146/CBC_Television"
+          },
+          {
+            "mal_id": 159,
+            "type": "anime",
+            "name": "Kodansha",
+            "url": "https://myanimelist.net/anime/producer/159/Kodansha"
+          },
+          {
+            "mal_id": 539,
+            "type": "anime",
+            "name": "Ultra Super Pictures",
+            "url": "https://myanimelist.net/anime/producer/539/Ultra_Super_Pictures"
+          },
+          {
+            "mal_id": 1261,
+            "type": "anime",
+            "name": "Good Smile Company",
+            "url": "https://myanimelist.net/anime/producer/1261/Good_Smile_Company"
+          },
+          {
+            "mal_id": 1819,
+            "type": "anime",
+            "name": "D-techno",
+            "url": "https://myanimelist.net/anime/producer/1819/D-techno"
+          },
+          {
+            "mal_id": 1858,
+            "type": "anime",
+            "name": "Sonilude",
+            "url": "https://myanimelist.net/anime/producer/1858/Sonilude"
+          }
+        ],
+        "licensors": [],
+        "studios": [
+          {
+            "mal_id": 839,
+            "type": "anime",
+            "name": "LIDENFILMS",
+            "url": "https://myanimelist.net/anime/producer/839/LIDENFILMS"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 4,
+            "type": "anime",
+            "name": "Comedy",
+            "url": "https://myanimelist.net/anime/genre/4/Comedy"
+          },
+          {
+            "mal_id": 10,
+            "type": "anime",
+            "name": "Fantasy",
+            "url": "https://myanimelist.net/anime/genre/10/Fantasy"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [
+          {
+            "mal_id": 23,
+            "type": "anime",
+            "name": "School",
+            "url": "https://myanimelist.net/anime/genre/23/School"
+          }
+        ],
+        "demographics": []
+      },
+      {
+        "mal_id": 21,
+        "url": "https://myanimelist.net/anime/21/One_Piece",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1244/138851.jpg",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1244/138851t.jpg",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1244/138851l.jpg"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/anime/1244/138851.webp",
+            "small_image_url": "https://cdn.myanimelist.net/images/anime/1244/138851t.webp",
+            "large_image_url": "https://cdn.myanimelist.net/images/anime/1244/138851l.webp"
+          }
+        },
+        "trailer": {
+          "youtube_id": null,
+          "url": null,
+          "embed_url": "https://www.youtube-nocookie.com/embed/-tviZNY6CSw?enablejsapi=1&wmode=opaque&autoplay=1",
+          "images": {
+            "image_url": null,
+            "small_image_url": null,
+            "medium_image_url": null,
+            "large_image_url": null,
+            "maximum_image_url": null
+          }
+        },
+        "approved": true,
+        "titles": [
+          {
+            "type": "Default",
+            "title": "One Piece"
+          },
+          {
+            "type": "Synonym",
+            "title": "OP"
+          },
+          {
+            "type": "Japanese",
+            "title": "ONE PIECE"
+          },
+          {
+            "type": "English",
+            "title": "One Piece"
+          }
+        ],
+        "title": "One Piece",
+        "title_english": "One Piece",
+        "title_japanese": "ONE PIECE",
+        "title_synonyms": [
+          "OP"
+        ],
+        "type": "TV",
+        "source": "Manga",
+        "episodes": null,
+        "status": "Currently Airing",
+        "airing": true,
+        "aired": {
+          "from": "1999-10-20T00:00:00+00:00",
+          "to": null,
+          "prop": {
+            "from": {
+              "day": 20,
+              "month": 10,
+              "year": 1999
+            },
+            "to": {
+              "day": null,
+              "month": null,
+              "year": null
+            }
+          },
+          "string": "Oct 20, 1999 to ?"
+        },
+        "duration": "24 min",
+        "rating": "PG-13 - Teens 13 or older",
+        "score": 8.73,
+        "scored_by": 1541086,
+        "rank": 54,
+        "popularity": 17,
+        "members": 2698960,
+        "favorites": 253662,
+        "synopsis": "Barely surviving in a barrel after passing through a terrible whirlpool at sea, carefree Monkey D. Luffy ends up aboard a ship under attack by fearsome pirates. Despite being a naive-looking teenager, he is not to be underestimated. Unmatched in battle, Luffy is a pirate himself who resolutely pursues the coveted One Piece treasure and the King of the Pirates title that comes with it.\n\nThe late King of the Pirates, Gol D. Roger, stirred up the world before his death by disclosing the whereabouts of his hoard of riches and daring everyone to obtain it. Ever since then, countless powerful pirates have sailed dangerous seas for the prized One Piece only to never return. Although Luffy lacks a crew and a proper ship, he is endowed with a superhuman ability and an unbreakable spirit that make him not only a formidable adversary but also an inspiration to many.\n\nAs he faces numerous challenges with a big smile on his face, Luffy gathers one-of-a-kind companions to join him in his ambitious endeavor, together embracing perils and wonders on their once-in-a-lifetime adventure.\n\n[Written by MAL Rewrite]",
+        "background": "The anime had a hiatus from October 13, 2024, to April 6, 2025. The anime switched to a seasonal release model starting from April 5, 2026. The airing time was Wednesdays 19:00 between October 20, 1999 - March 2001. The airing time was changed to Sundays 19:30 between April 2001 - December 2004. The airing time was changed to Sundays 9:30 between October 6, 2006 - October 13, 2024. The airing time was again changed to Sundays 23:15 on April 6, 2025. Several anime-original arcs have been adapted into light novels, and the series has inspired 50+ video games as of 2023. In June 2004, One Piece was licensed in North America by 4Kids Entertainment, which partnered with Viz Media for home video distribution. As One Piece proved unsuitable for their target demographic, 4Kids Entertainment censored the show to meet their standards, and, in December 2006, they stopped its production. In April 2007, Funimation took over the series licensing, providing an uncut version that remained faithful to the original release. In Japan, the anime's first 574 episodes were released exclusively on DVD by Avex Pictures from February 21, 2001, to December 4, 2013. Blu-rays also became available with the DVDs starting on January 8, 2014. In North America, Viz Media released the anime on DVD between February 28, 2006, and June 26, 2007. Funimation has re-released and continued the series since May 27, 2008. From March 23, 2021, the DVDs were accompanied by Blu-rays as well.",
+        "season": "fall",
+        "year": 1999,
+        "broadcast": {
+          "day": "Sundays",
+          "time": "23:15",
+          "timezone": "Asia/Tokyo",
+          "string": "Sundays at 23:15 (JST)"
+        },
+        "producers": [
+          {
+            "mal_id": 169,
+            "type": "anime",
+            "name": "Fuji TV",
+            "url": "https://myanimelist.net/anime/producer/169/Fuji_TV"
+          },
+          {
+            "mal_id": 416,
+            "type": "anime",
+            "name": "TAP",
+            "url": "https://myanimelist.net/anime/producer/416/TAP"
+          }
+        ],
+        "licensors": [
+          {
+            "mal_id": 102,
+            "type": "anime",
+            "name": "Funimation",
+            "url": "https://myanimelist.net/anime/producer/102/Funimation"
+          },
+          {
+            "mal_id": 252,
+            "type": "anime",
+            "name": "4Kids Entertainment",
+            "url": "https://myanimelist.net/anime/producer/252/4Kids_Entertainment"
+          }
+        ],
+        "studios": [
+          {
+            "mal_id": 18,
+            "type": "anime",
+            "name": "Toei Animation",
+            "url": "https://myanimelist.net/anime/producer/18/Toei_Animation"
+          }
+        ],
+        "genres": [
+          {
+            "mal_id": 1,
+            "type": "anime",
+            "name": "Action",
+            "url": "https://myanimelist.net/anime/genre/1/Action"
+          },
+          {
+            "mal_id": 2,
+            "type": "anime",
+            "name": "Adventure",
+            "url": "https://myanimelist.net/anime/genre/2/Adventure"
+          },
+          {
+            "mal_id": 10,
+            "type": "anime",
+            "name": "Fantasy",
+            "url": "https://myanimelist.net/anime/genre/10/Fantasy"
+          }
+        ],
+        "explicit_genres": [],
+        "themes": [],
+        "demographics": [
+          {
+            "mal_id": 27,
+            "type": "anime",
+            "name": "Shounen",
+            "url": "https://myanimelist.net/anime/genre/27/Shounen"
+          }
+        ]
+      }
+    ]
+  },
+  "expireAt": 1782678396289
+}

@@ -1,0 +1,743 @@
+{
+  "data": {
+    "top5": [
+      {
+        "_id": "51553",
+        "title": "ورشة قبعة الساحرة",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1726/155542l.jpg",
+        "rating": 8.6,
+        "genres": [
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "61316",
+        "title": "إعادة: الصفر - بدء الحياة في عالم آخر - الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1540/155824l.jpg",
+        "rating": 9.2,
+        "genres": [
+          "Drama",
+          "Fantasy",
+          "Suspense"
+        ]
+      },
+      {
+        "_id": "59708",
+        "title": "فصل النخبة - الموسم الرابع: السنة الثانية، الفصل الأول",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1176/153626l.jpg",
+        "rating": 7.92,
+        "genres": [
+          "Drama",
+          "Suspense"
+        ]
+      },
+      {
+        "_id": "59970",
+        "title": "في ذلك الوقت، تجسدت من جديد في شكل سلايم، الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1695/156389l.jpg",
+        "rating": 8.11,
+        "genres": [
+          "Action",
+          "Comedy",
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "62001",
+        "title": "شياطين عالم الظل",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1171/156397l.jpg",
+        "rating": 7.92,
+        "genres": [
+          "Action",
+          "Adventure",
+          "Supernatural"
+        ]
+      },
+      {
+        "_id": "59983",
+        "title": "ويستوريا: العصا والسيف، الموسم 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1190/155788l.jpg",
+        "rating": 8.26,
+        "genres": [
+          "Action",
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "62568",
+        "title": "دكتور ستون: مستقبل العلوم الجزء الثالث",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3,
+        "genres": [
+          "Adventure",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "62568",
+        "title": "دكتور ستون: مستقبل العلوم الجزء الثالث",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3,
+        "genres": [
+          "Adventure",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "56876",
+        "title": "الملاك المجاور يفسدني الفاسد 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1989/154843l.jpg",
+        "rating": 7.1,
+        "genres": [
+          "Romance"
+        ]
+      },
+      {
+        "_id": "56734",
+        "title": "لقد كونت صداقات مع ثاني أجمل فتاة في صفي",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1423/155713l.jpg",
+        "rating": 7.87,
+        "genres": [
+          "Romance"
+        ]
+      },
+      {
+        "_id": "62601",
+        "title": "سموم الزواج",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1927/154309l.jpg",
+        "rating": 7.52,
+        "genres": [
+          "Action",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "62604",
+        "title": "لا تستطيع الفتيات أن تكون لطيفات مع أوتاكو!؟",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1956/155456l.jpg",
+        "rating": 7.54,
+        "genres": [
+          "Comedy",
+          "Romance"
+        ]
+      },
+      {
+        "_id": "60852",
+        "title": "أسوار الجليد",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1565/154933l.jpg",
+        "rating": 8.02,
+        "genres": [
+          "Drama",
+          "Romance"
+        ]
+      },
+      {
+        "_id": "63375",
+        "title": "نيبون سانجوكو: الأمم الثلاث للشمس القرمزية",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1623/156387l.jpg",
+        "rating": 8.58,
+        "genres": [
+          "Drama"
+        ]
+      },
+      {
+        "_id": "60028",
+        "title": "الأميرة المحاربة والملك البربري",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1229/155022l.jpg",
+        "rating": 6.94,
+        "genres": [
+          "Comedy",
+          "Fantasy",
+          "Romance"
+        ]
+      }
+    ],
+    "recentEpisodes": [
+      {
+        "_id": "recent-scraped-0",
+        "animeId": {
+          "_id": "search-Kill Ao",
+          "title": "اقتل آو",
+          "titleAr": "اقتل آو",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325087.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325087.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-1",
+        "animeId": {
+          "_id": "search-Neko to Ryuu",
+          "title": "نيكو إلى Ryuu",
+          "titleAr": "نيكو إلى Ryuu",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/157796l.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/157796l.webp"
+        },
+        "episodeNumber": "1"
+      },
+      {
+        "_id": "recent-scraped-2",
+        "animeId": {
+          "_id": "search-Mairimashita! Iruma kun",
+          "title": "ميريماشيتا! إيروما كون",
+          "titleAr": "ميريماشيتا! إيروما كون",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613958579eba8187_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613958579eba8187_m-1.webp"
+        },
+        "episodeNumber": "13"
+      },
+      {
+        "_id": "recent-scraped-3",
+        "animeId": {
+          "_id": "search-Honzuki no Gekokujou",
+          "title": "هونزوكي نو جيكوكوجو",
+          "titleAr": "هونزوكي نو جيكوكوجو",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19402710cc7c44dab3_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19402710cc7c44dab3_m-1.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-4",
+        "animeId": {
+          "_id": "search-Guimi Zhi Zhu Tebie Pian: Liewu",
+          "title": "Guimi Zhi Zhu Tebie Pian: Liewu",
+          "titleAr": "Guimi Zhi Zhu Tebie Pian: Liewu",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/151543l.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/151543l.webp"
+        },
+        "episodeNumber": "2"
+      },
+      {
+        "_id": "recent-scraped-5",
+        "animeId": {
+          "_id": "search-Mahou no Shimai Lulutto Lilly",
+          "title": "Mahou no Shimai Lulutto Lilly",
+          "titleAr": "Mahou no Shimai Lulutto Lilly",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324724.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324724.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-6",
+        "animeId": {
+          "_id": "search-Hokuto no Ken: Fist of the North Star",
+          "title": "هوكوتو نو كين: قبضة نجم الشمال",
+          "titleAr": "هوكوتو نو كين: قبضة نجم الشمال",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325095.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325095.webp"
+        },
+        "episodeNumber": "14"
+      },
+      {
+        "_id": "recent-scraped-7",
+        "animeId": {
+          "_id": "search-Kami no Shizuku",
+          "title": "كامي نو شيزوكو",
+          "titleAr": "كامي نو شيزوكو",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324567.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324567.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-8",
+        "animeId": {
+          "_id": "search-Tensei shitara Slime Datta Ken",
+          "title": "تينسي شيتارا سلايم داتا كين",
+          "titleAr": "تينسي شيتارا سلايم داتا كين",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613952e335dfd046_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613952e335dfd046_m-1.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-9",
+        "animeId": {
+          "_id": "search-Reincarnation no Kaben",
+          "title": "التناسخ لا كابين",
+          "titleAr": "التناسخ لا كابين",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323773.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323773.webp"
+        },
+        "episodeNumber": "13"
+      },
+      {
+        "_id": "recent-scraped-10",
+        "animeId": {
+          "_id": "search-Awajima Hyakkei",
+          "title": "أواجيما هياكي",
+          "titleAr": "أواجيما هياكي",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324575.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324575.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-11",
+        "animeId": {
+          "_id": "search-Koori no Jouheki",
+          "title": "كوري نو جوهيكي",
+          "titleAr": "كوري نو جوهيكي",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323461.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323461.webp"
+        },
+        "episodeNumber": "13"
+      },
+      {
+        "_id": "recent-scraped-12",
+        "animeId": {
+          "_id": "search-Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "title": "Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "titleAr": "Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327007.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327007.webp"
+        },
+        "episodeNumber": "1"
+      },
+      {
+        "_id": "recent-scraped-13",
+        "animeId": {
+          "_id": "search-Kujima Utaeba Ie Hororo",
+          "title": "كوجيما أوتايبا أي هورورو",
+          "titleAr": "كوجيما أوتايبا أي هورورو",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324202.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324202.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-14",
+        "animeId": {
+          "_id": "search-Dr. Stone: Science Future Part 3",
+          "title": "دكتور ستون: مستقبل العلوم الجزء الثالث",
+          "titleAr": "دكتور ستون: مستقبل العلوم الجزء الثالث",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19623926503f3ca95c_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19623926503f3ca95c_m-1.webp"
+        },
+        "episodeNumber": "37"
+      },
+      {
+        "_id": "recent-scraped-15",
+        "animeId": {
+          "_id": "search-Hidarikiki no Eren",
+          "title": "هيداريكيكي نو إيرين",
+          "titleAr": "هيداريكيكي نو إيرين",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324267.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324267.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-16",
+        "animeId": {
+          "_id": "search-Himekishi wa Barbaroi no Yome",
+          "title": "هيميكيشي وا بارباروي نو يومي",
+          "titleAr": "هيميكيشي وا بارباروي نو يومي",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323758.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323758.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-17",
+        "animeId": {
+          "_id": "search-Saikyou no Ousama",
+          "title": "سايكيو لا أسامة",
+          "titleAr": "سايكيو لا أسامة",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19744662ca476669ea_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19744662ca476669ea_m-1.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-18",
+        "animeId": {
+          "_id": "search-Otaku ni Yasashii Gal wa Inai",
+          "title": "أوتاكو ني ياساشي جال وا إيناي",
+          "titleAr": "أوتاكو ني ياساشي جال وا إيناي",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325086.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325086.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-19",
+        "animeId": {
+          "_id": "search-Heroine Seijo Iie All Works Maid desu (Hokori)!",
+          "title": "البطلة Seijo Iie All Works Maid desu (هوكوري)!",
+          "titleAr": "البطلة Seijo Iie All Works Maid desu (هوكوري)!",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327256.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327256.webp"
+        },
+        "episodeNumber": "1"
+      },
+      {
+        "_id": "recent-scraped-20",
+        "animeId": {
+          "_id": "search-Busamen Gachi Fighter",
+          "title": "مقاتلة بوسامين جاتشي",
+          "titleAr": "مقاتلة بوسامين جاتشي",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/181660713eb20eff8c_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/181660713eb20eff8c_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-21",
+        "animeId": {
+          "_id": "search-Tensei shitara Dainana Ouji Datta node",
+          "title": "عقدة Tensei Shitara Dainana Ouji Datta",
+          "titleAr": "عقدة Tensei Shitara Dainana Ouji Datta",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/177839920b315d4a71_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/177839920b315d4a71_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-22",
+        "animeId": {
+          "_id": "search-Tsuyokute New Saga",
+          "title": "تسويوكوتي الملحمة الجديدة",
+          "titleAr": "تسويوكوتي الملحمة الجديدة",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/1811286939e2b421da_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/1811286939e2b421da_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-23",
+        "animeId": {
+          "_id": "search-Clevatess",
+          "title": "كليفاتيس",
+          "titleAr": "كليفاتيس",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/18112857fb913466d7_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/18112857fb913466d7_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-24",
+        "animeId": {
+          "_id": "search-Dr. Stone",
+          "title": "دكتور ستون",
+          "titleAr": "دكتور ستون",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/168939268049f347e1_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/168939268049f347e1_m.webp"
+        },
+        "episodeNumber": "23"
+      },
+      {
+        "_id": "recent-scraped-25",
+        "animeId": {
+          "_id": "search-Tsuihousha Shokudou e Youkoso",
+          "title": "تسويهوشا شكودو ويوكوسو",
+          "titleAr": "تسويهوشا شكودو ويوكوسو",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/18154491c68bc3b9e3_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/18154491c68bc3b9e3_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-26",
+        "animeId": {
+          "_id": "search-Futari Solo Camp",
+          "title": "معسكر فوتاري سولو",
+          "titleAr": "معسكر فوتاري سولو",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/181728419717773450_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/181728419717773450_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-27",
+        "animeId": {
+          "_id": "search-Dandadan",
+          "title": "داندادان",
+          "titleAr": "داندادان",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/17633458a20435631a_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/17633458a20435631a_m.webp"
+        },
+        "episodeNumber": "12"
+      }
+    ],
+    "popular": [
+      {
+        "_id": "16498",
+        "title": "هجوم العمالقه",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
+        "rating": 8.57
+      },
+      {
+        "_id": "1535",
+        "title": "مذكره الموت",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1079/138100l.jpg",
+        "rating": 8.62
+      },
+      {
+        "_id": "5114",
+        "title": "الكيميائي المعدني الكامل: الإخوان",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1208/94745l.jpg",
+        "rating": 9.11
+      },
+      {
+        "_id": "30276",
+        "title": "رجل لكمة واحدة",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/12/76049l.jpg",
+        "rating": 8.47
+      },
+      {
+        "_id": "38000",
+        "title": "قاتل الشياطين: كيميتسو نو يايبا",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg",
+        "rating": 8.4
+      },
+      {
+        "_id": "31964",
+        "title": "ماي هيرو اكاديميا",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/10/78745l.jpg",
+        "rating": 7.82
+      },
+      {
+        "_id": "11757",
+        "title": "سورد ارت اونلاين",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/11/39717l.jpg",
+        "rating": 7.23
+      },
+      {
+        "_id": "11061",
+        "title": "هنتر",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1337/99013l.jpg",
+        "rating": 9.03
+      }
+    ],
+    "currentSeason": [
+      {
+        "_id": "51553",
+        "title": "ورشة قبعة الساحرة",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1726/155542l.jpg",
+        "rating": 8.6
+      },
+      {
+        "_id": "61316",
+        "title": "إعادة: الصفر - بدء الحياة في عالم آخر - الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1540/155824l.jpg",
+        "rating": 9.2
+      },
+      {
+        "_id": "59708",
+        "title": "فصل النخبة - الموسم الرابع: السنة الثانية، الفصل الأول",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1176/153626l.jpg",
+        "rating": 7.92
+      },
+      {
+        "_id": "59970",
+        "title": "في ذلك الوقت، تجسدت من جديد في شكل سلايم، الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1695/156389l.jpg",
+        "rating": 8.11
+      },
+      {
+        "_id": "62001",
+        "title": "شياطين عالم الظل",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1171/156397l.jpg",
+        "rating": 7.92
+      },
+      {
+        "_id": "59983",
+        "title": "ويستوريا: العصا والسيف، الموسم 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1190/155788l.jpg",
+        "rating": 8.26
+      },
+      {
+        "_id": "62568",
+        "title": "دكتور ستون: مستقبل العلوم الجزء الثالث",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3
+      },
+      {
+        "_id": "56876",
+        "title": "الملاك المجاور يفسدني الفاسد 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1989/154843l.jpg",
+        "rating": 7.1
+      },
+      {
+        "_id": "56734",
+        "title": "لقد كونت صداقات مع ثاني أجمل فتاة في صفي",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1423/155713l.jpg",
+        "rating": 7.87
+      },
+      {
+        "_id": "62601",
+        "title": "سموم الزواج",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1927/154309l.jpg",
+        "rating": 7.52
+      },
+      {
+        "_id": "62604",
+        "title": "لا تستطيع الفتيات أن تكون لطيفات مع أوتاكو!؟",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1956/155456l.jpg",
+        "rating": 7.54
+      },
+      {
+        "_id": "60852",
+        "title": "أسوار الجليد",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1565/154933l.jpg",
+        "rating": 8.02
+      },
+      {
+        "_id": "63375",
+        "title": "نيبون سانجوكو: الأمم الثلاث للشمس القرمزية",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1623/156387l.jpg",
+        "rating": 8.58
+      },
+      {
+        "_id": "60028",
+        "title": "الأميرة المحاربة والملك البربري",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1229/155022l.jpg",
+        "rating": 6.94
+      },
+      {
+        "_id": "57779",
+        "title": "دوروهيدورو الموسم الثاني",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1603/155354l.jpg",
+        "rating": 8.48
+      },
+      {
+        "_id": "62146",
+        "title": "الحياة الزراعية في عالم آخر، الموسم 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1656/156369l.jpg",
+        "rating": 7.32
+      },
+      {
+        "_id": "61839",
+        "title": "أريد إنهاء لعبة الحب هذه",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1879/155958l.jpg",
+        "rating": 7.34
+      },
+      {
+        "_id": "60310",
+        "title": "مرحبا بكم في مدرسة شيطان! إيروما-كون الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1434/154048l.jpg",
+        "rating": 8.14
+      },
+      {
+        "_id": "57466",
+        "title": "صعود دودة الكتب: ابنة الأرشيدوق المتبنية",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1371/155054l.jpg",
+        "rating": 7.83
+      },
+      {
+        "_id": "61501",
+        "title": "السيدة كنعان سهلة بشكل شيطاني",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1681/154996l.jpg",
+        "rating": 7.11
+      },
+      {
+        "_id": "61443",
+        "title": "وكلاء الفصول الأربعة: رقصة الربيع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1993/156385l.jpg",
+        "rating": 7.67
+      },
+      {
+        "_id": "61831",
+        "title": "البداية بعد النهاية الموسم الثاني",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1738/156028l.jpg",
+        "rating": 6.34
+      },
+      {
+        "_id": "62331",
+        "title": "لعبة الكاذب",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1984/158634l.jpg",
+        "rating": 6.33
+      },
+      {
+        "_id": "62164",
+        "title": "أكاني باناشي",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1162/155669l.jpg",
+        "rating": 7.94
+      }
+    ],
+    "schedule": [
+      {
+        "_id": "63762",
+        "title": "أوشيري تانتي الموسم العاشر",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1098/156208l.jpg",
+        "rating": 0
+      },
+      {
+        "_id": "62495",
+        "title": "نيزومي كون نو تشوكي (تلفزيون)",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1515/152058l.jpg",
+        "rating": 0
+      },
+      {
+        "_id": "18941",
+        "title": "شيماجيرو لا واو!",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/9/50737l.jpg",
+        "rating": 0
+      },
+      {
+        "_id": "60153",
+        "title": "ريلاكوما",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1705/158571l.jpg",
+        "rating": 6.29
+      },
+      {
+        "_id": "50418",
+        "title": "نينجالا (تلفزيون)",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1552/119871l.jpg",
+        "rating": 5.58
+      },
+      {
+        "_id": "32353",
+        "title": "بونو بونو",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1686/149949l.jpg",
+        "rating": 6.43
+      },
+      {
+        "_id": "62048",
+        "title": "ماو",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1738/156386l.jpg",
+        "rating": 7.02
+      },
+      {
+        "_id": "62391",
+        "title": "اقتل الأزرق",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1899/156600l.jpg",
+        "rating": 7.42
+      },
+      {
+        "_id": "57466",
+        "title": "صعود دودة الكتب: ابنة الأرشيدوق المتبنية",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1371/155054l.jpg",
+        "rating": 7.83
+      },
+      {
+        "_id": "60310",
+        "title": "مرحبا بكم في مدرسة شيطان! إيروما-كون الموسم الرابع",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1434/154048l.jpg",
+        "rating": 8.14
+      },
+      {
+        "_id": "966",
+        "title": "شين تشان",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/10/59897l.jpg",
+        "rating": 7.82
+      },
+      {
+        "_id": "62001",
+        "title": "شياطين عالم الظل",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1171/156397l.jpg",
+        "rating": 7.92
+      },
+      {
+        "_id": "235",
+        "title": "القضية مغلقة",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/7/75199l.jpg",
+        "rating": 8.18
+      }
+    ]
+  },
+  "expireAt": 1782575943934
+}

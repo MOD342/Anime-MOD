@@ -14,6 +14,15 @@ export const clientCache = {
 
       const parsed: CacheWrapper<T> = JSON.parse(raw);
       if (Date.now() < parsed.expireAt) {
+        // Validation: If it's a dashboard cache, reject if it has no recent episodes, top5 or if recent episodes list is too small (e.g., Jikan 6-episode fallback)
+        if (key.includes('dashboard_cache') && parsed.data && typeof parsed.data === 'object') {
+          const d = parsed.data as any;
+          if (!d.top5 || d.top5.length === 0 || !d.recentEpisodes || d.recentEpisodes.length < 15) {
+            console.warn(`[ClientCache] Rejecting empty/corrupt or Jikan-fallback dashboard cache for key: ${key}`);
+            localStorage.removeItem(key);
+            return null;
+          }
+        }
         return parsed.data;
       } else {
         // Remove expired client item

@@ -1,0 +1,713 @@
+{
+  "data": {
+    "top5": [
+      {
+        "_id": "51553",
+        "title": "Witch Hat Atelier",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1726/155542l.jpg",
+        "rating": 8.62,
+        "genres": [
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "61316",
+        "title": "Re:ZERO -Starting Life in Another World- Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1540/155824l.jpg",
+        "rating": 9.2,
+        "genres": [
+          "Drama",
+          "Fantasy",
+          "Suspense"
+        ]
+      },
+      {
+        "_id": "59708",
+        "title": "Classroom of the Elite 4th Season: Second Year, First Semester",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1176/153626l.jpg",
+        "rating": 7.96,
+        "genres": [
+          "Drama",
+          "Suspense"
+        ]
+      },
+      {
+        "_id": "59970",
+        "title": "That Time I Got Reincarnated as a Slime Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1695/156389l.jpg",
+        "rating": 8.11,
+        "genres": [
+          "Action",
+          "Comedy",
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "62001",
+        "title": "Daemons of the Shadow Realm",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1171/156397l.jpg",
+        "rating": 7.92,
+        "genres": [
+          "Action",
+          "Adventure",
+          "Supernatural"
+        ]
+      },
+      {
+        "_id": "59983",
+        "title": "Wistoria: Wand and Sword Season 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1190/155788l.jpg",
+        "rating": 8.25,
+        "genres": [
+          "Action",
+          "Fantasy"
+        ]
+      },
+      {
+        "_id": "62568",
+        "title": "Dr. Stone: Science Future Part 3",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3,
+        "genres": [
+          "Adventure",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "62568",
+        "title": "Dr. Stone: Science Future Part 3",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3,
+        "genres": [
+          "Adventure",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "56876",
+        "title": "The Angel Next Door Spoils Me Rotten 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1989/154843l.jpg",
+        "rating": 7.12,
+        "genres": [
+          "Romance"
+        ]
+      },
+      {
+        "_id": "56734",
+        "title": "I Made Friends with the Second Prettiest Girl in My Class",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1423/155713l.jpg",
+        "rating": 7.9,
+        "genres": [
+          "Romance"
+        ]
+      },
+      {
+        "_id": "62601",
+        "title": "Marriagetoxin",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1927/154309l.jpg",
+        "rating": 7.52,
+        "genres": [
+          "Action",
+          "Comedy"
+        ]
+      },
+      {
+        "_id": "62604",
+        "title": "Gals Can't Be Kind to Otaku!?",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1956/155456l.jpg",
+        "rating": 7.58,
+        "genres": [
+          "Comedy",
+          "Romance"
+        ]
+      },
+      {
+        "_id": "60852",
+        "title": "The Ramparts of Ice",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1565/154933l.jpg",
+        "rating": 7.99,
+        "genres": [
+          "Drama",
+          "Romance"
+        ]
+      },
+      {
+        "_id": "63375",
+        "title": "Nippon Sangoku: The Three Nations of the Crimson Sun",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1623/156387l.jpg",
+        "rating": 8.57,
+        "genres": [
+          "Drama"
+        ]
+      },
+      {
+        "_id": "60028",
+        "title": "The Warrior Princess and the Barbaric King",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1229/155022l.jpg",
+        "rating": 6.8,
+        "genres": [
+          "Comedy",
+          "Fantasy",
+          "Romance"
+        ]
+      }
+    ],
+    "recentEpisodes": [
+      {
+        "_id": "recent-scraped-0",
+        "animeId": {
+          "_id": "search-Hokuto no Ken: Fist of the North Star",
+          "title": "Hokuto no Ken: Fist of the North Star",
+          "titleAr": "Hokuto no Ken: Fist of the North Star",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325095.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325095.webp"
+        },
+        "episodeNumber": "14"
+      },
+      {
+        "_id": "recent-scraped-1",
+        "animeId": {
+          "_id": "search-Kami no Shizuku",
+          "title": "Kami no Shizuku",
+          "titleAr": "Kami no Shizuku",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324567.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324567.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-2",
+        "animeId": {
+          "_id": "search-Tensei shitara Slime Datta Ken",
+          "title": "Tensei shitara Slime Datta Ken",
+          "titleAr": "Tensei shitara Slime Datta Ken",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613952e335dfd046_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19613952e335dfd046_m-1.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-3",
+        "animeId": {
+          "_id": "search-Reincarnation no Kaben",
+          "title": "Reincarnation no Kaben",
+          "titleAr": "Reincarnation no Kaben",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323773.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323773.webp"
+        },
+        "episodeNumber": "13"
+      },
+      {
+        "_id": "recent-scraped-4",
+        "animeId": {
+          "_id": "search-Awajima Hyakkei",
+          "title": "Awajima Hyakkei",
+          "titleAr": "Awajima Hyakkei",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324575.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324575.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-5",
+        "animeId": {
+          "_id": "search-Koori no Jouheki",
+          "title": "Koori no Jouheki",
+          "titleAr": "Koori no Jouheki",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323461.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323461.webp"
+        },
+        "episodeNumber": "13"
+      },
+      {
+        "_id": "recent-scraped-6",
+        "animeId": {
+          "_id": "search-Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "title": "Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "titleAr": "Rakudai Kenja no Gakuin Musou: Nidome no Tensei",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327007.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327007.webp"
+        },
+        "episodeNumber": "1"
+      },
+      {
+        "_id": "recent-scraped-7",
+        "animeId": {
+          "_id": "search-Kujima Utaeba Ie Hororo",
+          "title": "Kujima Utaeba Ie Hororo",
+          "titleAr": "Kujima Utaeba Ie Hororo",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324202.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324202.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-8",
+        "animeId": {
+          "_id": "search-Dr. Stone: Science Future Part 3",
+          "title": "Dr. Stone: Science Future Part 3",
+          "titleAr": "Dr. Stone: Science Future Part 3",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19623926503f3ca95c_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19623926503f3ca95c_m-1.webp"
+        },
+        "episodeNumber": "37"
+      },
+      {
+        "_id": "recent-scraped-9",
+        "animeId": {
+          "_id": "search-Hidarikiki no Eren",
+          "title": "Hidarikiki no Eren",
+          "titleAr": "Hidarikiki no Eren",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324267.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324267.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-10",
+        "animeId": {
+          "_id": "search-Himekishi wa Barbaroi no Yome",
+          "title": "Himekishi wa Barbaroi no Yome",
+          "titleAr": "Himekishi wa Barbaroi no Yome",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323758.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/323758.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-11",
+        "animeId": {
+          "_id": "search-Saikyou no Ousama",
+          "title": "Saikyou no Ousama",
+          "titleAr": "Saikyou no Ousama",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19744662ca476669ea_m-1.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/19744662ca476669ea_m-1.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-12",
+        "animeId": {
+          "_id": "search-Otaku ni Yasashii Gal wa Inai",
+          "title": "Otaku ni Yasashii Gal wa Inai",
+          "titleAr": "Otaku ni Yasashii Gal wa Inai",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325086.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/325086.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-13",
+        "animeId": {
+          "_id": "search-Heroine Seijo Iie All Works Maid desu (Hokori)!",
+          "title": "Heroine Seijo Iie All Works Maid desu (Hokori)!",
+          "titleAr": "Heroine Seijo Iie All Works Maid desu (Hokori)!",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327256.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/06/327256.webp"
+        },
+        "episodeNumber": "1"
+      },
+      {
+        "_id": "recent-scraped-14",
+        "animeId": {
+          "_id": "search-Jidou Hanbaiki ni Umarekawatta Ore wa Meikyuu wo Samayou",
+          "title": "Jidou Hanbaiki ni Umarekawatta Ore wa Meikyuu wo Samayou",
+          "titleAr": "Jidou Hanbaiki ni Umarekawatta Ore wa Meikyuu wo Samayou",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324764.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324764.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-15",
+        "animeId": {
+          "_id": "search-Higeki no Genkyou to Naru Saikyou Gedou Last Boss Joou",
+          "title": "Higeki no Genkyou to Naru Saikyou Gedou Last Boss Joou",
+          "titleAr": "Higeki no Genkyou to Naru Saikyou Gedou Last Boss Joou",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324915.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324915.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-16",
+        "animeId": {
+          "_id": "search-Quanzhi Fashi",
+          "title": "Quanzhi Fashi",
+          "titleAr": "Quanzhi Fashi",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/05/12197.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/05/12197.webp"
+        },
+        "episodeNumber": "6"
+      },
+      {
+        "_id": "recent-scraped-17",
+        "animeId": {
+          "_id": "search-Kanojo, Okarishimasu",
+          "title": "Kanojo, Okarishimasu",
+          "titleAr": "Kanojo, Okarishimasu",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324787.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324787.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-18",
+        "animeId": {
+          "_id": "search-Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
+          "title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
+          "titleAr": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/322265.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/322265.webp"
+        },
+        "episodeNumber": "16"
+      },
+      {
+        "_id": "recent-scraped-19",
+        "animeId": {
+          "_id": "search-Megami",
+          "title": "Megami",
+          "titleAr": "Megami",
+          "posterUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324737.webp",
+          "thumbnailUrl": "https://ristoanime.me/wp-content/uploads/2026/04/324737.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-20",
+        "animeId": {
+          "_id": "search-Busamen Gachi Fighter",
+          "title": "Busamen Gachi Fighter",
+          "titleAr": "Busamen Gachi Fighter",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/181660713eb20eff8c_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/181660713eb20eff8c_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-21",
+        "animeId": {
+          "_id": "search-Tensei shitara Dainana Ouji Datta node",
+          "title": "Tensei shitara Dainana Ouji Datta node",
+          "titleAr": "Tensei shitara Dainana Ouji Datta node",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/177839920b315d4a71_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/177839920b315d4a71_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-22",
+        "animeId": {
+          "_id": "search-Tsuyokute New Saga",
+          "title": "Tsuyokute New Saga",
+          "titleAr": "Tsuyokute New Saga",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/1811286939e2b421da_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/1811286939e2b421da_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-23",
+        "animeId": {
+          "_id": "search-Clevatess",
+          "title": "Clevatess",
+          "titleAr": "Clevatess",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/18112857fb913466d7_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/18112857fb913466d7_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-24",
+        "animeId": {
+          "_id": "search-Dr. Stone",
+          "title": "Dr. Stone",
+          "titleAr": "Dr. Stone",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/168939268049f347e1_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/168939268049f347e1_m.webp"
+        },
+        "episodeNumber": "23"
+      },
+      {
+        "_id": "recent-scraped-25",
+        "animeId": {
+          "_id": "search-Tsuihousha Shokudou e Youkoso",
+          "title": "Tsuihousha Shokudou e Youkoso",
+          "titleAr": "Tsuihousha Shokudou e Youkoso",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/18154491c68bc3b9e3_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/18154491c68bc3b9e3_m.webp"
+        },
+        "episodeNumber": "12"
+      },
+      {
+        "_id": "recent-scraped-26",
+        "animeId": {
+          "_id": "search-Futari Solo Camp",
+          "title": "Futari Solo Camp",
+          "titleAr": "Futari Solo Camp",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/181728419717773450_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/181728419717773450_m.webp"
+        },
+        "episodeNumber": "11"
+      },
+      {
+        "_id": "recent-scraped-27",
+        "animeId": {
+          "_id": "search-Dandadan",
+          "title": "Dandadan",
+          "titleAr": "Dandadan",
+          "posterUrl": "https://witaanime.com/wp-content/uploads/2025/09/17633458a20435631a_m.webp",
+          "thumbnailUrl": "https://witaanime.com/wp-content/uploads/2025/09/17633458a20435631a_m.webp"
+        },
+        "episodeNumber": "12"
+      }
+    ],
+    "popular": [
+      {
+        "_id": "16498",
+        "title": "Attack on Titan",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
+        "rating": 8.57
+      },
+      {
+        "_id": "1535",
+        "title": "Death Note",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1079/138100l.jpg",
+        "rating": 8.62
+      },
+      {
+        "_id": "5114",
+        "title": "Fullmetal Alchemist: Brotherhood",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1208/94745l.jpg",
+        "rating": 9.11
+      },
+      {
+        "_id": "30276",
+        "title": "One-Punch Man",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/12/76049l.jpg",
+        "rating": 8.47
+      },
+      {
+        "_id": "38000",
+        "title": "Demon Slayer: Kimetsu no Yaiba",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg",
+        "rating": 8.4
+      },
+      {
+        "_id": "31964",
+        "title": "My Hero Academia",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/10/78745l.jpg",
+        "rating": 7.82
+      },
+      {
+        "_id": "11757",
+        "title": "Sword Art Online",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/11/39717l.jpg",
+        "rating": 7.23
+      },
+      {
+        "_id": "11061",
+        "title": "Hunter x Hunter",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1337/99013l.jpg",
+        "rating": 9.03
+      }
+    ],
+    "currentSeason": [
+      {
+        "_id": "51553",
+        "title": "Witch Hat Atelier",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1726/155542l.jpg",
+        "rating": 8.62
+      },
+      {
+        "_id": "61316",
+        "title": "Re:ZERO -Starting Life in Another World- Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1540/155824l.jpg",
+        "rating": 9.2
+      },
+      {
+        "_id": "59708",
+        "title": "Classroom of the Elite 4th Season: Second Year, First Semester",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1176/153626l.jpg",
+        "rating": 7.96
+      },
+      {
+        "_id": "59970",
+        "title": "That Time I Got Reincarnated as a Slime Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1695/156389l.jpg",
+        "rating": 8.11
+      },
+      {
+        "_id": "62001",
+        "title": "Daemons of the Shadow Realm",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1171/156397l.jpg",
+        "rating": 7.92
+      },
+      {
+        "_id": "59983",
+        "title": "Wistoria: Wand and Sword Season 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1190/155788l.jpg",
+        "rating": 8.25
+      },
+      {
+        "_id": "62568",
+        "title": "Dr. Stone: Science Future Part 3",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1773/155779l.jpg",
+        "rating": 8.3
+      },
+      {
+        "_id": "56876",
+        "title": "The Angel Next Door Spoils Me Rotten 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1989/154843l.jpg",
+        "rating": 7.12
+      },
+      {
+        "_id": "56734",
+        "title": "I Made Friends with the Second Prettiest Girl in My Class",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1423/155713l.jpg",
+        "rating": 7.9
+      },
+      {
+        "_id": "62601",
+        "title": "Marriagetoxin",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1927/154309l.jpg",
+        "rating": 7.52
+      },
+      {
+        "_id": "62604",
+        "title": "Gals Can't Be Kind to Otaku!?",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1956/155456l.jpg",
+        "rating": 7.58
+      },
+      {
+        "_id": "60852",
+        "title": "The Ramparts of Ice",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1565/154933l.jpg",
+        "rating": 7.99
+      },
+      {
+        "_id": "63375",
+        "title": "Nippon Sangoku: The Three Nations of the Crimson Sun",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1623/156387l.jpg",
+        "rating": 8.57
+      },
+      {
+        "_id": "60028",
+        "title": "The Warrior Princess and the Barbaric King",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1229/155022l.jpg",
+        "rating": 6.8
+      },
+      {
+        "_id": "57779",
+        "title": "Dorohedoro Season 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1603/155354l.jpg",
+        "rating": 8.48
+      },
+      {
+        "_id": "62146",
+        "title": "Farming Life in Another World Season 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1656/156369l.jpg",
+        "rating": 7.33
+      },
+      {
+        "_id": "57466",
+        "title": "Ascendance of a Bookworm: Adopted Daughter of an Archduke",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1371/155054l.jpg",
+        "rating": 7.83
+      },
+      {
+        "_id": "60310",
+        "title": "Welcome to Demon School! Iruma-kun Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1434/154048l.jpg",
+        "rating": 8.14
+      },
+      {
+        "_id": "61839",
+        "title": "I Want to End This Love Game",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1879/155958l.jpg",
+        "rating": 7.33
+      },
+      {
+        "_id": "61501",
+        "title": "Mistress Kanan is Devilishly Easy",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1681/154996l.jpg",
+        "rating": 7.12
+      },
+      {
+        "_id": "61443",
+        "title": "Agents of the Four Seasons: Dance of Spring",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1993/156385l.jpg",
+        "rating": 7.68
+      },
+      {
+        "_id": "61831",
+        "title": "The Beginning After the End Season 2",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1738/156028l.jpg",
+        "rating": 6.29
+      },
+      {
+        "_id": "62331",
+        "title": "Liar Game",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1984/158634l.jpg",
+        "rating": 6.34
+      },
+      {
+        "_id": "62164",
+        "title": "Akane-banashi",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1162/155669l.jpg",
+        "rating": 7.94
+      }
+    ],
+    "schedule": [
+      {
+        "_id": "1960",
+        "title": "Sore Ike! Anpanman",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1902/111797l.jpg",
+        "rating": 6.76
+      },
+      {
+        "_id": "56566",
+        "title": "Beyblade X",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1394/145458l.jpg",
+        "rating": 6.88
+      },
+      {
+        "_id": "62981",
+        "title": "The Drops of God",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1045/155698l.jpg",
+        "rating": 5.93
+      },
+      {
+        "_id": "62068",
+        "title": "Snowball Earth",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1786/156390l.jpg",
+        "rating": 6.65
+      },
+      {
+        "_id": "50250",
+        "title": "Chiikawa",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1783/121944l.jpg",
+        "rating": 8.6
+      },
+      {
+        "_id": "8687",
+        "title": "Doraemon (2005)",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/6/23935l.jpg",
+        "rating": 7.78
+      },
+      {
+        "_id": "53876",
+        "title": "Pokémon Horizons: The Series",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1703/137216l.jpg",
+        "rating": 7.41
+      },
+      {
+        "_id": "59970",
+        "title": "That Time I Got Reincarnated as a Slime Season 4",
+        "posterUrl": "https://cdn.myanimelist.net/images/anime/1695/156389l.jpg",
+        "rating": 8.11
+      }
+    ]
+  },
+  "expireAt": 1782512929638
+}

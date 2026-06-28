@@ -17,15 +17,22 @@ const isWebView = isBrowser && (
   (navigator.userAgent.includes('Android') && navigator.userAgent.includes('Version/'))
 );
 
-const dbId = (firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== "(default)")
-  ? firebaseConfig.firestoreDatabaseId
+const dbId = ((firebaseConfig as any).firestoreDatabaseId && (firebaseConfig as any).firestoreDatabaseId !== "(default)")
+  ? (firebaseConfig as any).firestoreDatabaseId
   : undefined;
 
 const isIframe = isBrowser && (window.self !== window.top);
 
 if (isIframe) {
-  console.log("AI Studio Sandbox: Running inside iframe, bypassing persistent cache to ensure reliable Firestore connection.");
-  dbInstance = getFirestore(app, dbId);
+  console.log("AI Studio Sandbox: Running inside iframe, forcing long-polling for instant connection.");
+  try {
+    dbInstance = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+    }, dbId);
+  } catch (error) {
+    console.warn("Firestore iframe initialization failed, falling back to basic.", error);
+    dbInstance = getFirestore(app, dbId);
+  }
 } else if (isWebView) {
   console.log("MOD Developer Suite: WebView/APK environment detected. Activating long-polling and single-tab optimizations.");
   try {
@@ -44,13 +51,20 @@ if (isIframe) {
 } else if (isBrowser) {
   try {
     dbInstance = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager()
       })
     }, dbId);
   } catch (error) {
-    console.warn("Firestore persistent cache not supported in this environment, falling back to default.", error);
-    dbInstance = getFirestore(app, dbId);
+    console.warn("Firestore persistent cache not supported in this environment, falling back with long polling.", error);
+    try {
+      dbInstance = initializeFirestore(app, {
+        experimentalForceLongPolling: true,
+      }, dbId);
+    } catch {
+      dbInstance = getFirestore(app, dbId);
+    }
   }
 } else {
   dbInstance = initializeFirestore(app, {

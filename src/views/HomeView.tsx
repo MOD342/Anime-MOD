@@ -9,7 +9,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../firebaseUtils';
 
 interface HomeViewProps {
-  onAnimeClick?: (animeId: string) => void;
+  onAnimeClick?: (animeId: string, epNum?: string) => void;
   onNavigateToGames?: () => void;
   onSearchCategory?: (category: string) => void;
   onNavigateToSchedule?: (targetDay?: string) => void;
@@ -39,10 +39,30 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
     return () => clearInterval(int);
   }, []);
   const [dashboard, setDashboard] = useState<{ top5: any[], recentEpisodes: any[], popular: any[], currentSeason: any[], schedule: any[] }>(() => {
-    return clientCache.get<{ top5: any[], recentEpisodes: any[], popular: any[], currentSeason: any[], schedule: any[] }>('client_dashboard_cache') || { top5: [], recentEpisodes: [], popular: [], currentSeason: [], schedule: [] };
+    try {
+      const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const clientDay = daysMap[new Date().getDay()];
+      const settings = JSON.parse(localStorage.getItem('adminSliderSettings') || '{"limit": 5, "season": "auto", "speed": 3, "globalAnnouncement": ""}');
+      const activeSeason = settings?.season || 'auto';
+      const key = `client_dashboard_cache_${activeSeason}_${clientDay}`;
+      return clientCache.get<{ top5: any[], recentEpisodes: any[], popular: any[], currentSeason: any[], schedule: any[] }>(key)
+        || clientCache.get<{ top5: any[], recentEpisodes: any[], popular: any[], currentSeason: any[], schedule: any[] }>('client_dashboard_cache')
+        || { top5: [], recentEpisodes: [], popular: [], currentSeason: [], schedule: [] };
+    } catch {
+      return { top5: [], recentEpisodes: [], popular: [], currentSeason: [], schedule: [] };
+    }
   });
   const [loading, setLoading] = useState(() => {
-    return !clientCache.get('client_dashboard_cache');
+    try {
+      const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const clientDay = daysMap[new Date().getDay()];
+      const settings = JSON.parse(localStorage.getItem('adminSliderSettings') || '{"limit": 5, "season": "auto", "speed": 3, "globalAnnouncement": ""}');
+      const activeSeason = settings?.season || 'auto';
+      const key = `client_dashboard_cache_${activeSeason}_${clientDay}`;
+      return !clientCache.get(key) && !clientCache.get('client_dashboard_cache');
+    } catch {
+      return true;
+    }
   });
   const [history, setHistory] = useState<any[]>([]);
   const [sliderSettings, setSliderSettings] = useState(() => {
@@ -69,6 +89,8 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
         (data) => {
           setDashboard(data);
           setLoading(false);
+          // Sync generic client cache for other views to load instantly
+          clientCache.set('client_dashboard_cache', data, 15 * 60 * 1000);
         },
         15 * 60 * 1000 // 15 mins client cache TTL
       );
@@ -301,7 +323,7 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
           {dashboard.recentEpisodes && dashboard.recentEpisodes.length > 0 ? dashboard.recentEpisodes.map((ep: any, idx: number) => (
             <motion.div 
               key={`recent-${ep._id}-${idx}`} 
-              onClick={() => onAnimeClick?.(`search-${ep.animeId?.title || ep.title || 'unknown'}`)}
+              onClick={() => onAnimeClick?.(`search-${ep.animeId?.title || ep.title || 'unknown'}`, ep.episodeNumber?.toString())}
               whileHover={{ y: -6, scale: 1.02, borderColor: '#ef4444' }}
               whileTap={{ scale: 0.98 }}
               className="cursor-pointer w-[130px] md:w-[180px] lg:w-[220px] flex-shrink-0 relative rounded-2xl overflow-hidden group border border-neutral-800 transition-all duration-300 aspect-[3/4] bg-neutral-900 gpu-accelerated"
@@ -321,7 +343,7 @@ export default function HomeView({ onAnimeClick, onNavigateToGames, onSearchCate
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-3 pointer-events-none">
                 <div className="absolute top-2 left-2 right-2 flex justify-between items-center gap-1 flex-wrap">
-                  <span className="bg-purple-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0"><Tv size={10} /> جديد</span>
+                  <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0">مترجم</span>
                   <span className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0">حلقة {ep.episodeNumber || '1'}</span>
                 </div>
                 <h5 className="font-bold text-xs md:text-sm text-white drop-shadow line-clamp-2 text-right dir-rtl">{ep.animeId?.title || 'أنمي غير معروف'}</h5>

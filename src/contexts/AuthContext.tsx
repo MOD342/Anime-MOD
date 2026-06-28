@@ -93,6 +93,15 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         console.log("GSI skipped: VITE_GOOGLE_CLIENT_ID is not configured in environment variables. Using standard Firebase Auth flow.");
         return;
       }
+
+      // Skip GSI completely inside iframes (such as the Google AI Studio preview sandbox)
+      // because browsers block the 'identity-credentials-get' API inside sandboxed documents,
+      // which triggers GSI NotAllowedError exceptions. Standard Firebase popup works perfectly since it breaks out in a popup.
+      const isReallyInIframe = typeof window !== 'undefined' && (window.self !== window.top || isInIframe);
+      if (isReallyInIframe) {
+        console.log("GSI skipped: Running in an iframe. Using standard Firebase Popup/Redirect flow to prevent FedCM iframe NotAllowedError.");
+        return;
+      }
       
       if (!(window as any).google?.accounts?.id) {
         return;
@@ -745,9 +754,10 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
                       setAuthError('');
                       setAuthSuccess('');
                       
-                      // 1. Try Native/System Google One Tap Prompt first if VITE_GOOGLE_CLIENT_ID is set
+                      // 1. Try Native/System Google One Tap Prompt first if VITE_GOOGLE_CLIENT_ID is set and NOT in iframe
                       const hasGoogleClientId = !!(import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
-                      if (hasGoogleClientId && (window as any).google?.accounts?.id) {
+                      const isReallyInIframe = typeof window !== 'undefined' && (window.self !== window.top || isInIframe);
+                      if (!isReallyInIframe && hasGoogleClientId && (window as any).google?.accounts?.id) {
                         try {
                           console.log("Triggering One Tap via button click...");
                           setAuthSuccess('جاري الاتصال بحسابات Google بالنظام...');

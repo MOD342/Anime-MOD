@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronRight, PlayCircle, Star, Tv } from 'lucide-react';
 import { clientCache } from '../utils/clientCache';
 
-export default function RecentEpisodesView({ onBack, onAnimeClick }: { onBack: () => void, onAnimeClick: (id: string) => void }) {
+export default function RecentEpisodesView({ onBack, onAnimeClick }: { onBack: () => void, onAnimeClick: (id: string, epNum?: string) => void }) {
   const [episodes, setEpisodes] = useState<any[]>(() => {
     const cached = clientCache.get<any>('client_dashboard_cache');
     return cached?.recentEpisodes || [];
@@ -43,7 +43,7 @@ export default function RecentEpisodesView({ onBack, onAnimeClick }: { onBack: (
           episodes.map((ep: any, idx: number) => (
             <div 
               key={`recent-${ep._id}-${idx}`} 
-              onClick={() => onAnimeClick(`search-${ep.animeId?.title || ep.title || 'unknown'}`)}
+              onClick={() => onAnimeClick(`search-${ep.animeId?.title || ep.title || 'unknown'}`, ep.episodeNumber?.toString())}
               className="cursor-pointer relative rounded-2xl overflow-hidden group border border-neutral-800 hover:border-red-500/50 transition-all duration-300 aspect-[3/4] bg-neutral-900"
             >
               <img 
@@ -61,7 +61,7 @@ export default function RecentEpisodesView({ onBack, onAnimeClick }: { onBack: (
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-3 pointer-events-none">
                 <div className="absolute top-2 left-2 right-2 flex justify-between items-center gap-1 flex-wrap">
-                  <span className="bg-purple-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0"><Tv size={10} /> جديد</span>
+                  <span className="bg-red-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0">مترجم</span>
                   <span className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold shadow-lg flex items-center gap-1 shrink-0">حلقة {ep.episodeNumber || '1'}</span>
                 </div>
                 <h5 className="font-bold text-sm text-white drop-shadow line-clamp-2 text-right dir-rtl">{ep.animeId?.title || 'أنمي غير معروف'}</h5>
